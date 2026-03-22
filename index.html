@@ -8,11 +8,17 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .balance { color: #2eb85c; font-weight: bold; font-size: 20px; }
-        .dep-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; text-decoration: none; display: block; text-align: center; margin-bottom: 15px; }
+        
+        /* በተኖች */
+        .action-btns { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
+        .btn-link { flex: 1; padding: 15px; border-radius: 12px; font-weight: bold; text-decoration: none; text-align: center; font-size: 16px; border: none; cursor: pointer; }
+        .dep-btn { background-color: #2eb85c; color: black; }
+        .with-btn { background-color: #3d4449; color: white; }
+
         .timer-box { background: #1c2529; border: 1px solid #c8a42d; color: #c8a42d; width: 100%; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; background: #1c2529; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .number { width: 34px; height: 38px; background: #2c3439; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-size: 14px; border: 1px solid #3d4449; }
-        .number.selected { background: #2eb85c; color: black; box-shadow: 0 0 10px #2eb85c; font-weight: bold; }
+        .number.selected { background: #2eb85c; color: black; font-weight: bold; }
         .number.drawn { background: #f1c40f !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 15px #f1c40f; font-weight: bold; }
         .play-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 20px; border-radius: 15px; font-size: 20px; font-weight: bold; cursor: pointer; margin-top: 20px; }
     </style>
@@ -24,7 +30,10 @@
         <div class="balance">0.00 ETB</div>
     </div>
 
-    <a href="https://t.me/RunChickenRunBot?start=deposit" target="_blank" class="dep-btn">💰 ዲፖዚት (Deposit)</a>
+    <div class="action-btns">
+        <a href="https://t.me/RunChickenRunBot?start=deposit" target="_blank" class="btn-link dep-btn">💰 ዲፖዚት</a>
+        <button onclick="withdraw()" class="btn-link with-btn">💸 ውዝድራው</button>
+    </div>
 
     <div class="timer-box">⏳ ቀጣይ እጣ በ: <span id="timer">50</span> ሰከንድ</div>
 
@@ -39,6 +48,19 @@
             div.className = 'number'; div.id = 'n' + i; div.innerText = i;
             div.onclick = function() { this.classList.toggle('selected'); };
             grid.appendChild(div);
+        }
+
+        // የውዝድራው ተግባር
+        function withdraw() {
+            let amount = prompt("ማውጣት የሚፈልጉትን ብር ያስገቡ (ዝቅተኛ 50):");
+            if (amount >= 50) {
+                let phone = prompt("የቴሌብር ስልክ ቁጥርዎን ያስገቡ:");
+                if (phone) {
+                    window.open(`https://t.me/RunChickenRunBot?start=withdraw_${amount}_${phone}`, '_blank');
+                }
+            } else if (amount != null) {
+                alert("ዝቅተኛው የማውጫ መጠን 50 ብር ነው።");
+            }
         }
 
         function startDraw() {
