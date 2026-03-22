@@ -8,146 +8,75 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .balance { color: #2eb85c; font-weight: bold; font-size: 20px; }
-        
-        /* ዲፖዚት እና ውዝድራው በተኖች */
         .action-btns { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
-        .btn { flex: 1; padding: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; font-size: 14px; }
+        .btn { flex: 1; padding: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; font-size: 14px; display: flex; align-items: center; justify-content: center; }
         .dep-btn { background-color: #2eb85c; color: black; }
         .with-btn { background-color: #3d4449; color: white; }
-
         .timer-box { background: #1c2529; border: 1px solid #c8a42d; color: #c8a42d; width: 100%; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 18px; }
-        
-        /* የቁጥር ሰንጠረዥ */
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; background: #1c2529; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .number { width: 34px; height: 34px; background: #2c3439; display: flex; align-items: center; justify-content: center; border-radius: 5px; font-size: 13px; cursor: pointer; border: 1px solid #3d4449; transition: 0.2s; }
         .number.selected { background: #2eb85c; color: black; border-color: white; font-weight: bold; }
-        
-        /* ቁጥሮቹ ሲወጡ የሚፈኩበት ቢጫ ቀለም */
-        .number.drawn { background: #f1c40f !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 15px #f1c40f; font-weight: bold; z-index: 10; }
-
-        /* ውርርድ መቆጣጠሪያ */
+        .number.drawn { background: #f1c40f !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 15px #f1c40f; font-weight: bold; }
         .bet-box { width: 100%; margin-top: 20px; text-align: center; }
         .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin: 15px 0; }
         .circle-btn { width: 45px; height: 45px; border-radius: 50%; border: none; font-size: 24px; cursor: pointer; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         #bet-display { font-size: 24px; font-weight: bold; color: #2eb85c; min-width: 100px; }
-        .play-btn { width: 100%; padding: 18px; background: #2eb85c; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; color: black; transition: 0.3s; }
-        .play-btn:active { transform: scale(0.98); }
+        .play-btn { width: 100%; padding: 18px; background: #2eb85c; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; color: black; }
     </style>
 </head>
 <body>
-
     <div class="header">
         <div style="color: #2eb85c; font-weight: bold; font-size: 22px;">KENO ROYAL</div>
         <div class="balance">0.00 ETB</div>
     </div>
-
     <div class="action-btns">
-        <a href="https://t.me/RunChickenRunBot?start=deposit" class="btn dep-btn">💰 ዲፖዚት (Deposit)</a>
+        <a href="https://t.me/RunChickenRunBot?start=deposit" target="_blank" class="btn dep-btn">💰 ዲፖዚት (Deposit)</a>
         <a href="javascript:void(0)" onclick="withdraw()" class="btn with-btn">💸 ውዝድራው (Withdraw)</a>
     </div>
-
     <div class="timer-box">⏳ ቀጣይ እጣ በ: <span id="timer">50</span> ሰከንድ</div>
-
     <div class="grid" id="grid"></div>
-
     <div class="bet-box">
         <p style="color: #888; font-size: 14px; margin-bottom: 5px;">የውርርድ መጠን ይምረጡ (Min 20)</p>
         <div class="controls">
-            <button class="circle-btn" style="background: #ff4d4d;" onclick="changeBet(-10)">-</button>
+            <button type="button" class="circle-btn" style="background: #ff4d4d;" onclick="changeBet(-10)">-</button>
             <span id="bet-display">20 ETB</span>
-            <button class="circle-btn" style="background: #2eb85c;" onclick="changeBet(10)">+</button>
+            <button type="button" class="circle-btn" style="background: #2eb85c;" onclick="changeBet(10)">+</button>
         </div>
-        <button class="play-btn" id="playBtn" onclick="startManualDraw()">ውርርድ ተጫወት</button>
+        <button type="button" class="play-btn" id="playBtn" onclick="startManualDraw()">ውርርድ ተጫወት</button>
     </div>
-
     <script>
-        // 1. ቁጥሮቹን መፍጠር (1-80)
         const grid = document.getElementById('grid');
         for (let i = 1; i <= 80; i++) {
             const div = document.createElement('div');
-            div.className = 'number';
-            div.id = 'num-' + i;
-            div.innerText = i;
-            div.onclick = function() {
-                if (!this.classList.contains('drawn')) {
-                    this.classList.toggle('selected');
-                }
-            };
+            div.className = 'number'; div.id = 'num-' + i; div.innerText = i;
+            div.onclick = function() { if (!this.classList.contains('drawn')) this.classList.toggle('selected'); };
             grid.appendChild(div);
         }
-
-        // 2. የውርርድ መጠን መቀየሪያ
         let currentBet = 20;
-        function changeBet(val) {
-            currentBet += val;
-            if (currentBet < 20) currentBet = 20;
-            document.getElementById('bet-display').innerText = currentBet + " ETB";
-        }
-
-        // 3. ውዝድራው (Withdraw) ተግባር
+        function changeBet(val) { currentBet += val; if (currentBet < 20) currentBet = 20; document.getElementById('bet-display').innerText = currentBet + " ETB"; }
         function withdraw() {
-            let amount = prompt("ማውጣት የሚፈልጉትን የብር መጠን ያስገቡ (ዝቅተኛ 50):");
-            if (amount !== null && amount !== "") {
-                if (parseInt(amount) >= 50) {
-                    let phone = prompt("የቴሌብር ስልክ ቁጥር ያስገቡ:");
-                    if (phone) {
-                        window.location.href = `https://t.me/RunChickenRunBot?start=withdraw_${amount}_${phone}`;
-                    }
-                } else {
-                    alert("ዝቅተኛው የማውጫ መጠን 50 ብር ነው።");
-                }
-            }
+            let amount = prompt("የሚወጣ ብር (ዝቅተኛ 50):");
+            if (amount >= 50) {
+                let phone = prompt("የቴሌብር ስልክ:");
+                if (phone) window.open(`https://t.me/RunChickenRunBot?start=withdraw_${amount}_${phone}`, '_blank');
+            } else if (amount != null) alert("ዝቅተኛው 50 ብር ነው።");
         }
-
-        // 4. የእጣ አወጣጥ Animation
         function startManualDraw() {
-            const selectedCount = document.querySelectorAll('.selected').length;
-            if (selectedCount === 0) {
-                alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
-                return;
-            }
+            if (document.querySelectorAll('.selected').length === 0) return alert("ቁጥር ይምረጡ!");
             runGame();
         }
-
         function runGame() {
-            // የድሮ እጣዎችን አጽዳ
             document.querySelectorAll('.number').forEach(n => n.classList.remove('drawn'));
             document.getElementById('playBtn').disabled = true;
-            document.getElementById('playBtn').innerText = "በመካሄድ ላይ...";
-
-            let drawnNumbers = [];
-            let count = 0;
-            
+            let drawn = []; let count = 0;
             let interval = setInterval(() => {
-                let randomNum;
-                do {
-                    randomNum = Math.floor(Math.random() * 80) + 1;
-                } while (drawnNumbers.includes(randomNum));
-                
-                drawnNumbers.push(randomNum);
-                const numElement = document.getElementById('num-' + randomNum);
-                numElement.classList.add('drawn');
-                
-                count++;
-                if (count >= 20) {
-                    clearInterval(interval);
-                    document.getElementById('playBtn').disabled = false;
-                    document.getElementById('playBtn').innerText = "እንደገና ተጫወት";
-                }
-            }, 300); // በየ 0.3 ሰከንዱ አንድ ቁጥር ይወጣል
+                let r; do { r = Math.floor(Math.random() * 80) + 1; } while (drawn.includes(r));
+                drawn.push(r); document.getElementById('num-' + r).classList.add('drawn');
+                count++; if (count >= 20) { clearInterval(interval); document.getElementById('playBtn').disabled = false; }
+            }, 300);
         }
-
-        // 5. ሰዓት ቆጣሪ
         let timeLeft = 50;
-        setInterval(() => {
-            if (timeLeft > 0) {
-                timeLeft--;
-            } else {
-                timeLeft = 50;
-                runGame(); // ሰዓቱ ሲያልቅ በራሱ እጣ ያወጣል
-            }
-            document.getElementById('timer').innerText = timeLeft;
-        }, 1000);
+        setInterval(() => { if (timeLeft > 0) timeLeft--; else { timeLeft = 50; runGame(); } document.getElementById('timer').innerText = timeLeft; }, 1000);
     </script>
 </body>
 </html>
