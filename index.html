@@ -1,169 +1,64 @@
 <!DOCTYPE html>
-<html lang="am">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chicken Road Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chicken Road Fix</title>
     <style>
-        body { margin: 0; background: #1a1d21; color: white; font-family: sans-serif; overflow: hidden; touch-action: none; }
-        .header { background: #2c313a; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3e4451; }
-        .balance { color: #2ecc71; font-weight: bold; font-size: 20px; }
-        
-        .nav-btns { display: flex; gap: 10px; padding: 10px; background: #252930; }
-        .nav-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
-        .dep-btn { background: #27ae60; }
-        .wit-btn { background: #2980b9; }
-
-        #game-screen { width: 100%; height: 40vh; background: #333; position: relative; overflow: hidden; border-bottom: 4px solid #222; }
-        .road-line { position: absolute; width: 100%; height: 1px; border-top: 1px dashed rgba(255,255,255,0.2); }
-        .m-tag { position: absolute; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 10px; font-size: 10px; left: 5px; color: #f1c40f; }
-        
-        #chicken { width: 40px; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); z-index: 100; transition: bottom 0.2s; }
-        .car { width: 55px; height: 30px; position: absolute; border-radius: 4px; z-index: 50; }
-
-        .ui-panel { padding: 15px; background: #252930; height: 50vh; display: flex; flex-direction: column; align-items: center; }
-        select, input { background: #1a1d21; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; width: 90%; margin-bottom: 15px; text-align: center; font-size: 18px; }
-
-        .btn-container { display: flex; width: 100%; gap: 10px; }
-        .main-btn { flex: 1; padding: 18px; border: none; border-radius: 15px; font-size: 20px; font-weight: bold; cursor: pointer; }
-        #go-btn { background: #2ecc71; color: white; box-shadow: 0 5px #27ae60; }
-        #cash-btn { background: #f1c40f; color: black; box-shadow: 0 5px #d4ac0d; display: none; }
-
-        /* Modal Style */
-        #money-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#2c313a; padding:20px; border-radius:15px; z-index:1000; width:85%; border:2px solid #2ecc71; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        body { margin: 0; background: #1a1d21; color: white; text-align: center; font-family: sans-serif; }
+        #game-area { width: 100%; height: 300px; background: #333; position: relative; overflow: hidden; border-bottom: 5px solid #222; }
+        #chicken { width: 40px; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 100; }
+        .car { width: 50px; height: 30px; position: absolute; background: red; border-radius: 5px; }
+        .btn { padding: 15px 30px; font-size: 20px; background: #2ecc71; border: none; color: white; border-radius: 10px; margin-top: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div style="font-weight: bold;">CHICKEN ROAD</div>
-    <div class="balance" id="bal-txt">1,000.00 ETB</div>
-</div>
+    <h2>CHICKEN ROAD</h2>
+    <div id="bal">1000 ETB</div>
 
-<div class="nav-btns">
-    <button class="nav-btn dep-btn" onclick="openModal('deposit')">DEPOSIT</button>
-    <button class="nav-btn wit-btn" onclick="openModal('withdraw')">WITHDRAW</button>
-</div>
-
-<div id="game-screen">
-    <div class="road-line" style="bottom: 20%;"></div>
-    <div class="road-line" style="bottom: 40%;"></div>
-    <div class="road-line" style="bottom: 60%;"></div>
-    <div class="road-line" style="bottom: 80%;"></div>
-    <div class="m-tag" style="bottom: 20%;">1.44x</div>
-    <div class="m-tag" style="bottom: 40%;">2.21x</div>
-    <div class="m-tag" style="bottom: 60%;">3.45x</div>
-    <div class="m-tag" style="bottom: 80%;">5.53x</div>
-    <img id="chicken" src="https://img.icons8.com/emoji/96/000000/chicken-emoji.png">
-</div>
-
-<div class="ui-panel">
-    <select id="speed-level">
-        <option value="5">Easy</option>
-        <option value="9" selected>Medium</option>
-        <option value="14">Hard</option>
-    </select>
-    <input type="number" id="bet-amt" value="10">
-    <div class="btn-container">
-        <button id="cash-btn" class="main-btn" onclick="cashOut()">CASH OUT</button>
-        <button id="go-btn" class="main-btn" onclick="play()">PLAY / GO</button>
+    <div id="game-area">
+        <img id="chicken" src="https://img.icons8.com/emoji/96/000000/chicken-emoji.png">
     </div>
-</div>
 
-<div id="money-modal">
-    <h3 id="modal-title">ገንዘብ ያስገቡ</h3>
-    <input type="text" id="phone-num" placeholder="ስልክ ቁጥር">
-    <input type="number" id="money-amt" placeholder="የብር መጠን">
-    <div style="display:flex; gap:10px;">
-        <button onclick="processMoney()" style="flex:1; padding:10px; background:#2ecc71; border:none; border-radius:5px; color:white;">እሺ</button>
-        <button onclick="closeModal()" style="flex:1; padding:10px; background:#e74c3c; border:none; border-radius:5px; color:white;">ተው</button>
-    </div>
-</div>
+    <button class="btn" onclick="moveChicken()">GO / PLAY</button>
 
-<script>
-    let balance = 1000;
-    let step = 0;
-    let isPlaying = false;
-    let traffic;
-    const mults = [1.44, 2.21, 3.45, 5.53, 9.09];
-    let currentMode = '';
+    <script>
+        let balance = 1000;
+        let step = 0;
+        let isPlaying = false;
+        const chicken = document.getElementById('chicken');
 
-    function updateUI() { document.getElementById('bal-txt').innerText = balance.toFixed(2) + " ETB"; }
-
-    function openModal(mode) { 
-        currentMode = mode;
-        document.getElementById('money-modal').style.display = 'block';
-        document.getElementById('modal-title').innerText = mode === 'deposit' ? 'ገንዘብ ያስገቡ' : 'ገንዘብ ያውጡ';
-    }
-
-    function closeModal() { document.getElementById('money-modal').style.display = 'none'; }
-
-    function processMoney() {
-        let amt = parseFloat(document.getElementById('money-amt').value);
-        if(isNaN(amt) || amt <= 0) return alert("ትክክለኛ መጠን ያስገቡ!");
-        if(currentMode === 'deposit') balance += amt;
-        else {
-            if(amt > balance) return alert("በቂ ብር የለህም!");
-            balance -= amt;
-        }
-        updateUI(); closeModal();
-    }
-
-    function play() {
-        let bet = parseFloat(document.getElementById('bet-amt').value);
-        if(!isPlaying) {
-            if(balance < bet) return alert("ብር የለህም!");
-            balance -= bet; isPlaying = true;
-            document.getElementById('go-btn').innerText = "GO";
-            document.getElementById('cash-btn').style.display = "block";
-            startTraffic(); updateUI();
-        }
-        step++;
-        document.getElementById('chicken').style.bottom = (step * 20) + "%";
-        document.getElementById('cash-btn').innerText = "CASH (" + (bet * mults[step-1]).toFixed(2) + ")";
-        if(step >= 5) { setTimeout(() => { balance += bet * mults[4]; alert("አሸነፍክ!"); reset(); }, 300); }
-    }
-
-    function startTraffic() { traffic = setInterval(spawnCar, 1000); }
-
-    function spawnCar() {
-        const car = document.createElement('div');
-        car.className = 'car';
-        car.style.background = ["#e74c3c", "#3498db", "#f1c40f"][Math.floor(Math.random()*3)];
-        car.style.bottom = [20, 40, 60, 80][Math.floor(Math.random()*4)] + "%";
-        car.style.left = "-60px";
-        document.getElementById('game-screen').appendChild(car);
-        let speed = parseInt(document.getElementById('speed-level').value) + Math.random()*5;
-        let move = setInterval(() => {
-            let x = parseInt(car.style.left);
-            if(x > window.innerWidth || !isPlaying) { clearInterval(move); car.remove(); }
-            else {
-                car.style.left = (x + speed) + "px";
-                let c = document.getElementById('chicken').getBoundingClientRect();
-                let r = car.getBoundingClientRect();
-                if(!(r.left > c.right || r.right < c.left || r.top > c.bottom || r.bottom < c.top)) {
-                    isPlaying = false; 
-                    document.getElementById('chicken').src = "https://img.icons8.com/emoji/96/000000/feather-emoji.png";
-                    setTimeout(() => { alert("ተበላህ!"); reset(); }, 500);
-                }
+        function moveChicken() {
+            if(!isPlaying) {
+                isPlaying = true;
+                setInterval(spawnCar, 1000); // መኪና ማምጫ
             }
-        }, 20);
-    }
+            step++;
+            chicken.style.bottom = (step * 50) + "px";
+            if(step >= 5) { alert("አሸነፍክ!"); location.reload(); }
+        }
 
-    function cashOut() {
-        balance += parseFloat(document.getElementById('bet-amt').value) * mults[step-1];
-        reset();
-    }
+        function spawnCar() {
+            const car = document.createElement('div');
+            car.className = 'car';
+            car.style.left = "-60px";
+            car.style.bottom = (Math.floor(Math.random() * 4 + 1) * 50) + "px";
+            document.getElementById('game-area').appendChild(car);
 
-    function reset() {
-        isPlaying = false; clearInterval(traffic); step = 0;
-        document.getElementById('chicken').style.bottom = "5px";
-        document.getElementById('chicken').src = "https://img.icons8.com/emoji/96/000000/chicken-emoji.png";
-        document.getElementById('go-btn').innerText = "PLAY / GO";
-        document.getElementById('cash-btn').style.display = "none";
-        document.querySelectorAll('.car').forEach(c => c.remove());
-        updateUI();
-    }
-</script>
+            let move = setInterval(() => {
+                let x = parseInt(car.style.left);
+                if(x > window.innerWidth) { clearInterval(move); car.remove(); }
+                else {
+                    car.style.left = (x + 5) + "px";
+                    // መጋጨታቸውን ማረጋገጫ
+                    let c = chicken.getBoundingClientRect();
+                    let r = car.getBoundingClientRect();
+                    if(!(r.left > c.right || r.right < c.left || r.top > c.bottom || r.bottom < c.top)) {
+                        alert("ተገጨህ!"); location.reload();
+                    }
+                }
+            }, 20);
+        }
+    </script>
 </body>
 </html>
