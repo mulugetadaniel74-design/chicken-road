@@ -18,9 +18,9 @@
         #chicken { width: 60px; position: absolute; bottom: 22%; left: 20px; z-index: 10; transition: left 0.5s ease-out; }
         
         .ui-panel { padding: 15px; background: #252930; height: 40vh; border-top-left-radius: 20px; border-top-right-radius: 20px; }
-        .bet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 15px 0; }
-        .bet-btn { background: #333; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; font-weight: bold; }
-        .bet-btn.active { border-color: #2ecc71; background: rgba(46, 204, 113, 0.2); }
+        .bet-amounts { display: flex; justify-content: space-between; gap: 5px; margin-bottom: 15px; }
+        .amt-btn { flex: 1; background: #333; border: 1px solid #444; color: white; padding: 8px; border-radius: 5px; font-size: 14px; }
+        .amt-btn.active { border-color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
         
         #play-btn { width: 100%; background: #2ecc71; color: white; border: none; padding: 18px; border-radius: 12px; font-size: 22px; font-weight: bold; cursor: pointer; box-shadow: 0 4px #27ae60; }
         #play-btn:disabled { background: #555; box-shadow: none; cursor: not-allowed; }
@@ -30,7 +30,7 @@
 
 <div class="header">
     <div style="font-weight: bold;">CHICKEN ROAD</div>
-    <div class="balance" id="balance-txt">1,000.00 ETB</div>
+    <div class="balance" id="balance-txt">1 000 000 <span>$</span></div>
 </div>
 
 <div id="game-window">
@@ -45,18 +45,20 @@
 </div>
 
 <div class="ui-panel">
-    <div class="bet-grid">
-        <button class="bet-btn active" onclick="setBet(10, this)">10</button>
-        <button class="bet-btn" onclick="setBet(50, this)">50</button>
-        <button class="bet-btn" onclick="setBet(100, this)">100</button>
-        <button class="bet-btn" onclick="setBet(500, this)">500</button>
+    
+    <div class="bet-amounts">
+        <button class="amt-btn active" onclick="setBet(0.5, this)">0.5 $</button>
+        <button class="amt-btn" onclick="setBet(1, this)">1 $</button>
+        <button class="amt-btn" onclick="setBet(2, this)">2 $</button>
+        <button class="amt-btn" onclick="setBet(7, this)">7 $</button>
     </div>
+
     <button id="play-btn" onclick="nextStep()">PLAY</button>
 </div>
 
 <script>
-    let balance = 1000;
-    let bet = 10;
+    let balance = 1000000;
+    let bet = 0.5;
     let currentPos = 20;
     let step = 0;
     const chicken = document.getElementById('chicken');
@@ -65,7 +67,7 @@
     function setBet(val, el) {
         if(step > 0) return; // ጨዋታ ከጀመረ መቀየር አይቻልም
         bet = val;
-        document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
     }
 
