@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Keno Live - Full System</title>
+    <title>Keno Live - Daniel Payment</title>
     <style>
         body { margin: 0; background: #121417; color: white; font-family: sans-serif; text-align: center; }
-        .header { background: #1c1f24; padding: 15px; display: flex; justify-content: space-between; border-bottom: 2px solid #2ecc71; position: sticky; top: 0; z-index: 100; }
-        .wallet-btns { display: flex; gap: 10px; padding: 10px; background: #1c1f24; justify-content: center; }
-        .w-btn { flex: 1; padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; }
-        .dep-btn { background: #2ecc71; }
-        .wit-btn { background: #e67e22; }
-
-        .timer-panel { background: #1c1f24; margin: 10px; padding: 10px; border-radius: 10px; border: 1px solid #333; }
+        .header { background: #1c1f24; padding: 15px; display: flex; justify-content: space-between; border-bottom: 2px solid #2ecc71; }
+        
+        /* ብር ማስገቢያ አዝራር */
+        .deposit-bar { background: #2ecc71; color: black; padding: 12px; margin: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        
+        .timer-panel { background: #1c1f24; margin: 5px 10px; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .draw-panel { background: #1c1f24; margin: 0 10px 10px 10px; padding: 15px; border-radius: 10px; min-height: 50px; border: 1px solid #333; }
         .drawn-numbers { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
         .drawn-box { background: #f1c40f; color: black; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; animation: pop 0.2s; }
@@ -24,29 +23,27 @@
         .num.active-draw { background: #ffffff !important; color: black !important; animation: quickFade 1s forwards; }
 
         .footer { background: #1c1f24; padding: 15px; position: fixed; bottom: 0; width: 100%; border-radius: 20px 20px 0 0; box-sizing: border-box; }
-        .bet-control { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
-        .bet-btn-small { background: #333; border: 1px solid #444; color: white; width: 35px; height: 35px; border-radius: 5px; cursor: pointer; }
-        .play-btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 20px; font-weight: bold; background: #2ecc71; color: white; cursor: pointer; }
+        .play-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; background: #2ecc71; color: white; cursor: pointer; }
+        .play-btn:disabled { background: #333 !important; color: #555 !important; cursor: not-allowed; border: 1px solid #444; }
 
-        /* Modal for Deposit/Withdraw */
-        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1c1f24; padding: 20px; border-radius: 10px; border: 2px solid #2ecc71; z-index: 1000; width: 80%; max-width: 300px; }
-        .modal input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; background: #24292e; border: 1px solid #444; color: white; }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; }
-
-        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        /* Telebirr Modal */
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1c1f24; padding: 25px; border-radius: 15px; border: 2px solid #2ecc71; z-index: 1000; width: 85%; max-width: 350px; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        .modal input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; background: #24292e; border: 1px solid #444; color: white; border-radius: 8px; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; }
+        
         @keyframes quickFade { 0% { opacity: 1; } 100% { opacity: 0; } }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div style="font-weight: bold; color: #2ecc71;">KENO LIVE</div>
-    <div id="bal-display" style="font-weight: bold;">1,000.00 ETB</div>
+    <div style="font-weight: bold; color: #2ecc71;">KENO ROYAL</div>
+    <div id="bal-display" style="font-weight: bold; font-size: 18px;">0.00 ETB</div>
 </div>
 
-<div class="wallet-btns">
-    <button class="w-btn dep-btn" onclick="openModal('deposit')">DEPOSIT</button>
-    <button class="w-btn wit-btn" onclick="openModal('withdraw')">WITHDRAW</button>
+<div class="deposit-bar" onclick="openDeposit()">
+    <span>💰 ብር ያስገቡ (DEPOSIT)</span>
+    <span>➔</span>
 </div>
 
 <div class="timer-panel">ቀጣይ እጣ በ: <span id="timer-txt" style="color:#f1c40f; font-weight:bold;">01:00</span></div>
@@ -57,24 +54,27 @@
 <div style="height: 180px;"></div>
 
 <div class="footer">
-    <div class="bet-control">
-        <button class="bet-btn-small" onclick="changeBet(-5)">-</button>
-        <div style="font-weight:bold;">ውርርድ: <span id="bet-display">15</span> ETB</div>
-        <button class="bet-btn-small" onclick="changeBet(5)">+</button>
-    </div>
-    <button id="play-btn" class="play-btn" onclick="placeBet()">ውርርድ</button>
+    <div id="no-money-msg" style="color: #e74c3c; font-size: 12px; margin-bottom: 8px; display: none; font-weight: bold;">ሒሳብዎ ስላለቀ መጫወት አይችሉም! እባክዎ ብር ያስገቡ።</div>
+    <button id="play-btn" class="play-btn" onclick="placeBet()">ውርርድ (15 ETB)</button>
 </div>
 
-<div class="overlay" id="overlay" onclick="closeModal()"></div>
-<div class="modal" id="modal">
-    <h3 id="modal-title">Deposit</h3>
-    <p id="modal-limit" style="font-size:12px; color:#888;"></p>
-    <input type="number" id="modal-amount" placeholder="መጠን ያስገቡ">
-    <button class="play-btn" onclick="processWallet()">አረጋግጥ</button>
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="dep-modal">
+    <h2 style="color:#2ecc71; margin-top: 0;">የቴሌብር ዲፖዚት</h2>
+    <div style="text-align: left; font-size: 14px; background: #24292e; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+        <p style="margin: 0;"><b>ስም:</b> ዳንኤል ሙሉጌታ ኩምሳ</p>
+        <p style="margin: 5px 0;"><b>ቁጥር:</b> <span style="color: #2ecc71; font-size: 18px;">0986980130</span></p>
+        <hr style="border: 0.5px solid #333;">
+        <p style="margin: 0; font-size: 12px; color: #aaa;">1. ከላይ ወዳለው ቁጥር ብር ይላኩ።<br>2. የላኩትን መጠን እና የትራንዛክሽን ቁጥሩን ከታች ያስገቡ።</p>
+    </div>
+    <input type="number" id="dep-amount" placeholder="የብር መጠን (ቢያንስ 100)">
+    <input type="text" id="dep-id" placeholder="የግብይት መለያ (Transaction ID)">
+    <button class="play-btn" onclick="submitDeposit()">አረጋግጥ</button>
+    <button style="background:none; border:none; color:#888; margin-top:15px; font-weight: bold;" onclick="closeDeposit()">ተመለስ</button>
 </div>
 
 <script>
-    let balance = 1000, bet = 15, selected = [], isDrawing = false, hasBet = false, timeLeft = 60, currentAction = '';
+    let balance = 0, bet = 15, selected = [], isDrawing = false, hasBet = false, timeLeft = 60;
     const grid = document.getElementById('keno-grid');
 
     // ቦርድ መፍጠር
@@ -94,7 +94,42 @@
         grid.appendChild(n);
     }
 
-    // ሰዓት ቆጣሪ
+    function checkBalanceStatus() {
+        const btn = document.getElementById('play-btn');
+        const msg = document.getElementById('no-money-msg');
+        if (balance < bet) {
+            btn.disabled = true;
+            msg.style.display = "block";
+        } else {
+            btn.disabled = false;
+            msg.style.display = "none";
+        }
+    }
+
+    function openDeposit() {
+        document.getElementById('dep-modal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function closeDeposit() {
+        document.getElementById('dep-modal').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+    }
+
+    function submitDeposit() {
+        let amt = parseFloat(document.getElementById('dep-amount').value);
+        let tid = document.getElementById('dep-id').value;
+        if (amt >= 100 && tid.length >= 6) {
+            balance += amt;
+            updateUI();
+            alert("ብርዎ በትክክል ገብቷል! መልካም እድል!");
+            closeDeposit();
+            checkBalanceStatus();
+        } else {
+            alert("እባክዎ ቢያንስ 100 ብር እና ትክክለኛ Transaction ID ያስገቡ!");
+        }
+    }
+
     setInterval(() => {
         if (!isDrawing) {
             timeLeft--;
@@ -104,45 +139,11 @@
     }, 1000);
 
     function updateTimerUI() {
-        let s = timeLeft % 60;
-        document.getElementById('timer-txt').innerText = `00:${s.toString().padStart(2, '0')}`;
-    }
-
-    function changeBet(v) {
-        bet = Math.max(15, bet + v); // Minimum 15 ETB
-        document.getElementById('bet-display').innerText = bet;
-    }
-
-    function openModal(type) {
-        currentAction = type;
-        document.getElementById('modal').style.display = 'block';
-        document.getElementById('overlay').style.display = 'block';
-        document.getElementById('modal-title').innerText = type === 'deposit' ? 'ብር ማስገቢያ (Deposit)' : 'ብር ማውጫ (Withdraw)';
-        document.getElementById('modal-limit').innerText = type === 'deposit' ? 'ዝቅተኛ 100 ብር' : 'ዝቅተኛ 200 ብር';
-    }
-
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none';
-        document.getElementById('overlay').style.display = 'none';
-    }
-
-    function processWallet() {
-        let amt = parseFloat(document.getElementById('modal-amount').value);
-        if (currentAction === 'deposit') {
-            if (amt < 100) return alert("ዝቅተኛው የዲፖዚት መጠን 100 ብር ነው!");
-            balance += amt;
-        } else {
-            if (amt < 200) return alert("ዝቅተኛው የማውጫ መጠን 200 ብር ነው!");
-            if (amt > balance) return alert("በቂ ብር የለህም!");
-            balance -= amt;
-        }
-        updateUI();
-        closeModal();
+        document.getElementById('timer-txt').innerText = `00:${(timeLeft % 60).toString().padStart(2, '0')}`;
     }
 
     function placeBet() {
-        if(selected.length === 0) return alert("ቁጥር ምረጥ!");
-        if(balance < bet) return alert("በቂ ብር የለህም!");
+        if(selected.length === 0) return alert("እባክዎ ቁጥር ይምረጡ!");
         hasBet = true;
         document.getElementById('play-btn').innerText = "ውርርድ ተይዟል...";
         document.getElementById('play-btn').disabled = true;
@@ -173,21 +174,26 @@
         if(hasBet) checkWin(hits);
         setTimeout(() => {
             isDrawing = false; hasBet = false; timeLeft = 60;
-            document.getElementById('play-btn').innerText = "ውርርድ";
-            document.getElementById('play-btn').disabled = false;
+            document.getElementById('play-btn').innerText = "ውርርድ (15 ETB)";
+            checkBalanceStatus();
         }, 2000);
     }
 
     function checkWin(hits) {
-        let winMult = 0; let sCount = selected.length;
-        if (sCount >= 4 && hits >= 2) winMult = hits * 2;
-        else if (sCount >= 2 && hits >= 1) winMult = hits * 1.5;
+        let winMult = 0;
+        let sCount = selected.length;
+        if (sCount >= 4 && hits >= 2) winMult = hits * 2.5;
+        else if (sCount >= 2 && hits >= 1) winMult = hits * 2;
         else if (sCount === 1 && hits === 1) winMult = 3.5;
         if(winMult > 0) balance += (bet * winMult);
         updateUI();
     }
 
-    function updateUI() { document.getElementById('bal-display').innerText = balance.toFixed(2) + " ETB"; }
+    function updateUI() { 
+        document.getElementById('bal-display').innerText = balance.toFixed(2) + " ETB"; 
+    }
+    
+    checkBalanceStatus();
 </script>
 </body>
 </html>
