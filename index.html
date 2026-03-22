@@ -1,64 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="am">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chicken Road Fix</title>
+    <title>Chicken Road Pro</title>
     <style>
-        body { margin: 0; background: #1a1d21; color: white; text-align: center; font-family: sans-serif; }
-        #game-area { width: 100%; height: 300px; background: #333; position: relative; overflow: hidden; border-bottom: 5px solid #222; }
-        #chicken { width: 40px; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 100; }
-        .car { width: 50px; height: 30px; position: absolute; background: red; border-radius: 5px; }
-        .btn { padding: 15px 30px; font-size: 20px; background: #2ecc71; border: none; color: white; border-radius: 10px; margin-top: 20px; cursor: pointer; }
+        body { margin: 0; background: #1a1d21; color: white; font-family: sans-serif; text-align: center; overflow: hidden; }
+        .header { background: #2c313a; padding: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid #444; }
+        #game-area { width: 100%; height: 350px; background: #333; position: relative; border-bottom: 5px solid #222; overflow: hidden; }
+        .lane { position: absolute; width: 100%; height: 2px; border-top: 2px dashed rgba(255,255,255,0.1); }
+        #chicken { width: 45px; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 100; transition: 0.2s; }
+        .car { width: 60px; height: 35px; position: absolute; background: #e74c3c; border-radius: 6px; box-shadow: 0 4px #c0392b; }
+        .controls { padding: 20px; background: #252930; }
+        .btn { width: 80%; padding: 15px; font-size: 20px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; margin: 5px; }
+        #go-btn { background: #2ecc71; color: white; }
+        #cash-btn { background: #f1c40f; color: black; display: none; }
     </style>
 </head>
 <body>
 
-    <h2>CHICKEN ROAD</h2>
-    <div id="bal">1000 ETB</div>
+<div class="header">
+    <div style="font-weight: bold;">CHICKEN ROAD</div>
+    <div id="bal-txt" style="color: #2ecc71;">1000.00 ETB</div>
+</div>
 
-    <div id="game-area">
-        <img id="chicken" src="https://img.icons8.com/emoji/96/000000/chicken-emoji.png">
-    </div>
+<div id="game-area">
+    <div class="lane" style="bottom: 20%;"></div>
+    <div class="lane" style="bottom: 40%;"></div>
+    <div class="lane" style="bottom: 60%;"></div>
+    <div class="lane" style="bottom: 80%;"></div>
+    <img id="chicken" src="https://img.icons8.com/emoji/96/000000/chicken-emoji.png">
+</div>
 
-    <button class="btn" onclick="moveChicken()">GO / PLAY</button>
+<div class="controls">
+    <input type="number" id="bet" value="10" style="width: 100px; padding: 10px; border-radius: 5px; text-align: center;">
+    <button id="go-btn" class="btn" onclick="play()">GO / PLAY</button>
+    <button id="cash-btn" class="btn" onclick="cashOut()">CASH OUT</button>
+</div>
 
-    <script>
-        let balance = 1000;
-        let step = 0;
-        let isPlaying = false;
-        const chicken = document.getElementById('chicken');
+<script>
+    let balance = 1000, step = 0, isPlaying = false, traffic;
+    const mults = [1.44, 2.21, 3.45, 5.53, 9.09];
 
-        function moveChicken() {
-            if(!isPlaying) {
-                isPlaying = true;
-                setInterval(spawnCar, 1000); // መኪና ማምጫ
-            }
-            step++;
-            chicken.style.bottom = (step * 50) + "px";
-            if(step >= 5) { alert("አሸነፍክ!"); location.reload(); }
+    function play() {
+        let betAmt = parseFloat(document.getElementById('bet').value);
+        if(!isPlaying) {
+            if(balance < betAmt) return alert("ብር የለህም!");
+            balance -= betAmt; isPlaying = true;
+            document.getElementById('go-btn').innerText = "GO";
+            document.getElementById('cash-btn').style.display = "block";
+            traffic = setInterval(spawnCar, 900);
+            updateUI();
         }
+        step++;
+        document.getElementById('chicken').style.bottom = (step * 20) + "%";
+        document.getElementById('cash-btn').innerText = "CASH OUT (" + (betAmt * mults[step-1]).toFixed(2) + ")";
+        if(step >= 5) { setTimeout(() => { balance += betAmt * mults[4]; alert("አሸነፍክ!"); reset(); }, 300); }
+    }
 
-        function spawnCar() {
-            const car = document.createElement('div');
-            car.className = 'car';
-            car.style.left = "-60px";
-            car.style.bottom = (Math.floor(Math.random() * 4 + 1) * 50) + "px";
-            document.getElementById('game-area').appendChild(car);
-
-            let move = setInterval(() => {
-                let x = parseInt(car.style.left);
-                if(x > window.innerWidth) { clearInterval(move); car.remove(); }
-                else {
-                    car.style.left = (x + 5) + "px";
-                    // መጋጨታቸውን ማረጋገጫ
-                    let c = chicken.getBoundingClientRect();
-                    let r = car.getBoundingClientRect();
-                    if(!(r.left > c.right || r.right < c.left || r.top > c.bottom || r.bottom < c.top)) {
-                        alert("ተገጨህ!"); location.reload();
-                    }
+    function spawnCar() {
+        const car = document.createElement('div');
+        car.className = 'car';
+        car.style.left = "-70px";
+        car.style.bottom = [20, 40, 60, 80][Math.floor(Math.random()*4)] + "%";
+        document.getElementById('game-area').appendChild(car);
+        let move = setInterval(() => {
+            let x = parseInt(car.style.left);
+            if(x > window.innerWidth || !isPlaying) { clearInterval(move); car.remove(); }
+            else {
+                car.style.left = (x + 7) + "px";
+                let c = document.getElementById('chicken').getBoundingClientRect();
+                let r = car.getBoundingClientRect();
+                if(!(r.left > c.right || r.right < c.left || r.top > c.bottom || r.bottom < c.top)) {
+                    isPlaying = false;
+                    document.getElementById('chicken').src = "https://img.icons8.com/emoji/96/000000/feather-emoji.png";
+                    setTimeout(() => { alert("ተገጨህ!"); reset(); }, 500);
                 }
-            }, 20);
-        }
-    </script>
+            }
+        }, 20);
+    }
+
+    function cashOut() {
+        balance += parseFloat(document.getElementById('bet').value) * mults[step-1];
+        reset();
+    }
+
+    function reset() {
+        isPlaying = false; clearInterval(traffic); step = 0;
+        document.getElementById('chicken').style.bottom = "10px";
+        document.getElementById('chicken').src = "https://img.icons8.com/emoji/96/000000/chicken-emoji.png";
+        document.getElementById('go-btn').innerText = "PLAY / GO";
+        document.getElementById('cash-btn').style.display = "none";
+        document.querySelectorAll('.car').forEach(c => c.remove());
+        updateUI();
+    }
+
+    function updateUI() { document.getElementById('bal-txt').innerText = balance.toFixed(2) + " ETB"; }
+</script>
 </body>
 </html>
