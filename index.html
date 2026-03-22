@@ -3,64 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Keno Pro - 80</title>
+    <title>Ethio Keno UI</title>
     <style>
-        body { margin: 0; background: #1a1d21; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; text-align: center; }
-        .header { background: #24292e; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2ecc71; position: sticky; top: 0; z-index: 100; }
-        .balance { color: #2ecc71; font-weight: bold; font-size: 20px; }
+        body { margin: 0; background: #121417; color: white; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        .top-nav { background: #1c1f24; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2ecc71; }
+        .balance-box { background: rgba(46, 204, 113, 0.1); padding: 5px 15px; border-radius: 20px; color: #2ecc71; font-weight: bold; }
         
-        .keno-container { padding: 15px; max-width: 500px; margin: 0 auto; }
-        .info-text { color: #888; font-size: 14px; margin-bottom: 10px; }
+        .status-panel { background: #1c1f24; margin: 10px; padding: 15px; border-radius: 10px; text-align: left; }
+        .profit-text { color: #2ecc71; font-size: 18px; font-weight: bold; }
+        .selected-row { display: flex; gap: 5px; margin-top: 10px; overflow-x: auto; min-height: 35px; }
+        .sel-box { background: #24292e; min-width: 35px; height: 35px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-        /* Keno Grid */
-        .grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-bottom: 20px; }
-        .num { background: #2c313a; padding: 12px 0; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; border: 1px solid #3e4451; transition: 0.2s; }
-        .num.selected { background: #2ecc71; color: white; border-color: #2ecc71; transform: scale(0.95); }
-        .num.draw-win { background: #f1c40f; color: black; border-color: #f1c40f; animation: pulse 0.5s infinite; }
-        .num.draw-miss { background: #e74c3c; color: white; border-color: #e74c3c; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; padding: 10px; }
+        .num { background: #2c313a; padding: 12px 0; text-align: center; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; color: #888; border: 1px solid #3e4451; }
+        .num.selected { background: #2ecc71; color: white; border-color: #2ecc71; }
+        .num.hit { background: #f1c40f; color: black; animation: pulse 0.5s infinite; }
 
-        /* Betting Controls */
-        .controls { background: #24292e; padding: 20px; border-radius: 20px 20px 0 0; position: fixed; bottom: 0; width: 100%; box-sizing: border-box; }
-        .bet-row { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 15px; }
-        .bet-btn { background: #333; border: none; color: white; width: 45px; height: 45px; border-radius: 10px; font-size: 20px; font-weight: bold; }
-        #bet-display { font-size: 22px; font-weight: bold; min-width: 80px; }
+        .footer-controls { background: #1c1f24; padding: 15px; border-radius: 20px 20px 0 0; position: fixed; bottom: 0; width: 100%; box-sizing: border-box; }
+        .bet-input-area { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; background: #24292e; border-radius: 8px; padding: 5px; }
+        .bet-tool-btn { background: #333; border: none; color: white; width: 45px; height: 45px; border-radius: 5px; font-size: 24px; cursor: pointer; }
+        #bet-display { font-size: 20px; font-weight: bold; }
         
-        .play-btn { width: 100%; padding: 18px; border: none; border-radius: 15px; font-size: 22px; font-weight: bold; cursor: pointer; background: #2ecc71; color: white; box-shadow: 0 5px #27ae60; }
-        .play-btn:disabled { background: #555; box-shadow: none; cursor: not-allowed; }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .win-multiplier { background: #333; padding: 10px; border-radius: 5px; color: #2ecc71; font-weight: bold; }
+        .bet-btn { width: 100%; padding: 18px; border: none; border-radius: 10px; font-size: 24px; font-weight: bold; cursor: pointer; background: #2ecc71; color: white; }
+        
+        .bottom-nav { display: flex; justify-content: space-around; padding: 10px 0; background: #121417; font-size: 12px; color: #2ecc71; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div style="font-weight: bold; letter-spacing: 1px;">KENO 80</div>
-    <div class="balance" id="bal-txt">1,000.00 ETB</div>
+<div class="top-nav">
+    <div style="color: #2ecc71; font-size: 24px;">◈◈◈</div>
+    <div class="balance-box" id="bal">1,000.00 ETB</div>
+    <div style="font-size: 20px;">☰</div>
 </div>
 
-<div class="keno-container">
-    <div class="info-text">ከ 1 እስከ 10 ቁጥሮችን ይምረጡ</div>
-    <div class="grid" id="keno-grid"></div>
+<div class="status-panel">
+    <div class="profit-text">ሊገኝ የሚችል ትርፍ <span id="max-win">0</span></div>
+    <div style="font-size: 12px; color: #888; margin-top: 5px;">ተቀማጭ 1 &nbsp; ክፍያ x3.5</div>
+    <div class="selected-row" id="selected-list">
+        </div>
 </div>
 
-<div style="height: 180px;"></div> <div class="controls">
-    <div class="bet-row">
-        <button class="bet-btn" onclick="changeBet(-10)">-</button>
-        <div id="bet-display">10</div>
-        <button class="bet-btn" onclick="changeBet(10)">+</button>
+<div class="grid" id="keno-grid"></div>
+
+<div style="height: 220px;"></div>
+
+<div class="footer-controls">
+    <div class="bet-input-area">
+        <button class="bet-tool-btn" onclick="changeBet(-5)">-</button>
+        <div id="bet-display">15.00</div>
+        <button class="bet-tool-btn" onclick="changeBet(5)">+</button>
+        <div class="win-multiplier">X2</div>
+        <div style="color: #2ecc71;">ማክስ</div>
     </div>
-    <button id="play-btn" class="play-btn" onclick="startDraw()">BET (KENO)</button>
+    <button class="bet-btn" onclick="startDraw()">ውርርድ</button>
+    
+    <div class="bottom-nav">
+        <div>▶ ጨዋታ</div>
+        <div>↺ ታሪክ</div>
+        <div>✓ ውጤቶች</div>
+        <div>📊 ስታቲስቲክስ</div>
+    </div>
 </div>
 
 <script>
-    let balance = 1000, bet = 10, selected = [];
+    let balance = 1000, bet = 15, selected = [];
     const grid = document.getElementById('keno-grid');
+    const selectedList = document.getElementById('selected-list');
 
     // Create 80 Numbers
     for(let i=1; i<=80; i++) {
         let n = document.createElement('div');
-        n.className = 'num';
-        n.innerText = i;
+        n.className = 'num'; n.innerText = i;
         n.onclick = () => toggleNum(i, n);
         grid.appendChild(n);
     }
@@ -73,72 +88,55 @@
             selected.push(i);
             el.classList.add('selected');
         }
+        updateSelectedUI();
+    }
+
+    function updateSelectedUI() {
+        selectedList.innerHTML = '';
+        selected.forEach(n => {
+            let b = document.createElement('div');
+            b.className = 'sel-box';
+            b.innerText = n;
+            selectedList.appendChild(b);
+        });
+        document.getElementById('max-win').innerText = (bet * (selected.length * 3.5)).toFixed(0);
     }
 
     function changeBet(v) {
-        bet = Math.max(10, bet + v);
-        document.getElementById('bet-display').innerText = bet;
+        bet = Math.max(15, bet + v);
+        document.getElementById('bet-display').innerText = bet.toFixed(2);
+        updateSelectedUI();
     }
 
     function startDraw() {
-        if(selected.length === 0) return alert("እባክህ ቢያንስ 1 ቁጥር ምረጥ!");
+        if(selected.length === 0) return alert("እባክህ ቁጥር ምረጥ!");
         if(balance < bet) return alert("በቂ ብር የለህም!");
+        
+        balance -= bet; updateUI();
+        document.querySelectorAll('.num').forEach(n => n.classList.remove('hit', 'draw-miss'));
 
-        balance -= bet;
-        updateUI();
-        document.getElementById('play-btn').disabled = true;
-
-        // Reset previous colors
-        document.querySelectorAll('.num').forEach(n => n.classList.remove('draw-win', 'draw-miss'));
-
-        let draw = [];
-        let count = 0;
-        let hits = 0;
-
-        let interval = setInterval(() => {
+        let draw = [], count = 0, hits = 0;
+        let intv = setInterval(() => {
             let r;
             do { r = Math.floor(Math.random() * 80) + 1; } while(draw.includes(r));
             draw.push(r);
-            
             let el = grid.children[r-1];
-            if(selected.includes(r)) {
-                el.classList.add('draw-win');
-                hits++;
-            } else {
-                el.classList.add('draw-miss');
-            }
-
+            if(selected.includes(r)) { el.classList.add('hit'); hits++; }
             count++;
-            if(count >= 20) {
-                clearInterval(interval);
-                finishGame(hits);
-            }
-        }, 150);
+            if(count >= 20) { clearInterval(intv); finish(hits); }
+        }, 100);
     }
 
-    function finishGame(hits) {
-        let winMult = 0;
-        // Simple Paytable
-        if(hits === 1) winMult = 1.5;
-        else if(hits === 2) winMult = 3;
-        else if(hits === 3) winMult = 10;
-        else if(hits >= 4) winMult = 50;
-
-        if(winMult > 0) {
-            let winAmt = bet * winMult;
+    function finish(hits) {
+        if(hits >= 1) {
+            let winAmt = bet * (hits * 3.5);
             balance += winAmt;
-            alert("እንኳን ደስ አለህ! " + hits + " ቁጥሮች ገጥመውልሃል! " + winAmt + " ብር አሸነፍክ!");
-        } else {
-            alert("ምንም አልገጠመም። እንደገና ሞክር!");
-        }
-
-        document.getElementById('play-btn').disabled = false;
+            alert("አሸንፈሃል! " + winAmt.toFixed(2) + " ETB ተጨምሯል።");
+        } else { alert("አልገጠመም።"); }
         updateUI();
     }
 
-    function updateUI() {
-        document.getElementById('bal-txt').innerText = balance.toFixed(2) + " ETB";
-    }
+    function updateUI() { document.getElementById('bal').innerText = balance.toFixed(2) + " ETB"; }
 </script>
 
 </body>
