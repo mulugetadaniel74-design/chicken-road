@@ -1,100 +1,13 @@
-<!DOCTYPE html>
-<html lang="am">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setgame - KENO ROYAL</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 10px; text-align: center; }
-        .header { display: flex; justify-content: space-between; padding: 10px; color: #4caf50; font-weight: bold; }
-        .deposit-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; margin-bottom: 10px; }
-        .timer-box { background: #1c2529; color: #ffc107; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background: #1c2529; padding: 10px; border-radius: 8px; }
-        .number { background: #2a3539; padding: 12px 0; border-radius: 4px; font-size: 13px; color: #888; cursor: pointer; transition: 0.3s; }
-        .selected { background: #2eb85c !important; color: white; box-shadow: 0 0 10px #2eb85c; }
-        .win-num { background: #ffc107 !important; color: black !important; font-weight: bold; transform: scale(1.1); } /* የወጣ እጣ */
-        .footer-btn { background: #333; color: #777; border: none; width: 100%; padding: 18px; border-radius: 15px; margin-top: 20px; font-size: 18px; font-weight: bold; cursor: pointer; }
-        .active { background: #2eb85c !important; color: black !important; }
-        .withdraw-link { color: #e53935; text-decoration: none; font-weight: bold; font-size: 14px; display: block; margin-top: 20px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div class="header"><span>KENO ROYAL</span><span>0.00 ETB</span></div>
+function askWithdraw() {
+    let amt = prompt("ማውጣት የሚፈልጉትን የብር መጠን ያስገቡ:");
+    if (!amt) return;
     
-    <button class="deposit-btn" onclick="location.href='https://t.me/RunChickenRunBot?start=Deposit'">💰 ዴፖዚት (Deposit)</button>
-    
-    <div class="timer-box">⏳ ቀጣይ እጣ በ: <span id="timer">10</span> ሰከንድ</div>
-    
-    <div class="grid" id="kenoGrid"></div>
-    
-    <button class="footer-btn" id="playBtn">ውርርድ (15 ETB)</button>
+    let phone = prompt("ብር የሚላክበትን የቴሌብር ስልክ ቁጥር ያስገቡ:");
+    if (!phone) return;
 
-    <div class="withdraw-link" onclick="askWithdraw()">💸 ብር ለማውጣት (Withdraw)</div>
-
-    <script>
-        let selected = [];
-        let time = 10;
-        const grid = document.getElementById('kenoGrid');
-
-        // 1. ሰሌዳውን መፍጠር
-        for (let i = 1; i <= 80; i++) {
-            let div = document.createElement('div');
-            div.className = 'number';
-            div.id = 'n-' + i;
-            div.innerText = i;
-            div.onclick = () => {
-                if (selected.includes(i)) {
-                    selected = selected.filter(n => n !== i);
-                    div.classList.remove('selected');
-                } else if (selected.length < 10) {
-                    selected.push(i);
-                    div.classList.add('selected');
-                }
-                document.getElementById('playBtn').className = selected.length > 0 ? 'footer-btn active' : 'footer-btn';
-            };
-            grid.appendChild(div);
-        }
-
-        // 2. በየደቂቃው እጣ እንዲወጣ የሚያደርግ (Timer & Draw)
-        setInterval(() => {
-            time--;
-            document.getElementById('timer').innerText = time;
-            
-            if (time <= 0) {
-                drawNumbers(); // እጣ ማውጫ
-                time = 10; // ታይመሩን መልሰህ ጀምር
-            }
-        }, 1000);
-
-        function drawNumbers() {
-            // የቀድሞ እጣዎችን አጽዳ
-            document.querySelectorAll('.number').forEach(n => n.classList.remove('win-num'));
-            
-            // 20 የዕጣ ቁጥሮችን በዘፈቀደ ምረጥ
-            let winners = [];
-            while(winners.length < 20) {
-                let r = Math.floor(Math.random() * 80) + 1;
-                if(!winners.includes(r)) winners.push(r);
-            }
-
-            // እጣዎቹን በቢጫ ከለር አሳይ
-            winners.forEach((num, index) => {
-                setTimeout(() => {
-                    document.getElementById('n-' + num).classList.add('win-num');
-                }, index * 100);
-            });
-        }
-
-        // 3. ዊዝድራው ማረጋገጫ (Withdraw Confirmation)
-        function askWithdraw() {
-            let amt = prompt("ማውጣት የሚፈልጉትን የብር መጠን ያስገቡ:");
-            if (amt) {
-                let check = confirm("ያወጣኸው መጠን " + amt + " ETB ነው። እርግጠኛ ነህ?");
-                if (check) {
-                    window.location.href = "https://t.me/RunChickenRunBot?start=Withdraw_" + amt;
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+    let check = confirm("መጠን: " + amt + " ETB\nስልክ: " + phone + "\nእርግጠኛ ነዎት?");
+    if (check) {
+        // መጠኑን እና ስልኩን በአንድ ላይ ወደ ቦቱ ይልካል
+        window.location.href = "https://t.me/RunChickenRunBot?start=Withdraw_" + amt + "_Phone_" + phone;
+    }
+}
