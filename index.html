@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL - @RunChickenRunBot</title>
+    <title>KENO ROYAL - Official</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
@@ -60,15 +60,14 @@
             document.getElementById('betDisplay').innerText = currentBet + " ETB";
         }
 
-        // የውዝድራው ተግባር (400 ብር ሚኒማም)
         function handleWithdraw() {
-            let amount = prompt("ማውጣት የሚፈልጉትን የብር መጠን ያስገቡ (ዝቅተኛ 400):");
-            if (amount !== null && amount >= 400) {
-                let phone = prompt("እባክዎ የቴሌብር ስልክ ቁጥርዎን ያስገቡ:");
+            let amount = prompt("ማውጣት የሚፈልጉትን መጠን ያስገቡ (ዝቅተኛ 400):");
+            // እዚህ ጋር ቼክ ያደርጋል
+            if (amount !== null && parseInt(amount) >= 400) {
+                let phone = prompt("የቴሌብር ስልክ ቁጥርዎን ያስገቡ:");
                 if (phone && phone.length >= 10) {
-                    alert("ጥያቄዎ ወደ ቦቱ እየተላከ ነው...");
-                    // መጠኑን (amount) እና ስልኩን (phone) በአንድ ላይ ይልካል
-                    window.location.href = `https://t.me/RunChickenRunBot?start=WD_${amount}_PH_${phone}`;
+                    // መጠኑን እና ስልኩን ወደ ቦቱ ይልካል
+                    window.location.href = "https://t.me/RunChickenRunBot?start=WD_" + amount + "_PH_" + phone;
                 } else if (phone !== null) {
                     alert("ትክክለኛ ስልክ ቁጥር ያስገቡ!");
                 }
@@ -96,3 +95,4 @@
     </script>
 </body>
 </html>
+u
