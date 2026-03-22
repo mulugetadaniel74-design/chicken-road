@@ -1,23 +1,23 @@
 import telebot
-import os
 
-# ያንተ አዲሱ መረጃ
 TOKEN = "8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw"
-MY_ID = "7313437942"
+MY_ID = "7313437942" # የዳንኤል ID
 
 bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=['start'])
 def handle_start(message):
-    text = message.text.split()
-    if len(text) > 1:
-        data = text[1]
-        bot.send_message(MY_ID, f"🚀 አዲስ የገንዘብ ጥያቄ ደርሷል!\n\nዝርዝር፦ {data}")
-        bot.reply_to(message, "ጥያቄዎ ለዳንኤል ተልኳል!")
-    else:
-        bot.reply_to(message, "ሰላም ዳንኤል! ቦቱ በ Render ላይ በትክክል እየሰራ ነው።")
+    bot.reply_to(message, "ሰላም! የገንዘብ ጥያቄ ካለህ እባክህ የከፈልክበትን Screenshot (ፎቶ) ላክ።")
 
-# ለ Render እንዲመች
+@bot.message_handler(content_types=['photo'])
+def handle_receipt(message):
+    # ፎቶውን ለዳንኤል ያስተላልፋል
+    photo_id = message.photo[-1].file_id
+    caption = f"🚀 አዲስ የገንዘብ ማረጋገጫ ደርሷል!\n\nከ፦ @{message.from_user.username}\nID፦ {message.from_user.id}"
+    
+    bot.send_photo(MY_ID, photo_id, caption=caption)
+    bot.reply_to(message, "ማረጋገጫው ለዳንኤል ተልኳል። በ 2 ደቂቃ ውስጥ ይጨመርልሃል! ✅")
+
 if __name__ == "__main__":
-    print("Setgame bot is running on Render...")
+    print("ቦቱ ፎቶ ለመቀበል ዝግጁ ነው...")
     bot.polling(none_stop=True)
