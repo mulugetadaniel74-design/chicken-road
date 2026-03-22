@@ -7,47 +7,64 @@
     <style>
         body { font-family: Arial, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 10px; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; color: #4caf50; font-weight: bold; }
-        .balance { color: white; }
+        .balance { color: white; font-size: 18px; }
         .deposit-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 10px; font-size: 16px; cursor: pointer; }
-        .withdraw-link { color: #e53935; text-decoration: none; font-size: 14px; display: block; margin-bottom: 15px; font-weight: bold; }
-        .timer { color: #ffc107; font-size: 14px; margin-bottom: 10px; }
+        .withdraw-section { color: #e53935; background: #1c2529; padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #e53935; display: none; }
+        .timer { color: #ffc107; font-size: 14px; margin-bottom: 10px; text-align: center; }
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background-color: #1c2529; padding: 10px; border-radius: 8px; }
-        .number { background-color: #2a3539; padding: 10px 0; border-radius: 4px; font-size: 12px; cursor: pointer; color: #888; text-align: center; }
-        .selected { background-color: #2eb85c !important; color: white; }
-        .footer-btn { background-color: #333; color: #777; border: none; width: 100%; padding: 18px; border-radius: 15px; margin-top: 20px; font-size: 18px; font-weight: bold; }
-        
-        /* ፎቶ መላኪያ ቦታ */
-        #photoBox { display: none; background: #1c2529; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #2eb85c; }
+        .number { background-color: #2a3539; padding: 12px 0; border-radius: 4px; font-size: 13px; cursor: pointer; color: #888; text-align: center; font-weight: bold; }
+        .selected { background-color: #2eb85c !important; color: white; box-shadow: 0 0 10px #2eb85c; }
+        .footer-btn { background-color: #333; color: #777; border: none; width: 100%; padding: 18px; border-radius: 15px; margin-top: 20px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .payout-info { background: #1a2428; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 12px; color: #4caf50; border: 1px dashed #4caf50; }
+        input { width: 90%; padding: 10px; margin: 5px 0; border-radius: 5px; border: none; background: #2a3539; color: white; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <span>KENO ROYAL</span>
-    <span class="balance">0.00 ETB</span>
+    <span class="balance" id="userBalance">0.00 ETB</span>
 </div>
 
-<button class="deposit-btn" onclick="openPhoto()">💰 ብር ያስገቡ (Deposit)</button>
+<button class="deposit-btn" onclick="toggleSection('depositBox')">💰 ብር ያስገቡ (Deposit)</button>
 
-<div id="photoBox">
-    <p style="font-size: 12px;">የከፈሉበትን Screenshot ይምረጡ፡</p>
+<div id="depositBox" style="display:none; background:#1c2529; padding:15px; border-radius:10px; margin-bottom:10px; border:1px solid #2eb85c;">
+    <p style="font-size:12px;">የከፈሉበትን Screenshot ይምረጡ፡</p>
     <input type="file" id="receipt" accept="image/*">
-    <button onclick="sendPhoto()" style="background:#2eb85c; border:none; padding:8px; width:100%; border-radius:5px; margin-top:5px;">ጥያቄ ላክ</button>
+    <button onclick="sendDeposit()" style="background:#2eb85c; border:none; padding:10px; width:100%; border-radius:5px; font-weight:bold; margin-top:10px;">ጥያቄ ላክ</button>
 </div>
 
-<a href="#" class="withdraw-link" onclick="askWithdraw()">💸 ብር ለማውጣት (Withdraw)</a>
+<div style="text-align: center; margin-bottom: 10px;">
+    <a href="javascript:void(0)" onclick="toggleSection('withdrawBox')" style="color:#e53935; text-decoration:none; font-weight:bold;">💸 ብር ለማውጣት (Withdraw)</a>
+</div>
+
+<div id="withdrawBox" class="withdraw-section">
+    <input type="number" id="wAmount" placeholder="የሚወጣ ብር መጠን">
+    <input type="text" id="wPhone" placeholder="የቴሌብር ስልክ ቁጥር">
+    <button onclick="sendWithdraw()" style="background:#e53935; border:none; padding:10px; width:100%; border-radius:5px; color:white; font-weight:bold; margin-top:10px;">የማውጫ ጥያቄ ላክ</button>
+</div>
 
 <div class="timer">ቀጣይ እጣ በ: <span id="time">00:46</span></div>
 
-<div class="grid" id="kenoGrid">
-    </div>
+<div class="grid" id="kenoGrid"></div>
+
+<div class="payout-info" id="payoutDesc">
+    ቁጥር ይምረጡና የትርፍ መጠንዎን ይመልከቱ...
+</div>
 
 <button class="footer-btn" id="playBtn">ውርርድ (15 ETB)</button>
 
 <script>
-    // ቁጥሮችን መፍጠር
     let selected = [];
     const grid = document.getElementById('kenoGrid');
+    const payoutDesc = document.getElementById('payoutDesc');
+
+    // የብር ማባዣ ደንብ (Multiplier Logic)
+    const multipliers = {
+        1: "3.8x", 2: "10x", 3: "25x", 4: "50x", 5: "100x", 
+        6: "250x", 7: "500x", 8: "1000x", 9: "2500x", 10: "5000x"
+    };
+
     for (let i = 1; i <= 80; i++) {
         let div = document.createElement('div');
         div.className = 'number';
@@ -60,34 +77,43 @@
                 selected.push(i);
                 div.classList.add('selected');
             }
-            updateBtn();
+            updateUI();
         };
         grid.appendChild(div);
     }
 
-    function openPhoto() { document.getElementById('photoBox').style.display = 'block'; }
-    
-    function sendPhoto() {
+    function toggleSection(id) {
+        let el = document.getElementById(id);
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function updateUI() {
+        let btn = document.getElementById('playBtn');
+        let count = selected.length;
+        if(count > 0) {
+            btn.style.backgroundColor = "#2eb85c";
+            btn.style.color = "black";
+            btn.innerText = `ውርርድ (${count * 15} ETB)`;
+            payoutDesc.innerText = `${count} ቁጥር ከመጣልዎት ብርዎ ${multipliers[count]} ይባዛል!`;
+        } else {
+            btn.style.backgroundColor = "#333";
+            btn.innerText = "ውርርድ (15 ETB)";
+            payoutDesc.innerText = "ቁጥር ይምረጡና የትርፍ መጠንዎን ይመልከቱ...";
+        }
+    }
+
+    function sendDeposit() {
         let file = document.getElementById('receipt').files[0];
         if(!file) { alert("መጀመሪያ ፎቶ ይምረጡ!"); return; }
         window.location.href = "https://t.me/RunChickenRunBot?start=Deposit_Request";
     }
 
-    function askWithdraw() {
-        let amt = prompt("የሚወጣው የብር መጠን?");
-        let phone = prompt("የቴሌብር ስልክ ቁጥር?");
+    function sendWithdraw() {
+        let amt = document.getElementById('wAmount').value;
+        let phone = document.getElementById('wPhone').value;
         if(amt && phone) {
             window.location.href = `https://t.me/RunChickenRunBot?start=Withdraw_${amt}_Phone_${phone}`;
-        }
-    }
-
-    function updateBtn() {
-        let btn = document.getElementById('playBtn');
-        if(selected.length > 0) {
-            btn.style.backgroundColor = "#2eb85c";
-            btn.style.color = "black";
-            btn.innerText = `ውርርድ (${selected.length * 15} ETB)`;
-        }
+        } else { alert("እባክዎ መረጃ ይሙሉ!"); }
     }
 </script>
 
