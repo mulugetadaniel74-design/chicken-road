@@ -3,21 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chicken Road Game</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Chicken Road</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { margin: 0; background: #222; color: white; font-family: sans-serif; overflow: hidden; text-align: center; touch-action: none; }
+        #game-container { position: relative; width: 100vw; height: 80vh; background: #444; overflow: hidden; border-bottom: 5px solid #333; }
+        .lane { height: 20%; border-bottom: 1px solid #555; position: relative; }
+        #chicken { width: 50px; height: 50px; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); transition: bottom 0.2s, left 0.2s; z-index: 10; }
+        .car { width: 60px; height: 30px; background: red; position: absolute; border-radius: 5px; }
+        #controls { height: 20vh; display: flex; justify-content: center; align-items: center; gap: 20px; background: #000; }
+        .btn { width: 70px; height: 70px; background: #555; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .btn:active { background: #888; }
+        #score { font-size: 24px; padding: 10px; color: #ff0; }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="header">
-            <div class="score">ውጤት: <span id="score-value">0</span></div>
-        </div>
+    <div id="score">ውጤት: 0</div>
+    <div id="game-container" id="road">
+        <div class="lane"></div><div class="lane"></div><div class="lane"></div><div class="lane"></div><div class="lane"></div>
+        <img id="chicken" src="https://img.icons8.com/emoji/96/000000/chicken-emoji.png">
+    </div>
+    <div id="controls">
+        <div class="btn" onclick="move('left')">⬅️</div>
+        <div class="btn" onclick="move('up')">⬆️</div>
+        <div class="btn" onclick="move('right')">➡️</div>
+    </div>
 
-        <div class="game-area" id="game-area">
-            <div id="chicken" class="chicken">🐔</div>
-        </div>
+    <script>
+        let score = 0;
+        let chickenPos = { x: 50, y: 10 }; 
+        const chicken = document.getElementById('chicken');
+        const container = document.getElementById('game-container');
 
-        <div class="controls">
-            <button class="btn" onclick="move('up')">⬆️</button>
-            <div class="middle-btns">
-                <button class="btn" onclick="move('left')">⬅️</button>
-                <button class="btn" onclick="
+        function move(dir) {
+            if(dir === 'up') chickenPos.y += 15;
+            if(dir === 'left' && chickenPos.x > 5) chickenPos.x -= 10;
+            if(dir === 'right' && chickenPos.x < 85) chickenPos.x += 10;
+            
+            if(chickenPos.y > 90) {
+                score++;
+                document.getElementById('score').innerText = "ውጤት: " + score;
+                chickenPos.y = 10;
+            }
+            updatePos();
+        }
+
+        function updatePos() {
+            chicken.style.bottom = chickenPos.y + "%";
+            chicken.style.left = chickenPos.x + "%";
+        }
+
+        function createCar() {
+            const car = document.createElement('div');
+            car.className = 'car';
+            const lanes = [25, 45, 65, 85];
+            const lane = lanes[Math.floor(Math.random() * lanes.length)];
+            car.style.bottom = lane + "%";
+            car.style.left = "-70px";
+            container.appendChild(car);
+
+            let speed = 2 + Math.random() * 3;
+            let moveCar = setInterval(() => {
+                let currentLeft = parseInt(car.style.left);
+                if(currentLeft > window.innerWidth) {
+                    clearInterval(moveCar);
+                    car.remove();
+                } else {
+                    car.style.left = (currentLeft + speed) + "px";
+                }
+                
+                // Collision check
+                let cRect = chicken.getBoundingClientRect();
+                let rRect = car.getBoundingClientRect();
+                if(!(rRect.left > cRect.right || rRect.right < cRect.left || rRect.top > cRect.bottom || rRect.bottom < cRect.top)) {
+                    alert("ተመታህ! እንደገና ሞክር!");
+                    score = 0;
+                    document.getElementById('score').innerText = "ውጤት: 0";
+                    chickenPos = { x: 50, y: 10 };
+                    updatePos();
+                }
+            }, 20);
+        }
+        setInterval(createCar, 1500);
+        window.Telegram.WebApp.ready();
+    </script>
+</body>
+</html>
