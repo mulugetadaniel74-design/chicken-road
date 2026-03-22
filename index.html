@@ -5,69 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Setgame - KENO ROYAL</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f171a; color: white; margin: 0; padding: 10px; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1a2428; border-radius: 10px; margin-bottom: 10px; border-bottom: 2px solid #2eb85c; }
-        .balance-box { text-align: right; }
-        .balance-amount { color: #2eb85c; font-size: 18px; font-weight: bold; }
-        
-        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .btn { border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
-        .deposit-btn { background-color: #2eb85c; color: white; }
-        .withdraw-btn { background-color: #e53935; color: white; }
-        
-        .section-box { background: #1c2529; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: none; border: 1px solid #333; }
-        input { width: 90%; padding: 10px; margin: 8px 0; border-radius: 5px; border: 1px solid #444; background: #0f171a; color: white; }
-        
-        .timer { color: #ffc107; font-size: 13px; margin: 10px 0; text-align: center; background: #1a2428; padding: 5px; border-radius: 20px; }
-        
+        body { font-family: Arial, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 10px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; color: #4caf50; font-weight: bold; }
+        .balance { color: white; }
+        .deposit-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 10px; font-size: 16px; cursor: pointer; }
+        .withdraw-link { color: #e53935; text-decoration: none; font-size: 14px; display: block; margin-bottom: 15px; font-weight: bold; }
+        .timer { color: #ffc107; font-size: 14px; margin-bottom: 10px; }
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background-color: #1c2529; padding: 10px; border-radius: 8px; }
-        .number { background-color: #2a3539; padding: 12px 0; border-radius: 4px; font-size: 12px; cursor: pointer; color: #bbb; text-align: center; }
-        .selected { background-color: #2eb85c !important; color: white; box-shadow: 0 0 10px #2eb85c; }
+        .number { background-color: #2a3539; padding: 10px 0; border-radius: 4px; font-size: 12px; cursor: pointer; color: #888; text-align: center; }
+        .selected { background-color: #2eb85c !important; color: white; }
+        .footer-btn { background-color: #333; color: #777; border: none; width: 100%; padding: 18px; border-radius: 15px; margin-top: 20px; font-size: 18px; font-weight: bold; }
         
-        .footer-btn { background-color: #333; color: #777; border: none; width: 100%; padding: 18px; border-radius: 15px; margin-top: 15px; font-size: 18px; font-weight: bold; cursor: not-allowed; }
-        .active-play { background-color: #2eb85c !important; color: white !important; cursor: pointer !important; }
+        /* ፎቶ መላኪያ ቦታ */
+        #photoBox { display: none; background: #1c2529; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #2eb85c; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <span style="letter-spacing: 1px;">KENO ROYAL</span>
-    <div class="balance-box">
-        <div style="font-size: 10px; color: #888;">የእርስዎ ሂሳብ</div>
-        <div class="balance-amount">0.00 ETB</div>
+    <span>KENO ROYAL</span>
+    <span class="balance">0.00 ETB</span>
+</div>
+
+<button class="deposit-btn" onclick="openPhoto()">💰 ብር ያስገቡ (Deposit)</button>
+
+<div id="photoBox">
+    <p style="font-size: 12px;">የከፈሉበትን Screenshot ይምረጡ፡</p>
+    <input type="file" id="receipt" accept="image/*">
+    <button onclick="sendPhoto()" style="background:#2eb85c; border:none; padding:8px; width:100%; border-radius:5px; margin-top:5px;">ጥያቄ ላክ</button>
+</div>
+
+<a href="#" class="withdraw-link" onclick="askWithdraw()">💸 ብር ለማውጣት (Withdraw)</a>
+
+<div class="timer">ቀጣይ እጣ በ: <span id="time">00:46</span></div>
+
+<div class="grid" id="kenoGrid">
     </div>
-</div>
 
-<div class="action-buttons">
-    <button class="btn deposit-btn" onclick="toggleSection('deposit')">💰 ዲፖዚት</button>
-    <button class="btn withdraw-btn" onclick="toggleSection('withdraw')">💸 ዊዝድራው</button>
-</div>
-
-<div id="deposit" class="section-box">
-    <h4 style="margin-top:0; color:#2eb85c;">ብር ለማስገባት</h4>
-    <p style="font-size:11px;">1. በ 09... (ቴሌብር) ብር ይላኩ።<br>2. የከፈሉበትን Screenshot ይምረጡ።</p>
-    <input type="file" id="receiptPhoto" accept="image/*">
-    <button class="btn deposit-btn" style="width:100%" onclick="sendToBot('Deposit')">ማረጋገጫ ላክ</button>
-</div>
-
-<div id="withdraw" class="section-box">
-    <h4 style="margin-top:0; color:#e53935;">ብር ለማውጣት</h4>
-    <input type="number" id="withdrawAmount" placeholder="የሚወጣ ብር መጠን">
-    <input type="text" id="phone" placeholder="የቴሌብር ስልክ ቁጥር">
-    <button class="btn withdraw-btn" style="width:100%" onclick="sendToBot('Withdraw')">የማውጫ ጥያቄ ላክ</button>
-</div>
-
-<div class="timer">⏳ ቀጣይ እጣ በ: <span id="time">00:46</span></div>
-
-<div class="grid" id="kenoGrid"></div>
-
-<button class="footer-btn" id="playBtn" onclick="playGame()">ውርርድ (15 ETB)</button>
+<button class="footer-btn" id="playBtn">ውርርድ (15 ETB)</button>
 
 <script>
+    // ቁጥሮችን መፍጠር
     let selected = [];
     const grid = document.getElementById('kenoGrid');
-
-    // Grid መፍጠር
     for (let i = 1; i <= 80; i++) {
         let div = document.createElement('div');
         div.className = 'number';
@@ -80,46 +60,34 @@
                 selected.push(i);
                 div.classList.add('selected');
             }
-            updateUI();
+            updateBtn();
         };
         grid.appendChild(div);
     }
 
-    function toggleSection(id) {
-        const sections = ['deposit', 'withdraw'];
-        sections.forEach(s => {
-            document.getElementById(s).style.display = (s === id && document.getElementById(s).style.display !== 'block') ? 'block' : 'none';
-        });
+    function openPhoto() { document.getElementById('photoBox').style.display = 'block'; }
+    
+    function sendPhoto() {
+        let file = document.getElementById('receipt').files[0];
+        if(!file) { alert("መጀመሪያ ፎቶ ይምረጡ!"); return; }
+        window.location.href = "https://t.me/RunChickenRunBot?start=Deposit_Request";
     }
 
-    function updateUI() {
-        const btn = document.getElementById('playBtn');
-        if (selected.length > 0) {
-            btn.classList.add('active-play');
+    function askWithdraw() {
+        let amt = prompt("የሚወጣው የብር መጠን?");
+        let phone = prompt("የቴሌብር ስልክ ቁጥር?");
+        if(amt && phone) {
+            window.location.href = `https://t.me/RunChickenRunBot?start=Withdraw_${amt}_Phone_${phone}`;
+        }
+    }
+
+    function updateBtn() {
+        let btn = document.getElementById('playBtn');
+        if(selected.length > 0) {
+            btn.style.backgroundColor = "#2eb85c";
+            btn.style.color = "black";
             btn.innerText = `ውርርድ (${selected.length * 15} ETB)`;
-        } else {
-            btn.classList.remove('active-play');
-            btn.innerText = "ውርርድ (15 ETB)";
         }
-    }
-
-    function sendToBot(type) {
-        let msg = "";
-        if(type === 'Deposit') {
-            msg = "Deposit_Request_Check_Photo";
-        } else {
-            let amt = document.getElementById('withdrawAmount').value;
-            let ph = document.getElementById('phone').value;
-            if(!amt || !ph) { alert("እባክዎ መረጃ ይሙሉ!"); return; }
-            msg = `Withdraw_Amount:${amt}_Phone:${ph}`;
-        }
-        window.location.href = `https://t.me/RunChickenRunBot?start=${msg}`;
-    }
-
-    function playGame() {
-        if (selected.length === 0) return;
-        let info = `Play_Keno_Numbers:${selected.join(',')}`;
-        window.location.href = `https://t.me/RunChickenRunBot?start=${info}`;
     }
 </script>
 
