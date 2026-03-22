@@ -3,116 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chicken Road Clone</title>
+    <title>Chicken & Keno Pro</title>
     <style>
-        body { margin: 0; background: #1a1d21; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        .top-bar { display: flex; justify-content: space-between; padding: 10px 15px; background: #24292e; align-items: center; border-bottom: 1px solid #333; }
+        body { margin: 0; background: #1a1d21; color: white; font-family: sans-serif; overflow-x: hidden; }
+        .top-bar { display: flex; justify-content: space-between; padding: 12px; background: #24292e; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 1000; }
         .balance { color: #2ecc71; font-weight: bold; font-size: 18px; }
         
-        #game-view { width: 100%; height: 45vh; background: #2c313a; position: relative; overflow: hidden; background-image: linear-gradient(#333 2px, transparent 2px); background-size: 100% 20%; }
-        
-        .lane-mark { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-around; pointer-events: none; }
-        .multiplier-node { width: 50px; height: 50px; background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #aaa; margin: 0 auto; }
-        
-        #chicken { width: 45px; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); z-index: 10; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .car { width: 55px; height: 30px; position: absolute; border-radius: 4px; z-index: 5; }
+        /* Tabs */
+        .tabs { display: flex; background: #1a1d21; border-bottom: 1px solid #333; }
+        .tab { flex: 1; padding: 15px; border: none; background: none; color: #888; font-weight: bold; cursor: pointer; }
+        .tab.active { color: #2ecc71; border-bottom: 3px solid #2ecc71; }
 
-        .control-panel { padding: 20px; background: #1a1d21; height: 55vh; }
-        .bet-box { display: flex; align-items: center; background: #24292e; border-radius: 10px; padding: 5px; margin-bottom: 15px; border: 1px solid #333; }
-        .bet-btn { background: #333; border: none; color: white; width: 40px; height: 40px; font-size: 20px; border-radius: 8px; cursor: pointer; }
-        #bet-val { flex: 1; text-align: center; font-size: 20px; font-weight: bold; }
+        /* Chicken Game */
+        #chicken-game { height: 40vh; background: #2c313a; position: relative; overflow: hidden; display: block; }
+        #chicken { width: 45px; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); z-index: 10; transition: 0.3s; }
+        .car { width: 55px; height: 30px; position: absolute; border-radius: 4px; }
 
-        .play-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 22px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        #main-action { background: #2ecc71; color: white; }
+        /* Keno Game */
+        #keno-game { display: none; padding: 15px; background: #1a1d21; }
+        .keno-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-bottom: 20px; }
+        .keno-num { background: #2c313a; padding: 10px 0; text-align: center; border-radius: 4px; font-size: 12px; cursor: pointer; border: 1px solid #444; }
+        .keno-num.selected { background: #2ecc71; color: white; border-color: #2ecc71; }
+        .keno-num.hit { background: #f1c40f; color: black; animation: flash 0.5s infinite; }
+
+        /* Controls */
+        .controls { padding: 20px; background: #1a1d21; border-top: 1px solid #333; }
+        .bet-input { display: flex; align-items: center; background: #24292e; border-radius: 10px; padding: 10px; margin-bottom: 15px; }
+        .main-btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; }
+        #action-btn { background: #2ecc71; color: white; }
         #cashout-btn { background: #f1c40f; color: black; display: none; margin-top: 10px; }
-        
-        select { width: 100%; padding: 12px; background: #24292e; color: white; border: 1px solid #333; border-radius: 8px; margin-bottom: 15px; }
+
+        @keyframes flash { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
 <div class="top-bar">
-    <div style="font-weight: bold; color: #888;">CHICKEN ROAD</div>
-    <div class="balance" id="bal">1,000.00 ETB</div>
+    <div style="font-weight: bold;">GAME HUB</div>
+    <div class="balance" id="bal-txt">1,000.00 ETB</div>
 </div>
 
-<div id="game-view">
-    <div class="lane-mark">
-        <div class="multiplier-node">1.83x</div>
-        <div class="multiplier-node">1.46x</div>
-        <div class="multiplier-node">1.18x</div>
-        <div class="multiplier-node">1.03x</div>
-    </div>
+<div class="tabs">
+    <button id="t-chicken" class="tab active" onclick="switchTab('chicken')">CHICKEN</button>
+    <button id="t-keno" class="tab" onclick="switchTab('keno')">KENO</button>
+</div>
+
+<div id="chicken-game">
     <img id="chicken" src="https://img.icons8.com/emoji/96/000000/chicken-emoji.png">
 </div>
 
-<div class="control-panel">
-    <select id="diff">
-        <option value="6">Easy</option>
-        <option value="10" selected>Medium</option>
-        <option value="15">Hard</option>
-    </select>
+<div id="keno-game">
+    <div class="keno-grid" id="keno-grid"></div>
+</div>
 
-    <div class="bet-box">
-        <button class="bet-btn" onclick="adjBet(-5)">-</button>
-        <div id="bet-val">10.00</div>
-        <button class="bet-btn" onclick="adjBet(5)">+</button>
+<div class="controls">
+    <div class="bet-input">
+        <span style="color:#888; margin-right:10px;">BET:</span>
+        <input type="number" id="bet-amount" value="10" style="background:none; border:none; color:white; font-size:18px; width:100%;">
     </div>
-
-    <button id="main-action" class="play-btn" onclick="handlePlay()">PLAY</button>
-    <button id="cashout-btn" class="play-btn" onclick="cashOut()">CASH OUT</button>
+    <button id="action-btn" class="main-btn" onclick="handleMainAction()">PLAY</button>
+    <button id="cashout-btn" class="main-btn" onclick="cashOut()">CASH OUT</button>
 </div>
 
 <script>
-    let bal = 1000, bet = 10, step = 0, active = false, traffic;
-    const mults = [1.03, 1.18, 1.46, 1.83, 2.50];
-    const chk = document.getElementById('chicken'), act = document.getElementById('main-action'), csh = document.getElementById('cashout-btn');
+    let balance = 1000, bet = 10, step = 0, isPlaying = false, currentGame = 'chicken';
+    let selectedKeno = [], trafficInterval;
+    const mults = [1.20, 1.80, 2.50, 4.00, 10.00];
 
-    function adjBet(v) { if(!active) { bet = Math.max(5, bet + v); document.getElementById('bet-val').innerText = bet.toFixed(2); } }
-
-    function handlePlay() {
-        if(!active) {
-            if(bal < bet) return alert("በቂ ብር የለዎትም!");
-            bal -= bet; active = true;
-            act.innerText = "GO"; csh.style.display = "block";
-            traffic = setInterval(spawn, 1000);
-            updateUI();
-        }
-        step++;
-        chk.style.bottom = (step * 20) + "%";
-        csh.innerText = "CASH OUT (" + (bet * mults[step-1]).toFixed(2) + ")";
-        if(step >= 5) { setTimeout(() => { bal += bet * mults[4]; alert("አሸነፉ!"); reset(); }, 300); }
+    // Create Keno Grid (80 numbers)
+    const grid = document.getElementById('keno-grid');
+    for(let i=1; i<=80; i++) {
+        let n = document.createElement('div');
+        n.className = 'keno-num';
+        n.innerText = i;
+        n.onclick = () => toggleKeno(i, n);
+        grid.appendChild(n);
     }
 
-    function spawn() {
-        const c = document.createElement('div');
-        c.className = 'car'; c.style.background = ["#e74c3c", "#f1c40f", "#3498db"][Math.floor(Math.random()*3)];
-        c.style.bottom = [20, 40, 60, 80][Math.floor(Math.random()*4)] + "%";
-        c.style.left = "-60px"; document.getElementById('game-view').appendChild(c);
-        let s = parseInt(document.getElementById('diff').value) + Math.random()*5;
-        let mv = setInterval(() => {
-            if(!active) { clearInterval(mv); c.remove(); return; }
-            let x = parseInt(c.style.left || -60);
-            if(x > window.innerWidth) { clearInterval(mv); c.remove(); }
+    function toggleKeno(num, el) {
+        if(selectedKeno.includes(num)) {
+            selectedKeno = selectedKeno.filter(n => n !== num);
+            el.classList.remove('selected');
+        } else if(selectedKeno.length < 10) {
+            selectedKeno.push(num);
+            el.classList.add('selected');
+        }
+    }
+
+    function switchTab(game) {
+        currentGame = game;
+        document.getElementById('chicken-game').style.display = game === 'chicken' ? 'block' : 'none';
+        document.getElementById('keno-game').style.display = game === 'keno' ? 'block' : 'none';
+        document.getElementById('t-chicken').classList.toggle('active', game === 'chicken');
+        document.getElementById('t-keno').classList.toggle('active', game === 'keno');
+        resetAll();
+    }
+
+    function handleMainAction() {
+        bet = parseFloat(document.getElementById('bet-amount').value);
+        if(balance < bet) return alert("በቂ ብር የለህም!");
+
+        if(currentGame === 'chicken') {
+            if(!isPlaying) {
+                balance -= bet; isPlaying = true;
+                document.getElementById('action-btn').innerText = "GO";
+                document.getElementById('cashout-btn').style.display = "block";
+                trafficInterval = setInterval(spawnCar, 1000);
+            } else {
+                step++;
+                document.getElementById('chicken').style.bottom = (step * 20) + "%";
+                document.getElementById('cashout-btn').innerText = `CASH OUT (${(bet * mults[step-1]).toFixed(2)})`;
+                if(step >= 5) { win(bet * mults[4]); }
+            }
+        } else {
+            if(selectedKeno.length < 1) return alert("ቢያንስ 1 ቁጥር ምረጥ!");
+            balance -= bet;
+            playKeno();
+        }
+        updateUI();
+    }
+
+    function playKeno() {
+        let draw = [];
+        while(draw.length < 20) {
+            let r = Math.floor(Math.random() * 80) + 1;
+            if(!draw.includes(r)) draw.push(r);
+        }
+        
+        let hits = selectedKeno.filter(n => draw.includes(n)).length;
+        alert(`የወጡት ቁጥሮች: ${draw.slice(0,5).join(", ")} ...\n${hits} ቁጥሮች ገጥመውልሃል!`);
+        
+        if(hits > 0) {
+            let winAmt = bet * (hits * 1.5);
+            balance += winAmt;
+            alert(`${winAmt.toFixed(2)} ETB አሸነፍክ!`);
+        }
+        updateUI();
+    }
+
+    function spawnCar() {
+        const car = document.createElement('div');
+        car.className = 'car';
+        car.style.background = ["#e74c3c", "#f1c40f", "#3498db"][Math.floor(Math.random()*3)];
+        car.style.bottom = [20, 40, 60, 80][Math.floor(Math.random()*4)] + "%";
+        car.style.left = "-60px";
+        document.getElementById('chicken-game').appendChild(car);
+        
+        let move = setInterval(() => {
+            let x = parseInt(car.style.left || -60);
+            if(x > window.innerWidth || !isPlaying) { clearInterval(move); car.remove(); }
             else {
-                c.style.left = (x + s) + "px";
-                let cp = chk.getBoundingClientRect(), rp = c.getBoundingClientRect();
+                car.style.left = (x + 6) + "px";
+                let cp = document.getElementById('chicken').getBoundingClientRect();
+                let rp = car.getBoundingClientRect();
                 if(!(rp.left > cp.right || rp.right < cp.left || rp.top > cp.bottom || rp.bottom < cp.top)) {
-                    active = false; chk.src = "https://img.icons8.com/emoji/96/000000/feather-emoji.png";
-                    setTimeout(() => { alert("ተበላህ!"); reset(); }, 500);
+                    isPlaying = false; alert("ተበላህ!"); resetAll();
                 }
             }
         }, 20);
     }
 
-    function cashOut() { bal += bet * mults[step-1]; reset(); }
-    function reset() {
-        active = false; clearInterval(traffic); step = 0;
-        chk.style.bottom = "5px"; chk.src = "https://img.icons8.com/emoji/96/000000/chicken-emoji.png";
-        act.innerText = "PLAY"; csh.style.display = "none";
-        document.querySelectorAll('.car').forEach(c => c.remove()); updateUI();
+    function cashOut() { win(bet * mults[step-1]); }
+
+    function win(amt) {
+        balance += amt;
+        alert(`እንኳን ደስ አለህ! ${amt.toFixed(2)} ETB አሸነፍክ!`);
+        resetAll();
     }
-    function updateUI() { document.getElementById('bal').innerText = bal.toFixed(2) + " ETB"; }
+
+    function resetAll() {
+        isPlaying = false; step = 0; clearInterval(trafficInterval);
+        document.getElementById('chicken').style.bottom = "5px";
+        document.getElementById('action-btn').innerText = "PLAY";
+        document.getElementById('cashout-btn').style.display = "none";
+        document.querySelectorAll('.car').forEach(c => c.remove());
+        updateUI();
+    }
+
+    function updateUI() { document.getElementById('bal-txt').innerText = balance.toFixed(2) + " ETB"; }
 </script>
 </body>
 </html>
