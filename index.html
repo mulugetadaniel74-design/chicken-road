@@ -56,20 +56,24 @@
         let currentBet = 20;
         function updateBet(val) {
             currentBet += val;
-            if (currentBet < 20) currentBet = 20; // ከ20 ብር በታች እንዳይወርድ
+            if (currentBet < 20) currentBet = 20; 
             document.getElementById('betDisplay').innerText = currentBet + " ETB";
         }
 
+        // የውዝድራው ተግባር (400 ብር ሚኒማም)
         function handleWithdraw() {
-            let amount = prompt("ማውጣት የሚፈልጉትን ብር ያስገቡ (ዝቅተኛ 50):");
-            if (amount >= 50) {
-                let phone = prompt("የቴሌብር ስልክ ቁጥርዎን ያስገቡ:");
-                if (phone) {
-                    // ይህ መልእክት ቀጥታ ወደ አንተ ቴሌግራም ቦት ይላካል
-                    window.location.href = `https://t.me/RunChickenRunBot?start=withdraw_${amount}_${phone}`;
+            let amount = prompt("ማውጣት የሚፈልጉትን የብር መጠን ያስገቡ (ዝቅተኛ 400):");
+            if (amount !== null && amount >= 400) {
+                let phone = prompt("እባክዎ የቴሌብር ስልክ ቁጥርዎን ያስገቡ:");
+                if (phone && phone.length >= 10) {
+                    alert("ጥያቄዎ ወደ ቦቱ እየተላከ ነው...");
+                    // መጠኑን (amount) እና ስልኩን (phone) በአንድ ላይ ይልካል
+                    window.location.href = `https://t.me/RunChickenRunBot?start=WD_${amount}_PH_${phone}`;
+                } else if (phone !== null) {
+                    alert("ትክክለኛ ስልክ ቁጥር ያስገቡ!");
                 }
-            } else if (amount != null) {
-                alert("ዝቅተኛው የማውጫ መጠን 50 ብር ነው።");
+            } else if (amount !== null) {
+                alert("ይቅርታ፣ ዝቅተኛው የማውጫ መጠን 400 ብር ነው።");
             }
         }
 
