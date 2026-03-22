@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Keno Royal - Full Fix</title>
+    <title>Keno Royal - Bot Integration</title>
     <style>
-        body { margin: 0; background: #121417; color: white; font-family: sans-serif; text-align: center; overflow-x: hidden; }
+        body { margin: 0; background: #121417; color: white; font-family: sans-serif; text-align: center; }
         .header { background: #1c1f24; padding: 15px; display: flex; justify-content: space-between; border-bottom: 2px solid #2ecc71; position: sticky; top: 0; z-index: 100; }
         .wallet-bar { display: flex; gap: 10px; padding: 10px; background: #1c1f24; }
         .w-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
@@ -21,9 +21,9 @@
         .num.selected { background: #2ecc71 !important; color: white !important; }
         .num.hit { background: #f1c40f !important; color: black !important; box-shadow: 0 0 15px #f1c40f; }
 
-        .footer { background: #1c1f24; padding: 15px; position: fixed; bottom: 0; width: 100%; border-radius: 20px 20px 0 0; z-index: 100; box-sizing: border-box; }
+        .footer { background: #1c1f24; padding: 15px; position: fixed; bottom: 0; width: 100%; border-radius: 20px 20px 0 0; box-sizing: border-box; }
         .play-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; background: #2ecc71; color: white; cursor: pointer; }
-        .play-btn:disabled { background: #333 !important; color: #555 !important; cursor: not-allowed; }
+        .play-btn:disabled { background: #333 !important; color: #555 !important; }
 
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1c1f24; padding: 25px; border-radius: 15px; border: 2px solid #2ecc71; z-index: 1000; width: 85%; max-width: 350px; }
         .modal input { width: 100%; padding: 12px; margin: 10px 0; background: #24292e; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
@@ -61,7 +61,7 @@
     <p id="m-info" style="font-size: 12px;"></p>
     <input type="number" id="m-amount" placeholder="መጠን (ETB)">
     <input type="text" id="m-extra" placeholder="">
-    <button class="play-btn" onclick="handleWallet()">አረጋግጥ</button>
+    <button class="play-btn" onclick="handleWallet()">ጥያቄ ላክ</button>
 </div>
 
 <div id="admin-panel">
@@ -73,7 +73,7 @@
 <script>
     let balance = 0, bet = 15, selected = [], requests = [], timeLeft = 60, currentType = '', isDrawing = false, hasBet = false;
     
-    // Grid መፍጠር - ቁጥሮቹ እንዲነኩ ተደርጓል
+    // Grid መፍጠር
     const grid = document.getElementById('keno-grid');
     for(let i=1; i<=80; i++) {
         let n = document.createElement('div');
@@ -92,16 +92,15 @@
 
     function openModal(type) {
         currentType = type;
-        const modal = document.getElementById('wallet-modal');
         document.getElementById('overlay').style.display = 'block';
-        modal.style.display = 'block';
+        document.getElementById('wallet-modal').style.display = 'block';
         if(type === 'deposit') {
             document.getElementById('m-title').innerText = "ብር ማስገቢያ";
-            document.getElementById('m-info').innerText = "ለዳንኤል (0986980130) ይላኩና የትራንዛክሽን ቁጥሩን ይክተቱ።";
+            document.getElementById('m-info').innerText = "ለዳንኤል (0986980130) ይላኩና Screenshot/ID እዚህ ይክተቱ።";
             document.getElementById('m-extra').placeholder = "Transaction ID / Screenshot Name";
         } else {
             document.getElementById('m-title').innerText = "ብር ማውጫ";
-            document.getElementById('m-info').innerText = "ዝቅተኛ የማውጫ መጠን 200 ብር ነው።";
+            document.getElementById('m-info').innerText = "ቢያንስ 200 ብር ማውጣት ይቻላል።";
             document.getElementById('m-extra').placeholder = "የእርስዎ ቴሌብር ቁጥር";
         }
     }
@@ -109,28 +108,33 @@
     function closeModal() { document.getElementById('wallet-modal').style.display='none'; document.getElementById('overlay').style.display='none'; }
 
     function handleWallet() {
-        let amt = parseFloat(document.getElementById('m-amount').value);
+        let amt = document.getElementById('m-amount').value;
         let extra = document.getElementById('m-extra').value;
+        
         if(currentType === 'deposit') {
             if(amt >= 100 && extra !== "") {
                 requests.push({ id: Date.now(), amount: amt, status: 'Pending' });
-                alert("ጥያቄው ተልኳል! ዳንኤል ሲያጸድቀው ብር ይገባልዎታል።");
+                
+                // Bot Integration
+                let botUser = "RunChickenRunBot";
+                let msg = `ሰላም ዳንኤል፣ ${amt} ብር በ ID/Screenshot: ${extra} ልኬያለሁ። እባክህ አጽድቅልኝ።`;
+                let url = `https://t.me/${botUser}?start=${btoa(msg).substring(0,64)}`; 
+                // ማሳሰቢያ፡ በ start በኩል የሚላከው የተጫዋቹን መረጃ ለመለየት ይረዳሃል
+                
+                window.open(`https://t.me/${botUser}`, '_blank');
+                alert("ጥያቄው ተመዝግቧል! ቦቱ ላይ 'Start' በማለት መረጃውን ለዳንኤል ያድርሱ።");
             }
         } else {
-            if(amt >= 200 && amt <= balance) { balance -= amt; alert("የማውጣት ጥያቄዎ ተመዝግቧል!"); }
-            else { alert("በቂ ብር የለዎትም!"); }
+            if(amt >= 200 && amt <= balance) {
+                balance -= amt;
+                window.open(`https://t.me/RunChickenRunBot?text=${encodeURIComponent("የማውጫ ጥያቄ: " + amt + " ETB ወደ " + extra)}`, '_blank');
+                alert("የማውጫ ጥያቄዎ ተልኳል።");
+            }
         }
         updateUI(); closeModal();
     }
 
-    function placeBet() {
-        if(selected.length === 0) return alert("ቁጥር ይምረጡ!");
-        hasBet = true;
-        document.getElementById('play-btn').innerText = "ውርርድ ተይዟል...";
-        document.getElementById('play-btn').disabled = true;
-    }
-
-    // ቆጣሪ እና እጣ ማውጣት
+    // ጨዋታው እንዲቀጥል (ቆጣሪ)
     setInterval(() => {
         if(!isDrawing) {
             timeLeft--;
@@ -151,34 +155,41 @@
             let r = Math.floor(Math.random() * 80) + 1;
             while(draw.includes(r)) r = Math.floor(Math.random() * 80) + 1;
             draw.push(r);
-            
             let box = document.createElement('div'); box.className = 'drawn-box'; box.innerText = r;
             document.getElementById('drawn-list').appendChild(box);
-            
             if(selected.includes(r)) { grid.children[r-1].classList.add('hit'); hits++; }
-            
             count++;
             if(count >= 20) {
                 clearInterval(intv);
-                if(hasBet) balance += (hits * bet * 0.5); // አሸናፊ ከሆነ ብር መጨመር
+                if(hasBet && hits > 0) balance += calculateWin(hits);
                 setTimeout(() => { isDrawing = false; hasBet = false; timeLeft = 60; updateBtn(); }, 3000);
             }
         }, 500);
     }
 
+    function calculateWin(hits) {
+        if(hits === 1) return bet * 2;
+        if(hits === 2) return bet * 5;
+        return hits * bet * 3;
+    }
+
+    function placeBet() { hasBet = true; document.getElementById('play-btn').innerText = "ውርርድ ተይዟል..."; updateBtn(); }
     function checkAdmin() { if(prompt("Password:") === "2026") document.getElementById('admin-panel').style.display='block'; renderAdmin(); }
     function renderAdmin() {
         document.getElementById('req-list').innerHTML = requests.filter(r=>r.status==='Pending').map(r => `
-            <div style="background:#333; padding:10px; margin:5px;">መጠን: ${r.amount} <button onclick="appr(${r.id})">Approve</button></div>
+            <div style="background:#333; padding:10px; margin:5px; border-radius:5px;">
+                መጠን: ${r.amount} ETB <br>
+                <button onclick="appr(${r.id})" style="background:#2ecc71; border:none; padding:5px; margin-top:5px; border-radius:3px;">Approve (ልቀቅ)</button>
+            </div>
         `).join('') || "ጥያቄ የለም";
     }
     function appr(id) { 
         let r = requests.find(x=>x.id===id); 
-        if(r) { r.status='Approved'; balance += parseFloat(r.amount); updateUI(); renderAdmin(); }
+        if(r) { r.status='Approved'; balance += parseFloat(r.amount); updateUI(); renderAdmin(); alert("ብሩ ተለቋል!"); }
     }
     function closeAdmin() { document.getElementById('admin-panel').style.display='none'; }
     function updateUI() { document.getElementById('bal-display').innerText = balance.toFixed(2) + " ETB"; updateBtn(); }
-    function updateBtn() { document.getElementById('play-btn').disabled = (balance < bet || selected.length === 0 || isDrawing); }
+    function updateBtn() { document.getElementById('play-btn').disabled = (balance < bet || selected.length === 0 || isDrawing || hasBet); }
     
     updateUI();
 </script>
