@@ -3,94 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL - Setgame</title>
+    <title>KENO ROYAL - Official</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .logo { color: #2eb85c; font-weight: bold; font-size: 22px; }
+        body { font-family: Arial, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .balance { color: #2eb85c; font-weight: bold; font-size: 18px; }
-        .deposit-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 15px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 20px; text-decoration: none; display: block; text-align: center; }
-        .timer-box { background-color: #1c2529; border: 1px solid #c8a42d; color: #c8a42d; width: 100%; padding: 10px; border-radius: 10px; text-align: center; margin-bottom: 20px; font-size: 18px; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; background-color: #1c2529; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
-        .number { width: 30px; height: 35px; background-color: #2c3439; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-size: 14px; border: 1px solid #3d4449; }
-        .number.selected { background-color: #2eb85c; color: black; border-color: #2eb85c; box-shadow: 0 0 10px #2eb85c; }
         
-        /* አዲሱ የውርርድ መቆጣጠሪያ ዲዛይን */
-        .bet-selector { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; width: 100%; }
-        .controls { display: flex; align-items: center; gap: 20px; background: #1c2529; padding: 10px 25px; border-radius: 50px; border: 1px solid #333; }
-        .btn-round { background: #2eb85c; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 24px; cursor: pointer; font-weight: bold; }
-        .btn-minus { background: #ff4d4d; }
-        #bet-display { font-size: 22px; font-weight: bold; color: #2eb85c; min-width: 100px; text-align: center; }
-        .main-action-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 18px; border-radius: 12px; font-size: 20px; font-weight: bold; cursor: pointer; }
+        /* በተኖች */
+        .action-btns { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; font-size: 14px; }
+        .dep-btn { background-color: #2eb85c; color: black; }
+        .with-btn { background-color: #3d4449; color: white; }
+
+        .timer-box { background: #1c2529; border: 1px solid #c8a42d; color: #c8a42d; width: 100%; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px; }
+        
+        /* የቁጥር ሰንጠረዥ */
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background: #1c2529; padding: 8px; border-radius: 8px; }
+        .number { width: 32px; height: 32px; background: #2c3439; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 12px; cursor: pointer; border: 1px solid #3d4449; }
+        .number.selected { background: #2eb85c; color: black; }
+        .number.drawn { background: #f1c40f; color: black; transform: scale(1.1); transition: 0.3s; box-shadow: 0 0 10px #f1c40f; }
+
+        /* ውርርድ መቆጣጠሪያ */
+        .bet-box { width: 100%; margin-top: 20px; text-align: center; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin: 10px 0; }
+        .circle-btn { width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; color: white; }
+        #bet-display { font-size: 20px; font-weight: bold; color: #2eb85c; }
+        .play-btn { width: 100%; padding: 15px; background: #2eb85c; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo">KENO ROYAL</div>
+        <div style="color: #2eb85c; font-weight: bold;">KENO ROYAL</div>
         <div class="balance">0.00 ETB</div>
     </div>
 
-    <a href="https://t.me/የአንተ_ቦት_ሊንክ" class="deposit-btn">💰 ዲፖዚት (Deposit)</a>
-
-    <div class="timer-box">
-        ⏳ ቀጣይ እጣ በ: <span id="timer">50</span> ሰከንድ
+    <div class="action-btns">
+        <a href="https://t.me/ያነተ_ቦት_ሊንክ?start=deposit" class="btn dep-btn">💰 ዲፖዚት (Deposit)</a>
+        <a href="#" onclick="withdraw()" class="btn with-btn">💸 ውዝድራው (Withdraw)</a>
     </div>
 
-    <div class="grid" id="number-grid">
-        </div>
+    <div class="timer-box">⏳ ቀጣይ እጣ በ: <span id="timer">50</span> ሰከንድ</div>
 
-    <div class="bet-selector">
-        <p style="color: #888; margin-bottom: 10px;">የውርርድ መጠን ይምረጡ (Min 20 ETB)</p>
+    <div class="grid" id="grid"></div>
+
+    <div class="bet-box">
+        <p style="color: #888; font-size: 12px;">የውርርድ መጠን ይምረጡ</p>
         <div class="controls">
-            <button class="btn-round btn-minus" onclick="changeBet(-10)">-</button>
+            <button class="circle-btn" style="background: #ff4d4d;" onclick="changeBet(-10)">-</button>
             <span id="bet-display">20 ETB</span>
-            <button class="btn-round" onclick="changeBet(10)">+</button>
+            <button class="circle-btn" style="background: #2eb85c;" onclick="changeBet(10)">+</button>
         </div>
+        <button class="play-btn" onclick="startDraw()">ውርርድ ተጫወት</button>
     </div>
-
-    <button class="main-action-btn" onclick="placeBet()">ውርርድ ተጫወት</button>
 
     <script>
-        // 1. ቁጥሮቹን መፍጠር (1-80)
-        const grid = document.getElementById('number-grid');
+        // 1. ቁጥሮቹን መፍጠር
+        const grid = document.getElementById('grid');
         for (let i = 1; i <= 80; i++) {
-            const numDiv = document.createElement('div');
-            numDiv.classList.add('number');
-            numDiv.innerText = i;
-            numDiv.onclick = function() { this.classList.toggle('selected'); };
-            grid.appendChild(numDiv);
+            const div = document.createElement('div');
+            div.className = 'number';
+            div.id = 'num-' + i;
+            div.innerText = i;
+            div.onclick = () => div.classList.toggle('selected');
+            grid.appendChild(div);
         }
 
-        // 2. የውርርድ መጠን መቀየሪያ
+        // 2. የውርርድ መጠን
         let currentBet = 20;
-        function changeBet(amount) {
-            currentBet += amount;
+        function changeBet(val) {
+            currentBet += val;
             if (currentBet < 20) currentBet = 20;
             document.getElementById('bet-display').innerText = currentBet + " ETB";
         }
 
-        // 3. የሰዓት ቆጣሪ
-        let timeLeft = 50;
-        const timerSpan = document.getElementById('timer');
-        setInterval(() => {
-            if (timeLeft > 0) {
-                timeLeft--;
-                timerSpan.innerText = timeLeft;
+        // 3. ውዝድራው (Withdraw) ተግባር
+        function withdraw() {
+            let amount = prompt("ማውጣት የሚፈልጉትን የብር መጠን ያስገቡ:");
+            if (amount >= 50) {
+                let phone = prompt("የቴሌብር ስልክ ቁጥር ያስገቡ:");
+                if (phone) {
+                    window.location.href = `https://t.me/ያነተ_ቦት_ሊንክ?start=withdraw_${amount}_${phone}`;
+                }
             } else {
-                timeLeft = 50; // እንደገና ይጀምራል
-            }
-        }, 1000);
-
-        // 4. ውርርድ በተን ሲነካ
-        function placeBet() {
-            const selected = document.querySelectorAll('.selected').length;
-            if (selected === 0) {
-                alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
-            } else {
-                alert(currentBet + " ብር ውርርድ በ " + selected + " ቁጥሮች ተይዟል። መልካም እድል!");
+                alert("ዝቅተኛው የማውጫ መጠን 50 ብር ነው።");
             }
         }
+
+        // 4. ቁጥሮቹ ሲወጡ የሚያሳይ (Animation)
+        function startDraw() {
+            const selected = document.querySelectorAll('.selected').length;
+            if (selected === 0) return alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
+
+            // የድሮ ቁጥሮችን አጽዳ
+            document.querySelectorAll('.number').forEach(n => n.classList.remove('drawn'));
+            
+            let count = 0;
+            let drawInterval = setInterval(() => {
+                let randomNum = Math.floor(Math.random() * 80) + 1;
+                document.getElementById('num-' + randomNum).classList.add('drawn');
+                count++;
+                if (count >= 20) clearInterval(drawInterval);
+            }, 300); // በየ 0.3 ሰከንዱ አንድ ቁጥር ይወጣል
+        }
+
+        // 5. ሰዓት ቆጣሪ
+        let time = 50;
+        setInterval(() => {
+            if (time > 0) time--;
+            else { time = 50; startDraw(); } // ሰዓቱ ሲያልቅ በራሱ እጣ ያወጣል
+            document.getElementById('timer').innerText = time;
+        }, 1000);
     </script>
 </body>
 </html>
