@@ -3,100 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chicken Road ETB Betting</title>
+    <title>Chicken Road Side Scroll</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { margin: 0; background: #1a1d21; color: white; font-family: sans-serif; overflow: hidden; }
-        .header { background: #2c313a; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3e4451; }
-        .balance-box { text-align: right; }
-        .balance { font-size: 20px; font-weight: bold; color: #2ecc71; }
+        .header { background: #2c313a; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3e4451; }
+        .balance { font-size: 18px; font-weight: bold; color: #2ecc71; }
         
-        .action-btns { display: flex; gap: 10px; padding: 10px; background: #252930; justify-content: center; }
-        .act-btn { padding: 8px 15px; border-radius: 5px; border: none; font-weight: bold; color: white; cursor: pointer; }
-        .dep { background: #27ae60; }
-        .wit { background: #2980b9; }
-
-        #game-area { width: 100%; height: 40vh; background: #333; position: relative; overflow: hidden; }
-        .manhole { position: absolute; width: 80px; height: 80px; background: url('https://img.icons8.com/ios-filled/100/666666/manhole-cover.png') no-repeat center; background-size: contain; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: rgba(255,255,255,0.5); }
-        #chicken { width: 70px; position: absolute; bottom: 20px; left: 20px; z-index: 10; transition: 0.5s; }
-
-        .bet-panel { padding: 20px; background: #252930; height: 40vh; border-top-left-radius: 20px; border-top-right-radius: 20px; }
-        .amt-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 20px; }
-        .amt-btn { background: #333; border: 1px solid #444; color: white; padding: 12px 5px; border-radius: 8px; font-size: 14px; font-weight: bold; }
-        .amt-btn.active { border-color: #2ecc71; background: rgba(46, 204, 113, 0.2); }
-
-        #play-btn { width: 100%; background: #2ecc71; color: white; border: none; padding: 18px; border-radius: 12px; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 5px #27ae60; }
-        #play-btn:active { box-shadow: 0 0; transform: translateY(5px); }
+        #game-window { width: 100%; height: 50vh; background: #333; position: relative; overflow-x: auto; overflow-y: hidden; display: flex; align-items: center; border-bottom: 4px solid #444; }
+        #road { width: 2000px; height: 100%; position: relative; background: linear-gradient(to bottom, #444 0%, #444 80%, #555 80%, #555 100%); }
+        
+        .manhole { position: absolute; width: 70px; height: 70px; background: #555; border: 4px solid #666; border-radius: 50%; bottom: 20%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: #aaa; box-shadow: inset 0 0 10px #000; }
+        
+        #chicken { width: 60px; position: absolute; bottom: 22%; left: 20px; z-index: 10; transition: left 0.5s ease-out; }
+        
+        .ui-panel { padding: 15px; background: #252930; height: 40vh; border-top-left-radius: 20px; border-top-right-radius: 20px; }
+        .bet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 15px 0; }
+        .bet-btn { background: #333; border: 1px solid #444; color: white; padding: 10px; border-radius: 8px; font-weight: bold; }
+        .bet-btn.active { border-color: #2ecc71; background: rgba(46, 204, 113, 0.2); }
+        
+        #play-btn { width: 100%; background: #2ecc71; color: white; border: none; padding: 18px; border-radius: 12px; font-size: 22px; font-weight: bold; cursor: pointer; box-shadow: 0 4px #27ae60; }
+        #play-btn:disabled { background: #555; box-shadow: none; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div style="font-weight: bold;">CHICKEN ROAD 🇪🇹</div>
-    <div class="balance-box">
-        <div style="font-size: 10px; color: #aaa;">ያለህ ገንዘብ</div>
-        <div class="balance" id="bal-txt">1,000.00 ETB</div>
+    <div style="font-weight: bold;">CHICKEN ROAD</div>
+    <div class="balance" id="balance-txt">1,000.00 ETB</div>
+</div>
+
+<div id="game-window">
+    <div id="road">
+        <div class="manhole" style="left: 150px;">1.01x</div>
+        <div class="manhole" style="left: 300px;">1.20x</div>
+        <div class="manhole" style="left: 450px;">1.50x</div>
+        <div class="manhole" style="left: 600px;">2.00x</div>
+        <div class="manhole" style="left: 750px;">3.00x</div>
+        <img id="chicken" src="https://img.icons8.com/emoji/96/000000/chicken-emoji.png">
     </div>
 </div>
 
-<div class="action-btns">
-    <button class="act-btn dep" onclick="alert('የቴሌብር ቁጥርዎን ያስገቡ...')">DEPOSIT</button>
-    <button class="act-btn wit" onclick="alert('ዝቅተኛው የማውጫ መጠን 100 ብር ነው')">WITHDRAW</button>
-</div>
-
-<div id="game-area">
-    <div class="manhole" style="left: 40%; top: 40%;">1.2x</div>
-    <div class="manhole" style="left: 70%; top: 40%;">2.5x</div>
-    <img id="chicken" src="https://img.icons8.com/emoji/96/000000/chicken-emoji.png">
-</div>
-
-<div class="bet-panel">
-    <div style="margin-bottom: 10px; font-size: 14px; color: #ccc;">የውርርድ መጠን ይምረጡ (ብር)</div>
-    <div class="amt-grid">
-        <button class="amt-btn active" onclick="setBet(10, this)">10</button>
-        <button class="amt-btn" onclick="setBet(50, this)">50</button>
-        <button class="amt-btn" onclick="setBet(100, this)">100</button>
-        <button class="amt-btn" onclick="setBet(500, this)">500</button>
+<div class="ui-panel">
+    <div class="bet-grid">
+        <button class="bet-btn active" onclick="setBet(10, this)">10</button>
+        <button class="bet-btn" onclick="setBet(50, this)">50</button>
+        <button class="bet-btn" onclick="setBet(100, this)">100</button>
+        <button class="bet-btn" onclick="setBet(500, this)">500</button>
     </div>
-    <button id="play-btn" onclick="playGame()">PLAY</button>
+    <button id="play-btn" onclick="nextStep()">PLAY</button>
 </div>
 
 <script>
     let balance = 1000;
     let bet = 10;
-    const balTxt = document.getElementById('bal-txt');
+    let currentPos = 20;
+    let step = 0;
     const chicken = document.getElementById('chicken');
+    const road = document.getElementById('game-window');
 
     function setBet(val, el) {
+        if(step > 0) return; // ጨዋታ ከጀመረ መቀየር አይቻልም
         bet = val;
-        document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
     }
 
-    function playGame() {
-        if(balance < bet) return alert("በቂ ገንዘብ የለህም!");
-        balance -= bet;
-        updateUI();
-        
-        // Animation
-        chicken.style.left = "80%";
-        setTimeout(() => {
-            let win = Math.random() > 0.5;
-            if(win) {
-                let prize = bet * 2;
-                balance += prize;
-                alert("እንኳን ደስ አለህ! " + prize + " ብር አሸነፍክ!");
-            } else {
-                alert("ተበልተሃል! እንደገና ሞክር።");
-            }
-            chicken.style.left = "20px";
+    function nextStep() {
+        if (step === 0) {
+            if(balance < bet) return alert("በቂ ገንዘብ የለህም!");
+            balance -= bet;
             updateUI();
-        }, 600);
+        }
+
+        step++;
+        currentPos += 150; // ወደ ቀጣዩ ክዳን ሂድ
+        chicken.style.left = currentPos + "px";
+        
+        // ስክሪኑ ዶሮዋን እንዲከተል (Auto-scroll)
+        road.scrollTo({ left: currentPos - 50, behavior: 'smooth' });
+
+        // የማሸነፍ እድል (ለጊዜው 80%)
+        if (Math.random() < 0.2) {
+            setTimeout(() => {
+                alert("ተበልተሃል! እንደገና ሞክር።");
+                resetGame();
+            }, 600);
+        } else if (step >= 5) {
+            setTimeout(() => {
+                let winAmt = bet * 3;
+                balance += winAmt;
+                alert("ተሳካ! " + winAmt + " ብር አሸነፍክ!");
+                resetGame();
+            }, 600);
+        }
+        
+        document.getElementById('play-btn').innerText = "ቀጥል (Step " + step + ")";
+    }
+
+    function resetGame() {
+        step = 0;
+        currentPos = 20;
+        chicken.style.left = "20px";
+        road.scrollTo({ left: 0, behavior: 'smooth' });
+        document.getElementById('play-btn').innerText = "PLAY";
+        updateUI();
     }
 
     function updateUI() {
-        balTxt.innerText = balance.toFixed(2) + " ETB";
+        document.getElementById('balance-txt').innerText = balance.toFixed(2) + " ETB";
     }
+
+    window.Telegram.WebApp.ready();
 </script>
 
 </body>
