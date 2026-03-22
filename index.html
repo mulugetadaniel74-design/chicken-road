@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Keno Royal - Bot Integration</title>
+    <title>Keno Royal - Telegram Linked</title>
     <style>
         body { margin: 0; background: #121417; color: white; font-family: sans-serif; text-align: center; }
         .header { background: #1c1f24; padding: 15px; display: flex; justify-content: space-between; border-bottom: 2px solid #2ecc71; position: sticky; top: 0; z-index: 100; }
+        
+        /* Wallet Buttons */
         .wallet-bar { display: flex; gap: 10px; padding: 10px; background: #1c1f24; }
-        .w-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
+        .w-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
         .dep-btn { background: #2ecc71; color: black; }
         .wit-btn { background: #e67e22; }
 
         .timer-panel { background: #1c1f24; margin: 10px; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .draw-panel { background: #1c1f24; margin: 0 10px 10px 10px; padding: 15px; border-radius: 10px; min-height: 60px; border: 1px solid #333; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-        .drawn-box { background: #f1c40f; color: black; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; animation: pop 0.3s forwards; }
+        .drawn-box { background: #f1c40f; color: black; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; animation: pop 0.3s; }
 
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; padding: 10px; max-width: 450px; margin: 0 auto; }
         .num { background: #24292e; padding: 12px 0; border-radius: 4px; font-size: 14px; font-weight: bold; color: #888; border: 1px solid #333; cursor: pointer; }
@@ -23,13 +25,14 @@
 
         .footer { background: #1c1f24; padding: 15px; position: fixed; bottom: 0; width: 100%; border-radius: 20px 20px 0 0; box-sizing: border-box; }
         .play-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; background: #2ecc71; color: white; cursor: pointer; }
-        .play-btn:disabled { background: #333 !important; color: #555 !important; }
+        .play-btn:disabled { background: #333 !important; color: #555 !important; cursor: not-allowed; }
 
+        /* Modal */
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1c1f24; padding: 25px; border-radius: 15px; border: 2px solid #2ecc71; z-index: 1000; width: 85%; max-width: 350px; }
         .modal input { width: 100%; padding: 12px; margin: 10px 0; background: #24292e; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; }
         
-        #admin-panel { display: none; background: #1c1f24; padding: 20px; border: 2px solid #f1c40f; position: fixed; top: 10%; width: 90%; left: 5%; z-index: 2000; border-radius: 15px; color: white; }
+        #admin-panel { display: none; background: #1c1f24; padding: 20px; border: 2px solid #f1c40f; position: fixed; top: 10%; width: 90%; left: 5%; z-index: 2000; border-radius: 15px; }
         @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
     </style>
 </head>
@@ -61,19 +64,20 @@
     <p id="m-info" style="font-size: 12px;"></p>
     <input type="number" id="m-amount" placeholder="መጠን (ETB)">
     <input type="text" id="m-extra" placeholder="">
-    <button class="play-btn" onclick="handleWallet()">ጥያቄ ላክ</button>
+    <button class="play-btn" onclick="sendToTelegram()">ጥያቄ ላክ</button>
 </div>
 
 <div id="admin-panel">
-    <h3>Admin (የዳንኤል ገጽ)</h3>
-    <div id="req-list">ጥያቄ የለም...</div>
-    <button class="w-btn" style="background:#444;" onclick="closeAdmin()">ዝጋ</button>
+    <h3 style="color:#f1c40f;">Admin (የዳንኤል ገጽ)</h3>
+    <div id="req-list" style="max-height: 300px; overflow-y: auto;">ጥያቄ የለም...</div>
+    <button class="w-btn" style="background:#444; margin-top:10px;" onclick="closeAdmin()">ዝጋ</button>
 </div>
 
 <script>
     let balance = 0, bet = 15, selected = [], requests = [], timeLeft = 60, currentType = '', isDrawing = false, hasBet = false;
-    
-    // Grid መፍጠር
+    const botUser = "RunChickenRunBot";
+
+    // Grid መፍጠር - ቁጥሮቹ እንዲነኩ ተደርጓል
     const grid = document.getElementById('keno-grid');
     for(let i=1; i<=80; i++) {
         let n = document.createElement('div');
@@ -96,7 +100,7 @@
         document.getElementById('wallet-modal').style.display = 'block';
         if(type === 'deposit') {
             document.getElementById('m-title').innerText = "ብር ማስገቢያ";
-            document.getElementById('m-info').innerText = "ለዳንኤል (0986980130) ይላኩና Screenshot/ID እዚህ ይክተቱ።";
+            document.getElementById('m-info').innerText = "ለዳንኤል (0986980130) ይላኩና መረጃውን እዚህ ይክተቱ።";
             document.getElementById('m-extra').placeholder = "Transaction ID / Screenshot Name";
         } else {
             document.getElementById('m-title').innerText = "ብር ማውጫ";
@@ -107,34 +111,30 @@
 
     function closeModal() { document.getElementById('wallet-modal').style.display='none'; document.getElementById('overlay').style.display='none'; }
 
-    function handleWallet() {
+    // ወደ ቴሌግራም መላኪያ
+    function sendToTelegram() {
         let amt = document.getElementById('m-amount').value;
         let extra = document.getElementById('m-extra').value;
-        
+
+        if(!amt || !extra) return alert("እባክዎ መረጃውን በትክክል ይሙሉ!");
+
+        let message = "";
         if(currentType === 'deposit') {
-            if(amt >= 100 && extra !== "") {
-                requests.push({ id: Date.now(), amount: amt, status: 'Pending' });
-                
-                // Bot Integration
-                let botUser = "RunChickenRunBot";
-                let msg = `ሰላም ዳንኤል፣ ${amt} ብር በ ID/Screenshot: ${extra} ልኬያለሁ። እባክህ አጽድቅልኝ።`;
-                let url = `https://t.me/${botUser}?start=${btoa(msg).substring(0,64)}`; 
-                // ማሳሰቢያ፡ በ start በኩል የሚላከው የተጫዋቹን መረጃ ለመለየት ይረዳሃል
-                
-                window.open(`https://t.me/${botUser}`, '_blank');
-                alert("ጥያቄው ተመዝግቧል! ቦቱ ላይ 'Start' በማለት መረጃውን ለዳንኤል ያድርሱ።");
-            }
+            message = `🚀 አዲስ ዲፖዚት ጥያቄ:\nመጠን: ${amt} ETB\nID/መረጃ: ${extra}`;
+            requests.push({ id: Date.now(), amount: amt, status: 'Pending' });
         } else {
-            if(amt >= 200 && amt <= balance) {
-                balance -= amt;
-                window.open(`https://t.me/RunChickenRunBot?text=${encodeURIComponent("የማውጫ ጥያቄ: " + amt + " ETB ወደ " + extra)}`, '_blank');
-                alert("የማውጫ ጥያቄዎ ተልኳል።");
-            }
+            if(amt > balance) return alert("በቂ ብር የለዎትም!");
+            message = `💸 አዲስ የማውጫ ጥያቄ:\nመጠን: ${amt} ETB\nወደ ቁጥር: ${extra}`;
+            balance -= amt;
         }
+
+        // ቴሌግራምን ይከፍታል
+        window.open(`https://t.me/${botUser}?text=${encodeURIComponent(message)}`, '_blank');
+        alert("ጥያቄዎ ተመዝግቧል! መረጃው ለዳንኤል ይደርሰዋል።");
         updateUI(); closeModal();
     }
 
-    // ጨዋታው እንዲቀጥል (ቆጣሪ)
+    // የጨዋታ ሂደት (Timer & Draw)
     setInterval(() => {
         if(!isDrawing) {
             timeLeft--;
@@ -161,27 +161,21 @@
             count++;
             if(count >= 20) {
                 clearInterval(intv);
-                if(hasBet && hits > 0) balance += calculateWin(hits);
+                if(hasBet && hits > 0) balance += (hits * bet * 2); 
                 setTimeout(() => { isDrawing = false; hasBet = false; timeLeft = 60; updateBtn(); }, 3000);
             }
         }, 500);
     }
 
-    function calculateWin(hits) {
-        if(hits === 1) return bet * 2;
-        if(hits === 2) return bet * 5;
-        return hits * bet * 3;
-    }
-
-    function placeBet() { hasBet = true; document.getElementById('play-btn').innerText = "ውርርድ ተይዟል..."; updateBtn(); }
+    function placeBet() { if(selected.length > 0) { hasBet = true; updateBtn(); } }
     function checkAdmin() { if(prompt("Password:") === "2026") document.getElementById('admin-panel').style.display='block'; renderAdmin(); }
     function renderAdmin() {
         document.getElementById('req-list').innerHTML = requests.filter(r=>r.status==='Pending').map(r => `
-            <div style="background:#333; padding:10px; margin:5px; border-radius:5px;">
+            <div style="background:#333; padding:15px; margin-bottom:10px; border-radius:8px; text-align:left; border-left:5px solid #2ecc71;">
                 መጠን: ${r.amount} ETB <br>
-                <button onclick="appr(${r.id})" style="background:#2ecc71; border:none; padding:5px; margin-top:5px; border-radius:3px;">Approve (ልቀቅ)</button>
+                <button onclick="appr(${r.id})" style="background:#2ecc71; border:none; padding:8px; margin-top:10px; border-radius:5px; font-weight:bold;">አጽድቅ (Approve)</button>
             </div>
-        `).join('') || "ጥያቄ የለም";
+        `).join('') || "ምንም ጥያቄ የለም።";
     }
     function appr(id) { 
         let r = requests.find(x=>x.id===id); 
