@@ -7,18 +7,15 @@
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        
         .action-btns { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
         .btn-link { flex: 1; padding: 14px; border-radius: 10px; font-weight: bold; text-decoration: none; text-align: center; font-size: 14px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .dep-btn { background-color: #2eb85c; color: black; }
         .with-btn { background-color: #3d4449; color: white; border: 1px solid #4d555a; }
-
         .timer-box { background: #1c2529; border: 1px solid #c8a42d; color: #c8a42d; width: 100%; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; background: #1c2529; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .number { width: 34px; height: 38px; background: #2c3439; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-size: 14px; border: 1px solid #3d4449; }
         .number.selected { background: #2eb85c; color: black; font-weight: bold; }
         .number.drawn { background: #f1c40f !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 15px #f1c40f; }
-        
         .play-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 20px; border-radius: 15px; font-size: 20px; font-weight: bold; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
@@ -47,18 +44,16 @@
             grid.appendChild(div);
         }
 
-        // የተስተካከለ የውዝድራው ተግባር
         function handleWithdraw() {
-            // መጠኑን ወደ 400 ቀይረነዋል
-            let amount = 400; 
+            // ጥያቄውን ወደ 400 አድርገነዋል
             let confirmMsg = confirm("400 ETB ማውጣት ይፈልጋሉ?");
             if (confirmMsg) {
                 let phone = prompt("እባክዎ የቴሌብር ስልክ ቁጥርዎን ያስገቡ:");
                 if (phone && phone.length >= 10) {
-                    alert("ጥያቄዎ እየተላከ ነው...");
+                    // መልእክቱ ወደ ቦቱ ይላካል
                     window.location.href = `https://t.me/RunChickenRunBot?start=withdraw_400_${phone}`;
                 } else if (phone != null) {
-                    alert("ትክክለኛ ስልክ ቁጥር ያስገቡ!");
+                    alert("እባክዎ ትክክለኛ ስልክ ቁጥር ያስገቡ!");
                 }
             }
         }
