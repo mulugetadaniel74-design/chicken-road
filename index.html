@@ -3,151 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chicken Road Survival</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Chicken Road Pro</title>
     <style>
-        body { margin: 0; background: #1a1d21; color: white; font-family: sans-serif; overflow: hidden; touch-action: none; }
-        .header { background: #2c313a; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3e4451; }
-        .balance { font-size: 20px; font-weight: bold; color: #2ecc71; }
+        body { margin: 0; background: #1a1d21; color: white; font-family: sans-serif; overflow: hidden; }
+        .header { background: #2c313a; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .balance { color: #2ecc71; font-weight: bold; font-size: 18px; }
         
-        #game-area { width: 100%; height: 55vh; background: #333; position: relative; overflow: hidden; }
-        .lane { height: 20%; border-bottom: 1px dashed rgba(255,255,255,0.1); position: relative; }
-        .grass { background: #27ae60; height: 15%; }
+        #game-box { width: 100%; height: 50vh; background: #333; position: relative; border-bottom: 5px solid #222; }
+        .road-line { position: absolute; width: 100%; height: 2px; background: rgba(255,255,255,0.2); }
         
-        #chicken { width: 50px; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); z-index: 10; transition: all 0.1s; }
-        .car { width: 60px; height: 35px; background: #e74c3c; position: absolute; border-radius: 5px; box-shadow: 0 4px #c0392b; }
+        .multiplier-tag { position: absolute; background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 10px; font-size: 12px; transform: translateX(-50%); border: 1px solid #555; }
         
-        .controls-panel { padding: 15px; background: #252930; height: 35vh; text-align: center; }
-        .bet-display { margin-bottom: 10px; font-size: 14px; color: #aaa; }
+        #chicken { width: 50px; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 100; transition: bottom 0.2s; }
+        .car { width: 55px; height: 30px; position: absolute; border-radius: 4px; z-index: 50; }
         
-        #play-btn { width: 100%; background: #2ecc71; color: white; border: none; padding: 20px; border-radius: 15px; font-size: 26px; font-weight: bold; cursor: pointer; box-shadow: 0 6px #27ae60; margin-top: 10px; }
-        #play-btn:active { box-shadow: 0 0; transform: translateY(6px); }
+        .ui-area { padding: 15px; background: #252930; height: 45vh; display: flex; flex-direction: column; align-items: center; }
+        .bet-input { background: #1a1d21; border: 1px solid #444; color: white; padding: 10px; width: 80%; text-align: center; font-size: 20px; border-radius: 8px; margin-bottom: 15px; }
         
-        .bet-btns { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
-        .b-btn { background: #3e4451; border: none; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; }
-        .b-btn.active { background: #2ecc71; }
+        .btn-row { display: flex; width: 100%; gap: 10px; }
+        .action-btn { flex: 1; padding: 20px; border: none; border-radius: 12px; font-size: 22px; font-weight: bold; cursor: pointer; }
+        #go-btn { background: #2ecc71; color: white; box-shadow: 0 5px #27ae60; }
+        #cashout-btn { background: #f1c40f; color: black; box-shadow: 0 5px #f39c12; display: none; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div>CHICKEN CROSS 🇪🇹</div>
-    <div class="balance" id="bal">1,000.00 ETB</div>
+    <div style="font-weight: bold;">CHICKEN ROAD 2</div>
+    <div class="balance" id="bal-display">1,000.00 ETB</div>
 </div>
 
-<div id="game-area">
-    <div class="grass" style="position: absolute; top: 0; width: 100%; z-index: 1;"></div>
-    <div id="lanes-container" style="height: 100%;">
-        <div class="lane"></div><div class="lane"></div><div class="lane"></div><div class="lane"></div>
-    </div>
-    <div class="grass" style="position: absolute; bottom: 0; width: 100%;"></div>
+<div id="game-box">
+    <div class="multiplier-tag" style="bottom: 20%; left: 50%;">1.44x</div>
+    <div class="multiplier-tag" style="bottom: 40%; left: 50%;">2.21x</div>
+    <div class="multiplier-tag" style="bottom: 60%; left: 50%;">3.45x</div>
+    <div class="multiplier-tag" style="bottom: 80%; left: 50%;">5.53x</div>
+    
     <img id="chicken" src="https://img.icons8.com/emoji/96/000000/chicken-emoji.png">
 </div>
 
-<div class="controls-panel">
-    <div class="bet-display">ውርርድ: <span id="current-bet">10</span> ብር</div>
-    <div class="bet-btns">
-        <button class="b-btn active" onclick="setBet(10, this)">10</button>
-        <button class="b-btn" onclick="setBet(50, this)">50</button>
-        <button class="b-btn" onclick="setBet(100, this)">100</button>
+<div class="ui-area">
+    <input type="number" class="bet-input" id="bet-amt" value="10">
+    <div class="btn-row">
+        <button id="cashout-btn" onclick="cashOut()">CASH OUT</button>
+        <button id="go-btn" onclick="moveNext()">PLAY / GO</button>
     </div>
-    <button id="play-btn" onclick="moveUp()">⬆️ ተሻገር!</button>
-    <p style="font-size: 12px; color: #777; margin-top: 10px;">መኪና ሳይመታህ ማዶ ካደረስካት ብርህን ታባዛለህ!</p>
 </div>
 
 <script>
     let balance = 1000;
-    let bet = 10;
-    let chickenY = 5;
-    let isPlaying = false;
-    let gameLoop;
+    let currentStep = 0;
+    let isLive = false;
+    let currentMult = 1;
+    const multipliers = [1.44, 2.21, 3.45, 5.53, 9.09];
+    
     const chicken = document.getElementById('chicken');
-    const balDisplay = document.getElementById('bal');
+    const goBtn = document.getElementById('go-btn');
+    const cashBtn = document.getElementById('cashout-btn');
 
-    function setBet(amt, el) {
-        if(isPlaying) return;
-        bet = amt;
-        document.querySelectorAll('.b-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById('current-bet').innerText = amt;
-    }
-
-    function moveUp() {
-        if(!isPlaying) {
-            if(balance < bet) return alert("በቂ ገንዘብ የለህም!");
+    function moveNext() {
+        let bet = parseFloat(document.getElementById('bet-amt').value);
+        if (!isLive) {
+            if (balance < bet) return alert("ብር የለህም!");
             balance -= bet;
-            isPlaying = true;
+            isLive = true;
+            goBtn.innerText = "GO";
+            cashBtn.style.display = "block";
             startCars();
-            updateUI();
         }
 
-        chickenY += 18;
-        chicken.style.bottom = chickenY + "%";
-
-        // ማዶ ከተሻገረች (WIN)
-        if(chickenY > 85) {
-            setTimeout(() => {
-                let winAmt = bet * 2.5;
-                balance += winAmt;
-                alert("ተሳካ! " + winAmt + " ብር አሸነፍክ!");
-                resetGame();
-            }, 200);
+        currentStep++;
+        currentMult = multipliers[currentStep - 1];
+        chicken.style.bottom = (currentStep * 20) + "%";
+        
+        if (currentStep >= 5) {
+            alert("ማዶ ደርሰሃል! አሸነፍክ!");
+            cashOut();
         }
+        updateUI();
     }
 
     function startCars() {
-        gameLoop = setInterval(() => {
-            if(!isPlaying) return;
+        setInterval(() => {
+            if (!isLive) return;
             createCar();
-        }, 1000);
+        }, 800);
     }
 
     function createCar() {
         const car = document.createElement('div');
         car.className = 'car';
-        const lanes = [25, 43, 61, 79]; // አስፓልቶቹ
-        car.style.bottom = lanes[Math.floor(Math.random() * lanes.length)] + "%";
-        car.style.left = "-70px";
-        document.getElementById('game-area').appendChild(car);
+        car.style.background = ["#e74c3c", "#3498db", "#f1c40f"][Math.floor(Math.random()*3)];
+        const lanes = [20, 40, 60, 80];
+        car.style.bottom = lanes[Math.floor(Math.random()*4)] + "%";
+        car.style.left = "-60px";
+        document.getElementById('game-box').appendChild(car);
 
-        let speed = 3 + Math.random() * 5;
-        let carMove = setInterval(() => {
-            let left = parseInt(car.style.left);
-            if(left > window.innerWidth || !isPlaying) {
-                clearInterval(carMove);
-                car.remove();
+        let speed = 5 + Math.random() * 7;
+        let drive = setInterval(() => {
+            let x = parseInt(car.style.left);
+            if (x > window.innerWidth || !isLive) {
+                clearInterval(drive); car.remove();
             } else {
-                car.style.left = (left + speed) + "px";
-                checkCollision(car, carMove);
+                car.style.left = (x + speed) + "px";
+                checkCrash(car);
             }
         }, 20);
     }
 
-    function checkCollision(car, interval) {
-        let cRect = chicken.getBoundingClientRect();
-        let rRect = car.getBoundingClientRect();
-        if(!(rRect.left > cRect.right || rRect.right < cRect.left || rRect.top > cRect.bottom || rRect.bottom < cRect.top)) {
-            isPlaying = false;
-            clearInterval(gameLoop);
-            alert("መኪና ገጭቶሃል! ተበላህ።");
-            resetGame();
+    function checkCrash(car) {
+        let c = chicken.getBoundingClientRect();
+        let r = car.getBoundingClientRect();
+        if (!(r.left > c.right || r.right < c.left || r.top > c.bottom || r.bottom < c.top)) {
+            isLive = false;
+            chicken.src = "https://img.icons8.com/emoji/96/000000/feather-emoji.png"; // ላባ ሆነች
+            setTimeout(() => {
+                alert("ተበላህ! ብርህ ሄዷል።");
+                location.reload();
+            }, 500);
         }
     }
 
-    function resetGame() {
-        isPlaying = false;
-        clearInterval(gameLoop);
-        chickenY = 5;
-        chicken.style.bottom = "5px";
-        document.querySelectorAll('.car').forEach(c => c.remove());
-        updateUI();
+    function cashOut() {
+        let bet = parseFloat(document.getElementById('bet-amt').value);
+        balance += (bet * currentMult);
+        alert( (bet * currentMult).toFixed(2) + " ብር ወስደሃል!");
+        location.reload();
     }
 
     function updateUI() {
-        balDisplay.innerText = balance.toFixed(2) + " ETB";
+        document.getElementById('bal-display').innerText = balance.toFixed(2) + " ETB";
     }
-
-    window.Telegram.WebApp.ready();
 </script>
 
 </body>
