@@ -1,51 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="am">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL</title>
+    <title>KENO ROYAL - Setgame</title>
     <style>
-        body { background: #12191c; color: white; font-family: sans-serif; text-align: center; padding: 15px; }
-        .btn { background: #2eb85c; color: black; padding: 15px; border-radius: 10px; display: block; margin: 10px 0; text-decoration: none; font-weight: bold; font-size: 16px; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin: 20px 0; }
-        .num { background: #2c3439; padding: 10px 0; border-radius: 5px; cursor: pointer; font-size: 12px; border: 1px solid #3d4449; }
-        .selected { background: #2eb85c; color: black; }
-        .drawn { background: #f1c40f !important; color: black; box-shadow: 0 0 10px #f1c40f; transform: scale(1.1); }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .balance { color: #2eb85c; font-weight: bold; font-size: 20px; }
+        .dep-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; text-decoration: none; display: block; text-align: center; margin-bottom: 15px; }
+        .timer-box { background: #1c2529; border: 1px solid #c8a42d; color: #c8a42d; width: 100%; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; background: #1c2529; padding: 10px; border-radius: 10px; border: 1px solid #333; }
+        .number { width: 34px; height: 38px; background: #2c3439; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-size: 14px; border: 1px solid #3d4449; }
+        .number.selected { background: #2eb85c; color: black; box-shadow: 0 0 10px #2eb85c; font-weight: bold; }
+        .number.drawn { background: #f1c40f !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 15px #f1c40f; font-weight: bold; }
+        .play-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 20px; border-radius: 15px; font-size: 20px; font-weight: bold; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <h2 style="color: #2eb85c;">KENO ROYAL</h2>
-    <a href="https://t.me/RunChickenRunBot?start=deposit" target="_blank" class="btn">💰 ዲፖዚት (Deposit)</a>
-    <div id="timer" style="color: #f1c40f; margin: 10px; font-weight: bold;">⏳ እጣ በ: 50</div>
-    <div class="grid" id="grid"></div>
-    <div style="margin: 20px 0; font-size: 20px;">
-        <button onclick="changeBet(-10)" style="padding: 10px; border-radius: 50%;">-</button>
-        <span id="bet" style="margin: 0 15px; color: #2eb85c;">20 ETB</span>
-        <button onclick="changeBet(10)" style="padding: 10px; border-radius: 50%;">+</button>
+
+    <div class="header">
+        <div style="color: #2eb85c; font-weight: bold; font-size: 22px;">KENO ROYAL</div>
+        <div class="balance">0.00 ETB</div>
     </div>
-    <button class="btn" style="width:100%; font-size: 18px;" onclick="play()">ውርርድ ተጫወት</button>
+
+    <a href="https://t.me/RunChickenRunBot?start=deposit" target="_blank" class="dep-btn">💰 ዲፖዚት (Deposit)</a>
+
+    <div class="timer-box">⏳ ቀጣይ እጣ በ: <span id="timer">50</span> ሰከንድ</div>
+
+    <div class="grid" id="grid"></div>
+
+    <button class="play-btn" onclick="startDraw()">ውርርድ (20 ETB)</button>
 
     <script>
-        const g = document.getElementById('grid');
-        for(let i=1; i<=80; i++) {
-            let d = document.createElement('div');
-            d.className='num'; d.id='n'+i; d.innerText=i;
-            d.onclick=()=>d.classList.toggle('selected');
-            g.appendChild(d);
+        const grid = document.getElementById('grid');
+        for (let i = 1; i <= 80; i++) {
+            const div = document.createElement('div');
+            div.className = 'number'; div.id = 'n' + i; div.innerText = i;
+            div.onclick = function() { this.classList.toggle('selected'); };
+            grid.appendChild(div);
         }
-        let b = 20;
-        function changeBet(v) { b+=v; if(b<20) b=20; document.getElementById('bet').innerText=b+" ETB"; }
-        function play() {
-            if(document.querySelectorAll('.selected').length==0) return alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
-            document.querySelectorAll('.num').forEach(n=>n.classList.remove('drawn'));
-            let c=0;
-            let inv = setInterval(()=>{
-                let r = Math.floor(Math.random()*80)+1;
-                document.getElementById('n'+r).classList.add('drawn');
-                c++; if(c>=20) clearInterval(inv);
+
+        function startDraw() {
+            if (document.querySelectorAll('.selected').length === 0) return alert("ቁጥር ይምረጡ!");
+            document.querySelectorAll('.number').forEach(n => n.classList.remove('drawn'));
+            let count = 0;
+            let inv = setInterval(() => {
+                let r = Math.floor(Math.random() * 80) + 1;
+                document.getElementById('n' + r).classList.add('drawn');
+                count++; if (count >= 20) clearInterval(inv);
             }, 300);
         }
-        let t=50; setInterval(()=>{ t--; if(t<0) {t=50; play();} document.getElementById('timer').innerText="⏳ እጣ በ: "+t; }, 1000);
+
+        let time = 50;
+        setInterval(() => {
+            time--; if (time < 0) { time = 50; startDraw(); }
+            document.getElementById('timer').innerText = time;
+        }, 1000);
     </script>
 </body>
 </html>
