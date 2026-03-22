@@ -3,55 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keno Royal - Deposit</title>
+    <title>Keno Royal - በዳንኤል</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
-        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        h2 { color: #d32f2f; }
-        input, button { width: 90%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
-        button { background-color: #d32f2f; color: white; font-weight: bold; cursor: pointer; border: none; }
-        .telegram-btn { background-color: #0088cc; display: none; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a1a; color: white; text-align: center; padding: 10px; }
+        .container { background: #2c2c2c; padding: 20px; border-radius: 15px; max-width: 450px; margin: auto; box-shadow: 0 0 20px rgba(211, 47, 47, 0.4); }
+        h1 { color: #ff4444; margin-bottom: 5px; }
+        .grid { display: grid; grid-template-columns: repeat(8, 1 row); gap: 5px; margin: 20px 0; background: #333; padding: 10px; border-radius: 10px; }
+        .number { width: 40px; height: 40px; background: #444; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.3s; }
+        .number:hover { background: #666; }
+        .selected { background: #ff4444 !important; color: white; transform: scale(1.1); }
+        input { width: 85%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; }
+        .btn-play { background: #ff4444; color: white; padding: 15px; border: none; width: 90%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 18px; }
+        .btn-play:hover { background: #cc0000; }
+        #status { margin-top: 15px; color: #ffbb33; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>💰 ዲፖዚት (ገንዘብ ያስገቡ)</h2>
-    <p>መጀመሪያ በቴሌብር ብር ይላኩ፣ ከዚያም ማረጋገጫውን እዚህ ይላኩ።</p>
+    <h1>🎰 KENO ROYAL</h1>
+    <p>ከ 1 - 80 ያሉ 10 ቁጥሮችን ይምረጡ</p>
     
-    <input type="number" id="amount" placeholder="የብር መጠን">
-    <input type="text" id="transId" placeholder="Transaction ID">
-    
-    <div style="text-align: left; margin-left: 5%;">
-        <label>የክፍያ ማረጋገጫ (Screenshot) ይምረጡ፦</label>
-        <input type="file" id="receiptPhoto" accept="image/*">
-    </div>
+    <div id="kenoGrid" class="grid">
+        </div>
 
-    <button onclick="sendToBot()">ጥያቄ ላክ</button>
-    
-    <a id="telegramLink" href="https://t.me/RunChickenRunBot?start=" class="telegram-btn" style="text-decoration: none; color: white; display: none; padding: 10px; border-radius: 5px; margin-top: 10px;">
-        <button class="telegram-btn" style="display: block; width: 100%;">በ Setgame በኩል ላክ</button>
-    </a>
+    <div id="status">የተመረጡ ቁጥሮች፡ 0/10</div>
+
+    <input type="number" id="betAmount" placeholder="የመወራረጃ ብር (ለምሳሌ፡ 20)">
+    <button class="btn-play" onclick="playKeno()">አሁኑኑ ይጫወቱ!</button>
 </div>
 
 <script>
-    function sendToBot() {
-        let amount = document.getElementById('amount').value;
-        let transId = document.getElementById('transId').value;
-        let photo = document.getElementById('receiptPhoto').files[0];
+    let selectedNumbers = [];
+    const grid = document.getElementById('kenoGrid');
+    const status = document.getElementById('status');
 
-        if (!amount || !transId || !photo) {
-            alert("እባክዎ ሁሉንም መረጃ ይሙሉ (ፎቶውን ጨምሮ)!");
+    // 80 ቁጥሮችን መፍጠር
+    for (let i = 1; i <= 80; i++) {
+        let numDiv = document.createElement('div');
+        numDiv.className = 'number';
+        numDiv.innerText = i;
+        numDiv.onclick = function() {
+            if (selectedNumbers.includes(i)) {
+                selectedNumbers = selectedNumbers.filter(n => n !== i);
+                numDiv.classList.remove('selected');
+            } else if (selectedNumbers.length < 10) {
+                selectedNumbers.push(i);
+                numDiv.classList.add('selected');
+            }
+            status.innerText = `የተመረጡ ቁጥሮች፡ ${selectedNumbers.length}/10`;
+        };
+        grid.appendChild(numDiv);
+    }
+
+    function playKeno() {
+        let bet = document.getElementById('betAmount').value;
+        if (selectedNumbers.length < 1) {
+            alert("እባክዎ ቢያንስ አንድ ቁጥር ይምረጡ!");
             return;
         }
-
-        // መረጃውን ለቴሌግራም ሊንክ ማዘጋጀት
-        let info = `Amount:${amount}_ID:${transId}`;
-        let link = document.getElementById('telegramLink');
-        link.href = "https://t.me/RunChickenRunBot?start=" + info;
-        link.style.display = "block";
+        if (!bet || bet < 5) {
+            alert("ዝቅተኛ መወራረጃ 5 ብር ነው!");
+            return;
+        }
         
-        alert("አሁን 'በ Setgame በኩል ላክ' የሚለውን ተጭነው ፎቶውን ለቦቱ ይላኩ።");
+        // ወደ ቦቱ የሚላክ መረጃ
+        let info = `Keno_Bet:${bet}_Numbers:${selectedNumbers.join(',')}`;
+        window.location.href = "https://t.me/RunChickenRunBot?start=" + info;
     }
 </script>
 
