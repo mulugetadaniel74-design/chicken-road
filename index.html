@@ -20,30 +20,45 @@
 </head>
 <body>
     <div class="header"><span>KENO ROYAL</span><span>0.00 ETB</span></div>
+    
     <button class="deposit-btn" onclick="location.href='https://t.me/RunChickenRunBot?start=Deposit'">💰 ዴፖዚት (Deposit)</button>
-    <div class="timer-box">⏳ ቀጣይ እጣ በ: <span id="timer">10</span> ሰከንድ</div>
+    
+    <div class="timer-box">⏳ ቀጣይ እጣ በ: <span id="timer">60</span> ሰከንድ</div>
+    
     <div class="grid" id="kenoGrid"></div>
+    
     <button class="footer-btn" id="playBtn">ውርርድ (15 ETB)</button>
+
     <div class="withdraw-link" onclick="askWithdraw()">💸 ብር ለማውጣት (Withdraw)</div>
 
     <script>
         let selected = [];
-        let time = 10;
+        let time = 60;
         const grid = document.getElementById('kenoGrid');
+
+        // ሰሌዳውን መፍጠር
         for (let i = 1; i <= 80; i++) {
             let div = document.createElement('div');
             div.className = 'number'; div.id = 'n-' + i; div.innerText = i;
             div.onclick = () => {
-                if (selected.includes(i)) { selected = selected.filter(n => n !== i); div.classList.remove('selected'); }
-                else if (selected.length < 10) { selected.push(i); div.classList.add('selected'); }
+                if (selected.includes(i)) {
+                    selected = selected.filter(n => n !== i);
+                    div.classList.remove('selected');
+                } else if (selected.length < 10) {
+                    selected.push(i);
+                    div.classList.add('selected');
+                }
                 document.getElementById('playBtn').className = selected.length > 0 ? 'footer-btn active' : 'footer-btn';
             };
             grid.appendChild(div);
         }
+
+        // ታይመር
         setInterval(() => {
             time--; document.getElementById('timer').innerText = time;
-            if (time <= 0) { drawNumbers(); time = 10; }
+            if (time <= 0) { drawNumbers(); time = 60; }
         }, 1000);
+
         function drawNumbers() {
             document.querySelectorAll('.number').forEach(n => n.classList.remove('win-num'));
             let winners = [];
@@ -55,12 +70,18 @@
                 setTimeout(() => { document.getElementById('n-' + num).classList.add('win-num'); }, index * 100);
             });
         }
+
+        // የተስተካከለ ዊዝድራው (Confirmation + Phone)
         function askWithdraw() {
             let amt = prompt("ማውጣት የሚፈልጉትን የብር መጠን ያስገቡ:");
             if (!amt) return;
+            
             let phone = prompt("ብር የሚላክበትን የቴሌብር ስልክ ቁጥር ያስገቡ:");
             if (!phone) return;
-            if (confirm("መጠን: " + amt + " ETB\nስልክ: " + phone + "\nእርግጠኛ ነዎት?")) {
+
+            let check = confirm("የጠየቁት መረጃ፡\n💰 መጠን: " + amt + " ETB\n📱 ስልክ: " + phone + "\n\nእርግጠኛ ነዎት?");
+            if (check) {
+                // መረጃውን ወደ ቦቱ ይልካል
                 window.location.href = "https://t.me/RunChickenRunBot?start=Withdraw_" + amt + "_Phone_" + phone;
             }
         }
