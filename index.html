@@ -1,1 +1,51 @@
-<button onclick="window.open('https://t.me/RunChickenRunBot?start=deposit', '_blank')" class="btn dep-btn">💰 ዲፖዚት (Deposit)</button>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KENO ROYAL</title>
+    <style>
+        body { background: #12191c; color: white; font-family: sans-serif; text-align: center; padding: 15px; }
+        .btn { background: #2eb85c; color: black; padding: 15px; border-radius: 10px; display: block; margin: 10px 0; text-decoration: none; font-weight: bold; font-size: 16px; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin: 20px 0; }
+        .num { background: #2c3439; padding: 10px 0; border-radius: 5px; cursor: pointer; font-size: 12px; border: 1px solid #3d4449; }
+        .selected { background: #2eb85c; color: black; }
+        .drawn { background: #f1c40f !important; color: black; box-shadow: 0 0 10px #f1c40f; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <h2 style="color: #2eb85c;">KENO ROYAL</h2>
+    <a href="https://t.me/RunChickenRunBot?start=deposit" target="_blank" class="btn">💰 ዲፖዚት (Deposit)</a>
+    <div id="timer" style="color: #f1c40f; margin: 10px; font-weight: bold;">⏳ እጣ በ: 50</div>
+    <div class="grid" id="grid"></div>
+    <div style="margin: 20px 0; font-size: 20px;">
+        <button onclick="changeBet(-10)" style="padding: 10px; border-radius: 50%;">-</button>
+        <span id="bet" style="margin: 0 15px; color: #2eb85c;">20 ETB</span>
+        <button onclick="changeBet(10)" style="padding: 10px; border-radius: 50%;">+</button>
+    </div>
+    <button class="btn" style="width:100%; font-size: 18px;" onclick="play()">ውርርድ ተጫወት</button>
+
+    <script>
+        const g = document.getElementById('grid');
+        for(let i=1; i<=80; i++) {
+            let d = document.createElement('div');
+            d.className='num'; d.id='n'+i; d.innerText=i;
+            d.onclick=()=>d.classList.toggle('selected');
+            g.appendChild(d);
+        }
+        let b = 20;
+        function changeBet(v) { b+=v; if(b<20) b=20; document.getElementById('bet').innerText=b+" ETB"; }
+        function play() {
+            if(document.querySelectorAll('.selected').length==0) return alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
+            document.querySelectorAll('.num').forEach(n=>n.classList.remove('drawn'));
+            let c=0;
+            let inv = setInterval(()=>{
+                let r = Math.floor(Math.random()*80)+1;
+                document.getElementById('n'+r).classList.add('drawn');
+                c++; if(c>=20) clearInterval(inv);
+            }, 300);
+        }
+        let t=50; setInterval(()=>{ t--; if(t<0) {t=50; play();} document.getElementById('timer').innerText="⏳ እጣ በ: "+t; }, 1000);
+    </script>
+</body>
+</html>
