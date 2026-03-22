@@ -3,73 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keno Royal - በዳንኤል</title>
+    <title>Setgame - KENO ROYAL</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a1a; color: white; text-align: center; padding: 10px; }
-        .container { background: #2c2c2c; padding: 20px; border-radius: 15px; max-width: 450px; margin: auto; box-shadow: 0 0 20px rgba(211, 47, 47, 0.4); }
-        h1 { color: #ff4444; margin-bottom: 5px; }
-        .grid { display: grid; grid-template-columns: repeat(8, 1 row); gap: 5px; margin: 20px 0; background: #333; padding: 10px; border-radius: 10px; }
-        .number { width: 40px; height: 40px; background: #444; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.3s; }
-        .number:hover { background: #666; }
-        .selected { background: #ff4444 !important; color: white; transform: scale(1.1); }
-        input { width: 85%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; }
-        .btn-play { background: #ff4444; color: white; padding: 15px; border: none; width: 90%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 18px; }
-        .btn-play:hover { background: #cc0000; }
-        #status { margin-top: 15px; color: #ffbb33; font-weight: bold; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f171a; color: white; margin: 0; padding: 10px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1a2428; border-radius: 10px; margin-bottom: 10px; border-bottom: 2px solid #2eb85c; }
+        .balance-box { text-align: right; }
+        .balance-amount { color: #2eb85c; font-size: 18px; font-weight: bold; }
+        
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .btn { border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .deposit-btn { background-color: #2eb85c; color: white; }
+        .withdraw-btn { background-color: #e53935; color: white; }
+        
+        .section-box { background: #1c2529; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: none; border: 1px solid #333; }
+        input { width: 90%; padding: 10px; margin: 8px 0; border-radius: 5px; border: 1px solid #444; background: #0f171a; color: white; }
+        
+        .timer { color: #ffc107; font-size: 13px; margin: 10px 0; text-align: center; background: #1a2428; padding: 5px; border-radius: 20px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background-color: #1c2529; padding: 10px; border-radius: 8px; }
+        .number { background-color: #2a3539; padding: 12px 0; border-radius: 4px; font-size: 12px; cursor: pointer; color: #bbb; text-align: center; }
+        .selected { background-color: #2eb85c !important; color: white; box-shadow: 0 0 10px #2eb85c; }
+        
+        .footer-btn { background-color: #333; color: #777; border: none; width: 100%; padding: 18px; border-radius: 15px; margin-top: 15px; font-size: 18px; font-weight: bold; cursor: not-allowed; }
+        .active-play { background-color: #2eb85c !important; color: white !important; cursor: pointer !important; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🎰 KENO ROYAL</h1>
-    <p>ከ 1 - 80 ያሉ 10 ቁጥሮችን ይምረጡ</p>
-    
-    <div id="kenoGrid" class="grid">
-        </div>
-
-    <div id="status">የተመረጡ ቁጥሮች፡ 0/10</div>
-
-    <input type="number" id="betAmount" placeholder="የመወራረጃ ብር (ለምሳሌ፡ 20)">
-    <button class="btn-play" onclick="playKeno()">አሁኑኑ ይጫወቱ!</button>
+<div class="header">
+    <span style="letter-spacing: 1px;">KENO ROYAL</span>
+    <div class="balance-box">
+        <div style="font-size: 10px; color: #888;">የእርስዎ ሂሳብ</div>
+        <div class="balance-amount">0.00 ETB</div>
+    </div>
 </div>
 
-<script>
-    let selectedNumbers = [];
-    const grid = document.getElementById('kenoGrid');
-    const status = document.getElementById('status');
+<div class="action-buttons">
+    <button class="btn deposit-btn" onclick="toggleSection('deposit')">💰 ዲፖዚት</button>
+    <button class="btn withdraw-btn" onclick="toggleSection('withdraw')">💸 ዊዝድራው</button>
+</div>
 
-    // 80 ቁጥሮችን መፍጠር
+<div id="deposit" class="section-box">
+    <h4 style="margin-top:0; color:#2eb85c;">ብር ለማስገባት</h4>
+    <p style="font-size:11px;">1. በ 09... (ቴሌብር) ብር ይላኩ።<br>2. የከፈሉበትን Screenshot ይምረጡ።</p>
+    <input type="file" id="receiptPhoto" accept="image/*">
+    <button class="btn deposit-btn" style="width:100%" onclick="sendToBot('Deposit')">ማረጋገጫ ላክ</button>
+</div>
+
+<div id="withdraw" class="section-box">
+    <h4 style="margin-top:0; color:#e53935;">ብር ለማውጣት</h4>
+    <input type="number" id="withdrawAmount" placeholder="የሚወጣ ብር መጠን">
+    <input type="text" id="phone" placeholder="የቴሌብር ስልክ ቁጥር">
+    <button class="btn withdraw-btn" style="width:100%" onclick="sendToBot('Withdraw')">የማውጫ ጥያቄ ላክ</button>
+</div>
+
+<div class="timer">⏳ ቀጣይ እጣ በ: <span id="time">00:46</span></div>
+
+<div class="grid" id="kenoGrid"></div>
+
+<button class="footer-btn" id="playBtn" onclick="playGame()">ውርርድ (15 ETB)</button>
+
+<script>
+    let selected = [];
+    const grid = document.getElementById('kenoGrid');
+
+    // Grid መፍጠር
     for (let i = 1; i <= 80; i++) {
-        let numDiv = document.createElement('div');
-        numDiv.className = 'number';
-        numDiv.innerText = i;
-        numDiv.onclick = function() {
-            if (selectedNumbers.includes(i)) {
-                selectedNumbers = selectedNumbers.filter(n => n !== i);
-                numDiv.classList.remove('selected');
-            } else if (selectedNumbers.length < 10) {
-                selectedNumbers.push(i);
-                numDiv.classList.add('selected');
+        let div = document.createElement('div');
+        div.className = 'number';
+        div.innerText = i;
+        div.onclick = () => {
+            if (selected.includes(i)) {
+                selected = selected.filter(n => n !== i);
+                div.classList.remove('selected');
+            } else if (selected.length < 10) {
+                selected.push(i);
+                div.classList.add('selected');
             }
-            status.innerText = `የተመረጡ ቁጥሮች፡ ${selectedNumbers.length}/10`;
+            updateUI();
         };
-        grid.appendChild(numDiv);
+        grid.appendChild(div);
     }
 
-    function playKeno() {
-        let bet = document.getElementById('betAmount').value;
-        if (selectedNumbers.length < 1) {
-            alert("እባክዎ ቢያንስ አንድ ቁጥር ይምረጡ!");
-            return;
+    function toggleSection(id) {
+        const sections = ['deposit', 'withdraw'];
+        sections.forEach(s => {
+            document.getElementById(s).style.display = (s === id && document.getElementById(s).style.display !== 'block') ? 'block' : 'none';
+        });
+    }
+
+    function updateUI() {
+        const btn = document.getElementById('playBtn');
+        if (selected.length > 0) {
+            btn.classList.add('active-play');
+            btn.innerText = `ውርርድ (${selected.length * 15} ETB)`;
+        } else {
+            btn.classList.remove('active-play');
+            btn.innerText = "ውርርድ (15 ETB)";
         }
-        if (!bet || bet < 5) {
-            alert("ዝቅተኛ መወራረጃ 5 ብር ነው!");
-            return;
+    }
+
+    function sendToBot(type) {
+        let msg = "";
+        if(type === 'Deposit') {
+            msg = "Deposit_Request_Check_Photo";
+        } else {
+            let amt = document.getElementById('withdrawAmount').value;
+            let ph = document.getElementById('phone').value;
+            if(!amt || !ph) { alert("እባክዎ መረጃ ይሙሉ!"); return; }
+            msg = `Withdraw_Amount:${amt}_Phone:${ph}`;
         }
-        
-        // ወደ ቦቱ የሚላክ መረጃ
-        let info = `Keno_Bet:${bet}_Numbers:${selectedNumbers.join(',')}`;
-        window.location.href = "https://t.me/RunChickenRunBot?start=" + info;
+        window.location.href = `https://t.me/RunChickenRunBot?start=${msg}`;
+    }
+
+    function playGame() {
+        if (selected.length === 0) return;
+        let info = `Play_Keno_Numbers:${selected.join(',')}`;
+        window.location.href = `https://t.me/RunChickenRunBot?start=${info}`;
     }
 </script>
 
