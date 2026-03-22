@@ -1,4 +1,59 @@
-<div style="margin-top: 15px;">
-    <label>የክፍያ ማረጋገጫ (Screenshot) ይጫኑ፦</label><br>
-    <input type="file" id="receiptPhoto" accept="image/*" style="margin-top: 5px;">
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keno Royal - Deposit</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; text-align: center; padding: 20px; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        h2 { color: #d32f2f; }
+        input, button { width: 90%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+        button { background-color: #d32f2f; color: white; font-weight: bold; cursor: pointer; border: none; }
+        .telegram-btn { background-color: #0088cc; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>💰 ዲፖዚት (ገንዘብ ያስገቡ)</h2>
+    <p>መጀመሪያ በቴሌብር ብር ይላኩ፣ ከዚያም ማረጋገጫውን እዚህ ይላኩ።</p>
+    
+    <input type="number" id="amount" placeholder="የብር መጠን">
+    <input type="text" id="transId" placeholder="Transaction ID">
+    
+    <div style="text-align: left; margin-left: 5%;">
+        <label>የክፍያ ማረጋገጫ (Screenshot) ይምረጡ፦</label>
+        <input type="file" id="receiptPhoto" accept="image/*">
+    </div>
+
+    <button onclick="sendToBot()">ጥያቄ ላክ</button>
+    
+    <a id="telegramLink" href="https://t.me/RunChickenRunBot?start=" class="telegram-btn" style="text-decoration: none; color: white; display: none; padding: 10px; border-radius: 5px; margin-top: 10px;">
+        <button class="telegram-btn" style="display: block; width: 100%;">በ Setgame በኩል ላክ</button>
+    </a>
 </div>
+
+<script>
+    function sendToBot() {
+        let amount = document.getElementById('amount').value;
+        let transId = document.getElementById('transId').value;
+        let photo = document.getElementById('receiptPhoto').files[0];
+
+        if (!amount || !transId || !photo) {
+            alert("እባክዎ ሁሉንም መረጃ ይሙሉ (ፎቶውን ጨምሮ)!");
+            return;
+        }
+
+        // መረጃውን ለቴሌግራም ሊንክ ማዘጋጀት
+        let info = `Amount:${amount}_ID:${transId}`;
+        let link = document.getElementById('telegramLink');
+        link.href = "https://t.me/RunChickenRunBot?start=" + info;
+        link.style.display = "block";
+        
+        alert("አሁን 'በ Setgame በኩል ላክ' የሚለውን ተጭነው ፎቶውን ለቦቱ ይላኩ።");
+    }
+</script>
+
+</body>
+</html>
