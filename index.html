@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Keno Royal - Telegram Linked</title>
+    <title>Keno Royal - Direct To Daniel</title>
     <style>
-        body { margin: 0; background: #121417; color: white; font-family: sans-serif; text-align: center; }
+        body { margin: 0; background: #121417; color: white; font-family: sans-serif; text-align: center; overflow-x: hidden; }
         .header { background: #1c1f24; padding: 15px; display: flex; justify-content: space-between; border-bottom: 2px solid #2ecc71; position: sticky; top: 0; z-index: 100; }
-        
-        /* Wallet Buttons */
         .wallet-bar { display: flex; gap: 10px; padding: 10px; background: #1c1f24; }
-        .w-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
+        .w-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
         .dep-btn { background: #2ecc71; color: black; }
         .wit-btn { background: #e67e22; }
 
         .timer-panel { background: #1c1f24; margin: 10px; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .draw-panel { background: #1c1f24; margin: 0 10px 10px 10px; padding: 15px; border-radius: 10px; min-height: 60px; border: 1px solid #333; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-        .drawn-box { background: #f1c40f; color: black; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; animation: pop 0.3s; }
+        .drawn-box { background: #f1c40f; color: black; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; animation: pop 0.3s forwards; }
 
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; padding: 10px; max-width: 450px; margin: 0 auto; }
         .num { background: #24292e; padding: 12px 0; border-radius: 4px; font-size: 14px; font-weight: bold; color: #888; border: 1px solid #333; cursor: pointer; }
@@ -25,14 +23,14 @@
 
         .footer { background: #1c1f24; padding: 15px; position: fixed; bottom: 0; width: 100%; border-radius: 20px 20px 0 0; box-sizing: border-box; }
         .play-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 20px; font-weight: bold; background: #2ecc71; color: white; cursor: pointer; }
-        .play-btn:disabled { background: #333 !important; color: #555 !important; cursor: not-allowed; }
+        .play-btn:disabled { background: #333 !important; color: #555 !important; }
 
-        /* Modal */
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1c1f24; padding: 25px; border-radius: 15px; border: 2px solid #2ecc71; z-index: 1000; width: 85%; max-width: 350px; }
         .modal input { width: 100%; padding: 12px; margin: 10px 0; background: #24292e; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; }
         
         #admin-panel { display: none; background: #1c1f24; padding: 20px; border: 2px solid #f1c40f; position: fixed; top: 10%; width: 90%; left: 5%; z-index: 2000; border-radius: 15px; }
+        .tg-link { display: block; width: 100%; padding: 16px; background: #0088cc; color: white; text-decoration: none; border-radius: 12px; font-weight: bold; margin-top: 10px; }
         @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
     </style>
 </head>
@@ -64,77 +62,61 @@
     <p id="m-info" style="font-size: 12px;"></p>
     <input type="number" id="m-amount" placeholder="መጠን (ETB)">
     <input type="text" id="m-extra" placeholder="">
-    <button class="play-btn" onclick="sendToTelegram()">ጥያቄ ላክ</button>
+    <div id="tg-container"></div>
 </div>
 
 <div id="admin-panel">
-    <h3 style="color:#f1c40f;">Admin (የዳንኤል ገጽ)</h3>
+    <h3 style="color:#f1c40f;">Admin (ዳንኤል)</h3>
     <div id="req-list" style="max-height: 300px; overflow-y: auto;">ጥያቄ የለም...</div>
     <button class="w-btn" style="background:#444; margin-top:10px;" onclick="closeAdmin()">ዝጋ</button>
 </div>
 
 <script>
-    let balance = 0, bet = 15, selected = [], requests = [], timeLeft = 60, currentType = '', isDrawing = false, hasBet = false;
-    const botUser = "RunChickenRunBot";
+    let balance = 0, bet = 15, selected = [], requests = [], timeLeft = 60, isDrawing = false, hasBet = false;
+    const myTG = "Godis1256"; // ያንተ የቴሌግራም ስም
 
-    // Grid መፍጠር - ቁጥሮቹ እንዲነኩ ተደርጓል
     const grid = document.getElementById('keno-grid');
     for(let i=1; i<=80; i++) {
-        let n = document.createElement('div');
-        n.className = 'num'; n.innerText = i;
+        let n = document.createElement('div'); n.className = 'num'; n.innerText = i;
         n.onclick = () => {
             if(isDrawing) return;
-            if(selected.includes(i)) {
-                selected = selected.filter(x => x !== i); n.classList.remove('selected');
-            } else if(selected.length < 10) {
-                selected.push(i); n.classList.add('selected');
-            }
+            if(selected.includes(i)) { selected = selected.filter(x => x !== i); n.classList.remove('selected'); }
+            else if(selected.length < 10) { selected.push(i); n.classList.add('selected'); }
             updateBtn();
         };
         grid.appendChild(n);
     }
 
     function openModal(type) {
-        currentType = type;
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('wallet-modal').style.display = 'block';
+        const container = document.getElementById('tg-container');
         if(type === 'deposit') {
             document.getElementById('m-title').innerText = "ብር ማስገቢያ";
             document.getElementById('m-info').innerText = "ለዳንኤል (0986980130) ይላኩና መረጃውን እዚህ ይክተቱ።";
-            document.getElementById('m-extra').placeholder = "Transaction ID / Screenshot Name";
+            document.getElementById('m-extra').placeholder = "Transaction ID";
+            container.innerHTML = `<button class="play-btn" onclick="generateLink('deposit')">ጥያቄ ላክ</button>`;
         } else {
             document.getElementById('m-title').innerText = "ብር ማውጫ";
-            document.getElementById('m-info').innerText = "ቢያንስ 200 ብር ማውጣት ይቻላል።";
-            document.getElementById('m-extra').placeholder = "የእርስዎ ቴሌብር ቁጥር";
+            document.getElementById('m-info').innerText = "ቢያንስ 200 ብር ያስፈልጋል።";
+            document.getElementById('m-extra').placeholder = "የቴሌብር ቁጥር";
+            container.innerHTML = `<button class="play-btn" onclick="generateLink('withdraw')">ጥያቄ ላክ</button>`;
         }
+    }
+
+    function generateLink(type) {
+        let amt = document.getElementById('m-amount').value;
+        let extra = document.getElementById('m-extra').value;
+        if(!amt || !extra) return alert("እባክዎ መረጃውን ይሙሉ!");
+        let msg = (type === 'deposit') ? `🚀 ዲፖዚት: ${amt} ETB | ID: ${extra}` : `💸 ማውጫ: ${amt} ETB | ቁጥር: ${extra}`;
+        if(type === 'deposit') requests.push({ id: Date.now(), amount: amt, status: 'Pending' });
+        if(type === 'withdraw' && amt > balance) return alert("በቂ ብር የለዎትም!");
+        const link = `https://t.me/${myTG}?text=${encodeURIComponent(msg)}`;
+        document.getElementById('tg-container').innerHTML = `<a href="${link}" target="_blank" class="tg-link" onclick="closeModal()">ሜሴጁን ለዳንኤል ላክ</a>`;
     }
 
     function closeModal() { document.getElementById('wallet-modal').style.display='none'; document.getElementById('overlay').style.display='none'; }
 
-    // ወደ ቴሌግራም መላኪያ
-    function sendToTelegram() {
-        let amt = document.getElementById('m-amount').value;
-        let extra = document.getElementById('m-extra').value;
-
-        if(!amt || !extra) return alert("እባክዎ መረጃውን በትክክል ይሙሉ!");
-
-        let message = "";
-        if(currentType === 'deposit') {
-            message = `🚀 አዲስ ዲፖዚት ጥያቄ:\nመጠን: ${amt} ETB\nID/መረጃ: ${extra}`;
-            requests.push({ id: Date.now(), amount: amt, status: 'Pending' });
-        } else {
-            if(amt > balance) return alert("በቂ ብር የለዎትም!");
-            message = `💸 አዲስ የማውጫ ጥያቄ:\nመጠን: ${amt} ETB\nወደ ቁጥር: ${extra}`;
-            balance -= amt;
-        }
-
-        // ቴሌግራምን ይከፍታል
-        window.open(`https://t.me/${botUser}?text=${encodeURIComponent(message)}`, '_blank');
-        alert("ጥያቄዎ ተመዝግቧል! መረጃው ለዳንኤል ይደርሰዋል።");
-        updateUI(); closeModal();
-    }
-
-    // የጨዋታ ሂደት (Timer & Draw)
     setInterval(() => {
         if(!isDrawing) {
             timeLeft--;
@@ -144,13 +126,10 @@
     }, 1000);
 
     function startDraw() {
-        isDrawing = true;
-        if(hasBet) balance -= bet;
-        updateUI();
+        isDrawing = true; if(hasBet) balance -= bet; updateUI();
         let draw = [], count = 0, hits = 0;
         document.getElementById('drawn-list').innerHTML = '';
         document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
-
         let intv = setInterval(() => {
             let r = Math.floor(Math.random() * 80) + 1;
             while(draw.includes(r)) r = Math.floor(Math.random() * 80) + 1;
@@ -161,30 +140,23 @@
             count++;
             if(count >= 20) {
                 clearInterval(intv);
-                if(hasBet && hits > 0) balance += (hits * bet * 2); 
+                if(hasBet && hits > 0) balance += (hits * bet * 2);
                 setTimeout(() => { isDrawing = false; hasBet = false; timeLeft = 60; updateBtn(); }, 3000);
             }
         }, 500);
     }
 
-    function placeBet() { if(selected.length > 0) { hasBet = true; updateBtn(); } }
+    function placeBet() { hasBet = true; updateBtn(); }
     function checkAdmin() { if(prompt("Password:") === "2026") document.getElementById('admin-panel').style.display='block'; renderAdmin(); }
     function renderAdmin() {
         document.getElementById('req-list').innerHTML = requests.filter(r=>r.status==='Pending').map(r => `
-            <div style="background:#333; padding:15px; margin-bottom:10px; border-radius:8px; text-align:left; border-left:5px solid #2ecc71;">
-                መጠን: ${r.amount} ETB <br>
-                <button onclick="appr(${r.id})" style="background:#2ecc71; border:none; padding:8px; margin-top:10px; border-radius:5px; font-weight:bold;">አጽድቅ (Approve)</button>
-            </div>
-        `).join('') || "ምንም ጥያቄ የለም።";
+            <div style="background:#333; padding:10px; margin-bottom:5px;">መጠን: ${r.amount} <button onclick="appr(${r.id})">Approve</button></div>
+        `).join('') || "ጥያቄ የለም";
     }
-    function appr(id) { 
-        let r = requests.find(x=>x.id===id); 
-        if(r) { r.status='Approved'; balance += parseFloat(r.amount); updateUI(); renderAdmin(); alert("ብሩ ተለቋል!"); }
-    }
+    function appr(id) { let r = requests.find(x=>x.id===id); if(r) { r.status='Approved'; balance += parseFloat(r.amount); updateUI(); renderAdmin(); } }
     function closeAdmin() { document.getElementById('admin-panel').style.display='none'; }
     function updateUI() { document.getElementById('bal-display').innerText = balance.toFixed(2) + " ETB"; updateBtn(); }
     function updateBtn() { document.getElementById('play-btn').disabled = (balance < bet || selected.length === 0 || isDrawing || hasBet); }
-    
     updateUI();
 </script>
 </body>
