@@ -1,64 +1,100 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Keno Game</title>
+  <title>Keno Pro</title>
   <style>
-    body {
-      background: #111;
-      color: #fff;
-      font-family: Arial;
-      text-align: center;
-    }
+    body { background:#111; color:#fff; font-family:Arial; text-align:center; }
 
     .grid {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 5px;
-      max-width: 400px;
-      margin: auto;
+      display:grid;
+      grid-template-columns:repeat(10,1fr);
+      gap:5px;
+      max-width:400px;
+      margin:auto;
     }
 
     button {
-      padding: 10px;
-      border: none;
-      background: #333;
-      color: white;
-      cursor: pointer;
-      border-radius: 5px;
+      padding:10px;
+      border:none;
+      background:#333;
+      color:#fff;
+      border-radius:5px;
     }
 
-    .selected {
-      background: orange;
-    }
-
-    .win {
-      background: green;
-    }
+    .selected { background:orange; }
+    .win { background:green; }
   </style>
 </head>
 
 <body>
 
-<h1>🎰 KENO GAME</h1>
+<h2>🎰 KENO PRO (INDEX ONLY)</h2>
 
-<h3>Balance: <span id="balance">1000</span> ETB</h3>
+<!-- LOGIN -->
+<div id="loginBox">
+  <input id="user" placeholder="Username">
+  <input id="pass" type="password" placeholder="Password">
+  <button onclick="login()">LOGIN</button>
+</div>
 
-<input type="number" id="bet" placeholder="Bet amount">
-<button onclick="startGame()">PLAY</button>
+<!-- GAME -->
+<div id="game" style="display:none;">
+
+<h3>Balance: <span id="balance">0</span> ETB</h3>
+
+<input id="bet" type="number" placeholder="Bet">
+<button onclick="play()">PLAY</button>
 
 <h3 id="timer">Next draw: 10s</h3>
 
 <div class="grid" id="board"></div>
 
-<h3 id="selected">Selected: []</h3>
-<h3 id="result">Result: []</h3>
+<h4 id="selected">Selected: []</h4>
+<h4 id="result">Result: []</h4>
+
+<h4>History:</h4>
+<div id="history"></div>
+
+</div>
 
 <script>
+// LOCAL STORAGE USER
+let currentUser = "";
 let selected = [];
-let balance = 1000;
 let timer = 10;
 
-// create board 1–80
+// login/register
+function login(){
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
+
+  let users = JSON.parse(localStorage.getItem("users")) || {};
+
+  if(!users[u]){
+    users[u] = { password:p, balance:1000 };
+  }
+
+  if(users[u].password === p){
+    currentUser = u;
+    localStorage.setItem("users", JSON.stringify(users));
+
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("game").style.display="block";
+
+    updateBalance();
+  } else {
+    alert("Wrong password");
+  }
+}
+
+// balance
+function updateBalance(){
+  let users = JSON.parse(localStorage.getItem("users"));
+  document.getElementById("balance").innerText =
+    users[currentUser].balance;
+}
+
+// create board
 const board = document.getElementById("board");
 for(let i=1;i<=80;i++){
   let btn = document.createElement("button");
@@ -67,91 +103,106 @@ for(let i=1;i<=80;i++){
   board.appendChild(btn);
 }
 
-function selectNumber(num, btn){
-  if(selected.includes(num)){
-    selected = selected.filter(n => n !== num);
+function selectNumber(n, btn){
+  if(selected.includes(n)){
+    selected = selected.filter(x=>x!==n);
     btn.classList.remove("selected");
   } else {
-    if(selected.length >= 10){
-      alert("Max 10 numbers!");
-      return;
-    }
-    selected.push(num);
+    if(selected.length >= 10) return alert("Max 10");
+    selected.push(n);
     btn.classList.add("selected");
   }
 
   document.getElementById("selected").innerText =
-    "Selected: " + selected.join(", ");
+    "Selected: " + selected.join(",");
 }
 
-function startGame(){
+// play
+function play(){
   let bet = Number(document.getElementById("bet").value);
+  let users = JSON.parse(localStorage.getItem("users"));
 
-  if(bet <= 0){
-    alert("Enter bet!");
-    return;
-  }
+  if(bet <= 0) return alert("Enter bet");
+  if(bet > users[currentUser].balance) return alert("No balance");
 
-  if(bet > balance){
-    alert("Not enough balance!");
-    return;
-  }
+  users[currentUser].balance -= bet;
 
-  balance -= bet;
-  document.getElementById("balance").innerText = balance;
+  let result = draw();
+  let matches = selected.filter(n=>result.includes(n));
+  let win = matches.length * 10;
+
+  users[currentUser].balance += win;
+
+  localStorage.setItem("users", JSON.stringify(users));
+
+  showResult(result, matches.length, win);
+  updateBalance();
+  saveHistory(result, win);
 }
 
-// auto draw every 10s
-setInterval(() => {
-  timer--;
-  document.getElementById("timer").innerText =
-    "Next draw: " + timer + "s";
-
-  if(timer === 0){
-    draw();
-    timer = 10;
-  }
-}, 1000);
-
+// draw
 function draw(){
-  let result = [];
-
-  while(result.length < 20){
-    let n = Math.floor(Math.random()*80)+1;
-    if(!result.includes(n)) result.push(n);
+  let r=[];
+  while(r.length<20){
+    let n=Math.floor(Math.random()*80)+1;
+    if(!r.includes(n)) r.push(n);
   }
+  return r;
+}
 
+// show result
+function showResult(result, match, win){
   document.getElementById("result").innerText =
-    "Result: " + result.join(", ");
+    "Result: " + result.join(",");
 
-  checkWin(result);
   highlight(result);
+
+  alert("Matched: "+match+" | Win: "+win);
 }
 
-function checkWin(result){
-  let matches = selected.filter(n => result.includes(n));
-
-  let win = matches.length * 10; // simple payout
-  balance += win;
-
-  document.getElementById("balance").innerText = balance;
-
-  alert("Matched: " + matches.length + " | Win: " + win + " ETB");
-}
-
+// highlight
 function highlight(result){
-  let buttons = document.querySelectorAll(".grid button");
-
-  buttons.forEach(btn => {
-    let num = Number(btn.innerText);
-
+  document.querySelectorAll(".grid button").forEach(btn=>{
+    let n=Number(btn.innerText);
     btn.classList.remove("win");
 
-    if(result.includes(num)){
+    if(result.includes(n)){
       btn.classList.add("win");
     }
   });
 }
+
+// history
+function saveHistory(result, win){
+  let h = JSON.parse(localStorage.getItem("history")) || [];
+  h.unshift({result, win});
+
+  if(h.length>10) h.pop();
+
+  localStorage.setItem("history", JSON.stringify(h));
+  showHistory();
+}
+
+function showHistory(){
+  let h = JSON.parse(localStorage.getItem("history")) || [];
+  let div = document.getElementById("history");
+
+  div.innerHTML = h.map(x =>
+    "🎯 "+x.result.join(",")+" | 💰 "+x.win
+  ).join("<br>");
+}
+
+// timer
+setInterval(()=>{
+  timer--;
+  document.getElementById("timer").innerText =
+    "Next draw: "+timer+"s";
+
+  if(timer===0){
+    timer=10;
+  }
+},1000);
+
 </script>
 
 </body>
