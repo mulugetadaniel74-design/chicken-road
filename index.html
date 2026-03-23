@@ -1,128 +1,158 @@
 <!DOCTYPE html>
-<html lang="am">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL - ULTIMATE</title>
-    <style>
-        :root { --gold: #f1c40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; }
-        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        
-        .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 15px; }
-        .balance-display { font-size: 24px; font-weight: bold; color: var(--gold); margin: 10px 0; border: 2px solid var(--gold); display: inline-block; padding: 8px 25px; border-radius: 50px; background: rgba(241,196,15,0.1); }
-        
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 15px auto; padding: 10px; background: #000; border-radius: 12px; }
-        .num { background: #333; border: 1px solid #444; padding: 14px 0; cursor: pointer; font-weight: bold; color: #ccc; border-radius: 5px; transition: 0.2s; }
-        .selected { background: #3498db !important; color: white !important; transform: scale(1.05); }
-        .winner { background: var(--gold) !important; color: black !important; animation: glow 0.5s infinite alternate; }
-        
-        @keyframes glow { from { box-shadow: 0 0 5px var(--gold); } to { box-shadow: 0 0 20px var(--gold); } }
+  <title>Keno Game</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: Arial;
+      text-align: center;
+    }
 
-        .controls { display: flex; justify-content: space-around; margin: 10px; }
-        .btn-small { background: #444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+      max-width: 400px;
+      margin: auto;
+    }
 
-        .action-btn { width: 95%; padding: 16px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 18px; text-transform: uppercase; color: white; }
-        .contact-btn { background: linear-gradient(to right, #2ecc71, #27ae60); }
-    </style>
+    button {
+      padding: 10px;
+      border: none;
+      background: #333;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .selected {
+      background: orange;
+    }
+
+    .win {
+      background: green;
+    }
+  </style>
 </head>
+
 <body>
 
-    <div class="header">
-        <h2 style="margin:0; color:var(--gold);">🎰 KENO ROYAL PRO 🎰</h2>
-        <div class="balance-display">💰 <span id="balance">0.00</span> ETB</div>
-        <div style="color: #e74c3c; font-weight: bold; margin-top: 5px;">DRAW: <span id="timer">60</span>s</div>
-    </div>
+<h1>🎰 KENO GAME</h1>
 
-    <button onclick="copyUsername()" class="action-btn contact-btn">📲 ዳንኤልን አናግር (CONTACT)</button>
+<h3>Balance: <span id="balance">1000</span> ETB</h3>
 
-    <div class="controls">
-        <button class="btn-small" onclick="quickPick()">⚡ ፈጣን ምርጫ</button>
-        <button class="btn-small" onclick="clearAll()">🗑 ሁሉንም አጥፋ</button>
-    </div>
+<input type="number" id="bet" placeholder="Bet amount">
+<button onclick="startGame()">PLAY</button>
 
-    <div class="grid" id="grid"></div>
+<h3 id="timer">Next draw: 10s</h3>
 
-    <div style="background: var(--card); padding: 10px; border-radius: 10px; width: 90%; margin: auto;">
-        <p id="status" style="color: var(--gold);">ቁጥር ይምረጡ (ከ 1 - 5)</p>
-    </div>
+<div class="grid" id="board"></div>
 
-    <script>
-        let currentBalance = 0.00;
-        let selected = [];
-        const grid = document.getElementById('grid');
+<h3 id="selected">Selected: []</h3>
+<h3 id="result">Result: []</h3>
 
-        for(let i=1; i<=80; i++) {
-            let d = document.createElement('div');
-            d.className = 'num'; d.id = 'n'+i; d.innerText = i;
-            d.onclick = function() {
-                if(this.classList.contains('selected')) {
-                    this.classList.remove('selected');
-                    selected = selected.filter(n => n !== i);
-                } else if(selected.length < 5) {
-                    this.classList.add('selected');
-                    selected.push(i);
-                    if(navigator.vibrate) navigator.vibrate(50); // ንዝረት
-                }
-            };
-            grid.appendChild(d);
-        }
+<script>
+let selected = [];
+let balance = 1000;
+let timer = 10;
 
-        function quickPick() {
-            clearAll();
-            while(selected.length < 5) {
-                let r = Math.floor(Math.random()*80)+1;
-                if(!selected.includes(r)) {
-                    selected.push(r);
-                    document.getElementById('n'+r).classList.add('selected');
-                }
-            }
-        }
+// create board 1–80
+const board = document.getElementById("board");
+for(let i=1;i<=80;i++){
+  let btn = document.createElement("button");
+  btn.innerText = i;
+  btn.onclick = () => selectNumber(i, btn);
+  board.appendChild(btn);
+}
 
-        function clearAll() {
-            selected = [];
-            document.querySelectorAll('.num').forEach(n => n.classList.remove('selected'));
-        }
+function selectNumber(num, btn){
+  if(selected.includes(num)){
+    selected = selected.filter(n => n !== num);
+    btn.classList.remove("selected");
+  } else {
+    if(selected.length >= 10){
+      alert("Max 10 numbers!");
+      return;
+    }
+    selected.push(num);
+    btn.classList.add("selected");
+  }
 
-        function copyUsername() {
-            const el = document.createElement('textarea');
-            el.value = '@Godis1256';
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            alert("የዳንኤል ዩዘር ኔም ኮፒ ሆኗል! ቴሌግራም ላይ ይፈልጉት።");
-            window.location.href = "tg://resolve?domain=Godis1256";
-        }
+  document.getElementById("selected").innerText =
+    "Selected: " + selected.join(", ");
+}
 
-        let time = 60;
-        setInterval(() => {
-            time--;
-            document.getElementById('timer').innerText = time;
-            if(time <= 0) { draw(); time = 60; }
-        }, 1000);
+function startGame(){
+  let bet = Number(document.getElementById("bet").value);
 
-        function draw() {
-            document.querySelectorAll('.num').forEach(n => n.classList.remove('winner'));
-            let winners = [];
-            while(winners.length < 20) {
-                let r = Math.floor(Math.random()*80)+1;
-                if(!winners.includes(r)) winners.push(r);
-            }
-            winners.forEach((n, i) => {
-                setTimeout(() => { 
-                    document.getElementById('n'+n).classList.add('winner');
-                    if(i === 19) checkWin(winners);
-                }, i * 100);
-            });
-        }
+  if(bet <= 0){
+    alert("Enter bet!");
+    return;
+  }
 
-        function checkWin(winNums) {
-            let matches = selected.filter(n => winNums.includes(n)).length;
-            if(matches > 0) {
-                // ድምፅ እዚህ ጋር መጨመር ይቻላል
-                alert("እንኳን ደስ አለዎት! " + matches + " ቁጥሮች ደርሰውዎታል።");
-            }
-        }
-    </script>
+  if(bet > balance){
+    alert("Not enough balance!");
+    return;
+  }
+
+  balance -= bet;
+  document.getElementById("balance").innerText = balance;
+}
+
+// auto draw every 10s
+setInterval(() => {
+  timer--;
+  document.getElementById("timer").innerText =
+    "Next draw: " + timer + "s";
+
+  if(timer === 0){
+    draw();
+    timer = 10;
+  }
+}, 1000);
+
+function draw(){
+  let result = [];
+
+  while(result.length < 20){
+    let n = Math.floor(Math.random()*80)+1;
+    if(!result.includes(n)) result.push(n);
+  }
+
+  document.getElementById("result").innerText =
+    "Result: " + result.join(", ");
+
+  checkWin(result);
+  highlight(result);
+}
+
+function checkWin(result){
+  let matches = selected.filter(n => result.includes(n));
+
+  let win = matches.length * 10; // simple payout
+  balance += win;
+
+  document.getElementById("balance").innerText = balance;
+
+  alert("Matched: " + matches.length + " | Win: " + win + " ETB");
+}
+
+function highlight(result){
+  let buttons = document.querySelectorAll(".grid button");
+
+  buttons.forEach(btn => {
+    let num = Number(btn.innerText);
+
+    btn.classList.remove("win");
+
+    if(result.includes(num)){
+      btn.classList.add("win");
+    }
+  });
+}
+</script>
+
 </body>
 </html>
