@@ -25,7 +25,7 @@
 
     <div class="header">
         <div style="color: #2eb85c; font-weight: bold; font-size: 22px;">KENO ROYAL</div>
-        <div style="color: #2eb85c; font-weight: bold; font-size: 20px;">0.00 ETB</div>
+        <div id="balanceDisplay" style="color: #2eb85c; font-weight: bold; font-size: 20px;">0.00 ETB</div>
     </div>
 
     <div class="action-btns">
@@ -54,6 +54,8 @@
         }
 
         let currentBet = 20;
+        let userBalance = 0;
+
         function updateBet(val) {
             currentBet += val;
             if (currentBet < 20) currentBet = 20; 
@@ -61,30 +63,53 @@
         }
 
         function handleWithdraw() {
-            let amount = prompt("ማውጣት የሚፈልጉትን መጠን ያስገቡ (ዝቅተኛ 400):");
-            // እዚህ ጋር ቼክ ያደርጋል
+            let amount = prompt("ማውጣት የሚፈልጉትን የብር መጠን ያስገቡ (ዝቅተኛ 400):");
             if (amount !== null && parseInt(amount) >= 400) {
-                let phone = prompt("የቴሌብር ስልክ ቁጥርዎን ያስገቡ:");
+                let phone = prompt("እባክዎ የቴሌብር ስልክ ቁጥርዎን ያስገቡ:");
                 if (phone && phone.length >= 10) {
                     // መጠኑን እና ስልኩን ወደ ቦቱ ይልካል
-                    window.location.href = "https://t.me/RunChickenRunBot?start=WD_" + amount + "_PH_" + phone;
-                } else if (phone !== null) {
-                    alert("ትክክለኛ ስልክ ቁጥር ያስገቡ!");
-                }
+                    window.location.href = `https://t.me/RunChickenRunBot?start=WD_${amount}_PH_${phone}`;
+                } else { alert("ትክክለኛ ስልክ ቁጥር ያስገቡ!"); }
             } else if (amount !== null) {
                 alert("ይቅርታ፣ ዝቅተኛው የማውጫ መጠን 400 ብር ነው።");
             }
         }
 
         function startDraw() {
-            if (document.querySelectorAll('.selected').length === 0) return alert("ቁጥር ይምረጡ!");
+            let selectedNums = document.querySelectorAll('.selected');
+            if (selectedNums.length === 0) return alert("ቁጥር ይምረጡ!");
+            
             document.querySelectorAll('.number').forEach(n => n.classList.remove('drawn'));
             let count = 0;
+            let hits = 0;
+
             let inv = setInterval(() => {
                 let r = Math.floor(Math.random() * 80) + 1;
-                document.getElementById('n' + r).classList.add('drawn');
-                count++; if (count >= 20) clearInterval(inv);
+                let numDiv = document.getElementById('n' + r);
+                numDiv.classList.add('drawn');
+                
+                if (numDiv.classList.contains('selected')) hits++;
+
+                count++;
+                if (count >= 20) {
+                    clearInterval(inv);
+                    calculateWin(hits);
+                }
             }, 300);
+        }
+
+        function calculateWin(hits) {
+            // የማሸነፊያ ፎርሙላ (ለምሳሌ በ 2 ከተባዛ)
+            let winAmount = hits > 2 ? currentBet * 2 : 0;
+            
+            // 1500 ብር የድል ገደብ (መብላት የሚችለው ከፍተኛ መጠን)
+            if (winAmount > 1500) winAmount = 1500;
+            
+            if (winAmount > 0) {
+                alert("እንኳን ደስ አለዎት! " + winAmount + " ብር አሸንፈዋል!");
+                userBalance += winAmount;
+                document.getElementById('balanceDisplay').innerText = userBalance.toFixed(2) + " ETB";
+            }
         }
 
         let time = 50;
@@ -95,4 +120,3 @@
     </script>
 </body>
 </html>
-u
