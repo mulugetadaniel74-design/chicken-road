@@ -3,52 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL - BLACK & WHITE</title>
+    <title>KENO ROYAL - GOLD EDITION</title>
     <style>
-        :root { --main: #ffffff; --bg: #000000; --card: #1a1a1a; --border: #333333; }
-        body { background-color: var(--bg); color: var(--main); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+        /* ደመቅ ያለ የካሲኖ ከለሮች (Gold, Black, Green) */
+        :root { --gold: #f1c40f; --dark: #121212; --card: #1e1e1e; --green: #27ae60; --white: #ffffff; }
         
-        .header { border-bottom: 2px solid var(--main); padding: 15px; margin-bottom: 10px; }
-        .balance-display { font-size: 22px; font-weight: bold; margin: 10px 0; border: 1px solid var(--main); display: inline-block; padding: 5px 20px; border-radius: 50px; }
-        .timer-box { background: var(--main); color: var(--bg); padding: 5px 15px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 10px; display: inline-block; }
+        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+        
+        /* Header */
+        .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .balance-display { font-size: 24px; font-weight: bold; color: var(--gold); margin: 10px 0; border: 2px solid var(--gold); display: inline-block; padding: 8px 25px; border-radius: 50px; background: rgba(241,196,15,0.1); }
+        .timer-box { background: #c0392b; color: white; padding: 5px 15px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 10px; display: inline-block; border: 2px solid white; }
 
-        .bet-input-box { background: var(--card); padding: 15px; border-radius: 10px; margin: 10px auto; width: 90%; border: 1px solid var(--border); }
-        input { background: #000; color: #fff; border: 1px solid var(--main); padding: 8px; width: 80px; text-align: center; font-size: 16px; border-radius: 5px; }
+        /* Bet Input */
+        .bet-input-box { background: var(--card); padding: 15px; border-radius: 10px; margin: 10px auto; width: 90%; border: 1px solid #444; }
+        input[type="number"] { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 10px; width: 100px; text-align: center; font-size: 18px; border-radius: 5px; font-weight: bold; }
 
+        /* Stats */
         .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 95%; margin: 10px auto; }
-        .stat { border: 1px solid var(--border); padding: 10px; border-radius: 8px; }
+        .stat { background: var(--card); border: 1px solid #444; padding: 10px; border-radius: 8px; text-align: left; }
+        .stat-val { color: var(--gold); font-size: 18px; font-weight: bold; }
 
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 10px auto; padding: 10px; background: #000; }
-        .num { border: 1px solid var(--border); padding: 12px 0; cursor: pointer; font-weight: bold; transition: 0.2s; color: #888; }
-        .selected { background: #444 !important; color: #fff !important; border-color: #fff; }
-        .winner { background: #fff !important; color: #000 !important; transform: scale(1.1); box-shadow: 0 0 10px #fff; }
-
-        .action-btn { width: 95%; padding: 15px; border: 1px solid var(--main); border-radius: 8px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 16px; text-decoration: none; transition: 0.3s; }
-        .dep-btn { background: var(--main); color: var(--bg); }
-        .with-btn { background: var(--bg); color: var(--main); }
-
-        .withdraw-section { border: 1px dashed var(--border); padding: 15px; margin: 20px auto; width: 90%; border-radius: 10px; }
+        /* Grid */
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 15px auto; padding: 10px; background: #000; border-radius: 12px; border: 2px solid #333; }
+        .num { background: #333; border: 1px solid #444; padding: 14px 0; cursor: pointer; font-weight: bold; transition: 0.2s; color: #ccc; border-radius: 5px; }
+        .num:hover { background: #444; }
         
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 100; }
-        .result-msg { border: 2px solid #fff; padding: 30px; border-radius: 15px; background: #000; text-align: center; }
+        /* Selected & Winner Styles */
+        .selected { background: #3498db !important; color: white !important; transform: scale(1.05); box-shadow: 0 0 10px #3498db; border: 1px solid white; }
+        .winner { background: var(--gold) !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 15px var(--gold); z-index: 2; animation: pop 0.5s ease-out; }
+        
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+        /* Buttons */
+        .action-btn { width: 95%; padding: 16px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 18px; text-decoration: none; transition: 0.3s; text-transform: uppercase; }
+        .action-btn:hover { transform: translateY(-2px); }
+        .dep-btn { background: linear-gradient(to right, #e67e22, #d35400); color: white; box-shadow: 0 4px 10px rgba(230,126,34,0.3); }
+        .with-btn { background: #c0392b; color: white; border: 1px solid white; }
+
+        /* Withdraw Section */
+        .withdraw-section { background: var(--card); border: 2px dashed #444; padding: 20px; margin: 25px auto; width: 90%; border-radius: 15px; }
+        
+        /* Overlay */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
+        .result-card { background: var(--card); padding: 40px; border-radius: 20px; border: 2px solid var(--gold); text-align: center; animation: slideIn 0.5s ease-out; }
+        .result-card h1 { font-size: 40px; margin: 0; color: var(--green); text-transform: uppercase; }
+        .result-amt { font-size: 32px; font-weight: bold; color: white; margin: 20px 0; }
+        .close-btn { background: var(--gold); color: black; border: none; padding: 10px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; margin-top: 20px; }
+
+        @keyframes slideIn { from { transform: translateY(-100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2 style="margin:0;">KENO ROYAL PRO</h2>
-        <div class="balance-display">💰 <span id="balance">0.00</span> ብር</div>
+        <h2 style="margin:0; color:var(--gold);">🎰 KENO ROYAL 🎰</h2>
+        <div class="balance-display">💰 <span id="balance">0.00</span></div>
         <br>
         <div class="timer-box">DRAW: <span id="timer">60</span>s</div>
     </div>
 
     <div class="bet-input-box">
-        መቆራጫ (ሚኒመም 15): <input type="number" id="betAmount" value="15" min="15" oninput="updateStats()">
+        መቆራጫ (ሚኒመም 15): <input type="number" id="betAmount" value="15" min="15" step="5" oninput="updateStats()">
     </div>
 
     <div class="stats">
-        <div class="stat">የተመረጠ: <span id="count">0</span>/5</div>
-        <div class="stat">ሊያሸንፉ የሚችሉት: <br> <span id="potentialWin" style="font-size:18px; color:white;">0.00</span></div>
+        <div class="stat">የተመረጠ: <span id="count" class="stat-val">0</span> / 5</div>
+        <div class="stat">ሊያሸንፉ የሚችሉት: <br> <span id="potentialWin" class="stat-val" style="font-size:22px; color:var(--green);">0.00</span></div>
     </div>
 
     <div class="grid" id="grid"></div>
@@ -57,25 +78,26 @@
 
     <div class="withdraw-section">
         <h3>💸 ብር አውጣ (WITHDRAW)</h3>
-        <p style="font-size:12px; color:#666;">ከ 300 - 1000 ብር ብቻ</p>
-        <input type="number" id="withAmount" placeholder="መጠን..." style="width:150px; margin-bottom:10px;">
+        <p style="font-size:14px; color:#aaa; margin-bottom:15px;">ከ 300 - 1000 ብር ብቻ</p>
+        <input type="number" id="withAmount" placeholder="መጠን..." style="width:180px; margin-bottom:15px;">
         <button class="action-btn with-btn" onclick="requestWithdraw()">ብር አውጣ</button>
     </div>
 
     <div id="overlay" class="overlay">
-        <div class="result-msg">
-            <h1 id="resTitle"></h1>
-            <p id="resAmt" style="font-size:24px;"></p>
-            <button onclick="document.getElementById('overlay').style.display='none'" style="padding:10px 30px; cursor:pointer;">እሺ</button>
+        <div class="result-card">
+            <h1 id="resTitle">አሸነፉ!</h1>
+            <div id="resAmt" class="result-amt">+150.00 ብር</div>
+            <button class="close-btn" onclick="document.getElementById('overlay').style.display='none'">እሺ</button>
         </div>
     </div>
 
     <script>
-        let currentBalance = 0.00;
+        let currentBalance = 0.00; // Starting balance is 0.00
         let selected = [];
         const odds = {0:0, 1:3, 2:10, 3:25, 4:50, 5:100};
         const grid = document.getElementById('grid');
 
+        // Initialize Grid
         for(let i=1; i<=80; i++) {
             let d = document.createElement('div');
             d.className = 'num'; d.id = 'n'+i; d.innerText = i;
@@ -86,7 +108,7 @@
                 } else if(selected.length < 5) {
                     this.classList.add('selected');
                     selected.push(i);
-                } else { alert("ቢበዛ 5 ቁጥር!"); }
+                } else { alert("ቢበዛ 5 ቁጥር ብቻ መምረጥ ይቻላል!"); }
                 updateStats();
             };
             grid.appendChild(d);
@@ -96,7 +118,7 @@
             let b = parseFloat(document.getElementById('betAmount').value) || 0;
             let o = odds[selected.length];
             document.getElementById('count').innerText = selected.length;
-            document.getElementById('potentialWin').innerText = (o * b).toFixed(2) + " ብር";
+            document.getElementById('potentialWin').innerText = (o * b).toFixed(2);
         }
 
         function requestWithdraw() {
@@ -106,9 +128,12 @@
             } else {
                 let msg = encodeURIComponent("ሰላም ዳንኤል፣ እኔ ከኬኖ ሮያል " + amt + " ብር ማውጣት እፈልጋለሁ።");
                 window.open("https://t.me/Godis1256?text=" + msg, "_blank");
+                // ተጫዋቹ ቴሌግራም ላይ መልእክቱን ከላከ በኋላ እሺ እንዲል
+                alert("የማውጣት ጥያቄዎ ተልኳል! ዳንኤል እስኪያረጋግጥልዎት ይጠብቁ።");
             }
         }
 
+        // Timer
         let time = 60;
         setInterval(() => {
             time--;
@@ -118,41 +143,54 @@
 
         function draw() {
             let bet = parseFloat(document.getElementById('betAmount').value);
+            
+            // Deduct bet if selected and balance is sufficient
             if(selected.length > 0) {
                  if(currentBalance < bet) { 
-                     alert("በቂ ካፒታል የለዎትም! እባክዎ ብር ያስገቡ።"); 
+                     alert("በቂ ካፒታል የለዎትም! እባክዎ መጀመሪያ ብር ያስገቡ (Deposit)።"); 
                      return; 
                  }
                  currentBalance -= bet;
                  document.getElementById('balance').innerText = currentBalance.toFixed(2);
             }
 
+            // Clear previous winners
             document.querySelectorAll('.num').forEach(n => n.classList.remove('winner'));
+            
             let winners = [];
             while(winners.length < 20) {
                 let r = Math.floor(Math.random()*80)+1;
                 if(!winners.includes(r)) winners.push(r);
             }
 
+            // Animate Draw
             winners.forEach((n, i) => {
                 setTimeout(() => { 
                     document.getElementById('n'+n).classList.add('winner'); 
                     if(i === 19) checkResult(winners, bet);
-                }, i * 100);
+                }, i * 150);
             });
         }
 
         function checkResult(winNums, bet) {
             let matches = selected.filter(n => winNums.includes(n)).length;
             let winAmt = odds[matches] * bet;
+            
             if(winAmt > 0) {
                 currentBalance += winAmt;
                 document.getElementById('resTitle').innerText = "አሸነፉ!";
+                document.getElementById('resTitle').style.color = "var(--green)";
                 document.getElementById('resAmt').innerText = "+" + winAmt.toFixed(2) + " ብር";
                 document.getElementById('overlay').style.display = 'flex';
+            } else if(selected.length > 0) {
+                 // Option to show a "Loss" message can be added here
             }
             document.getElementById('balance').innerText = currentBalance.toFixed(2);
         }
+        
+        // Initial setup to ensure 0.00 is displayed
+        document.getElementById('balance').innerText = currentBalance.toFixed(2);
+        updateStats();
     </script>
 </body>
 </html>
