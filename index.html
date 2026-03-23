@@ -1,15 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="am">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <title>KENO ROYAL</title>
+    <style>
+        body { background-color: #121212; color: white; text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
+        h1 { color: #f1c40f; text-shadow: 2px 2px 4px #000; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 450px; margin: 20px auto; background: #222; padding: 10px; border-radius: 10px; border: 2px solid #444; }
+        .num { background: #333; padding: 12px 5px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; border: 1px solid #444; transition: 0.2s; }
+        .num:hover { background: #444; }
+        .selected { background: #f1c40f !important; color: black; transform: scale(1.1); box-shadow: 0 0 10px #f1c40f; }
+        .controls { margin-top: 20px; }
+        .btn { padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; font-size: 16px; }
+        .play-btn { background: #27ae60; color: white; }
+        .clear-btn { background: #c0392b; color: white; }
+        .contact-btn { display: block; width: 200px; margin: 30px auto; padding: 10px; background: #e67e22; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
+    </style>
 </head>
 <body>
     <h1>🎰 KENO ROYAL 🎰</h1>
-    <div class="action-buttons">
-        <a href="tg://resolve?domain=Godis1256" class="btn dep-btn">💰 ዲፖዚት ያድርጉ</a>
-        <a href="tg://resolve?domain=Godis1256" class="btn wit-btn">💸 ብር ለማውጣት</a>
+    <p>ከ 1 - 80 ያሉ ቁጥሮችን ይምረጡ</p>
+    
+    <div class="grid" id="grid"></div>
+
+    <div class="controls">
+        <button class="btn play-btn" onclick="alert('ጨዋታው ተጀምሯል!')">አሁኑኑ ይጫወቱ</button>
+        <button class="btn clear-btn" onclick="location.reload()">ሁሉንም አጥፋ</button>
     </div>
+
+    <a href="tg://resolve?domain=Godis1256" class="contact-btn">💰 ብር ለማስገባት (Deposit)</a>
+
+    <script>
+        const grid = document.getElementById('grid');
+        for (let i = 1; i <= 80; i++) {
+            let div = document.createElement('div');
+            div.className = 'num';
+            div.innerText = i;
+            div.onclick = function() { this.classList.toggle('selected'); };
+            grid.appendChild(div);
+        }
+    </script>
 </body>
 </html>
