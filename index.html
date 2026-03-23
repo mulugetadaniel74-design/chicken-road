@@ -1,24 +1,12 @@
-function requestDeposit() {
-    // መልእክቱ በግልጽ እንዲቀመጥ
-    let msg = "ሰላም ዳንኤል፣ በቴሌብር (telebirr) ብር ማስገባት እፈልጋለሁ። አሁን የላኩበትን Screenshot እልክልሃለሁ።";
-    
-    // የቴሌግራም ሊንክ አጻጻፍ ለውጥ
-    let telegramUrl = "https://t.me/Godis1256?text=" + encodeURIComponent(msg);
-    
-    // በተኑን ሲነካው በቀጥታ እንዲከፍት
-    window.location.href = telegramUrl; 
-}
-
-function requestWithdraw() {
-    let amt = document.getElementById('withAmount').value;
-    if(amt < 300 || amt > 1000) {
-        alert("እባክዎ ከ 300 እስከ 1000 ብር መካከል ያስገቡ!");
-    } else {
-        let msg = "ሰላም ዳንኤል፣ እኔ ከኬኖ ሮያል " + amt + " ብር ማውጣት እፈልጋለሁ።";
-        let telegramUrl = "https://t.me/Godis1256?text=" + encodeURIComponent(msg);
-        
-        // በቀጥታ ወደ ቴሌግራም እንዲወስደው
-        window.location.href = telegramUrl;
-    }
-}
-        
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KENO ROYAL PRO - FIXED</title>
+    <style>
+        :root { --gold: #f1c40f; --dark: #121212; --card: #1e1e1e; --green: #27ae60; --white: #ffffff; }
+        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+        .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 15px; }
+        .balance-display { font-size: 24px; font-weight: bold; color: var(--gold); border: 2px solid var(--gold); display: inline-block; padding: 8px 25px; border-radius: 50px; background:
+            
