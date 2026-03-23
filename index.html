@@ -3,101 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL - Official</title>
+    <title>KENO ROYAL</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #12191c; color: white; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .action-btns { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
-        .btn-link { flex: 1; padding: 14px; border-radius: 10px; font-weight: bold; text-decoration: none; text-align: center; font-size: 14px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .dep-btn { background-color: #2eb85c; color: black; }
-        .with-btn { background-color: #3d4449; color: white; border: 1px solid #4d555a; }
-        .timer-box { background: #1c2529; border: 1px solid #c8a42d; color: #c8a42d; width: 100%; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; background: #1c2529; padding: 10px; border-radius: 10px; border: 1px solid #333; }
-        .number { width: 34px; height: 38px; background: #2c3439; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; font-size: 14px; border: 1px solid #3d4449; }
-        .number.selected { background: #2eb85c; color: black; font-weight: bold; }
-        .number.drawn { background: #f1c40f !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 15px #f1c40f; }
-        .bet-control { margin: 20px 0; display: flex; align-items: center; gap: 20px; font-size: 20px; }
-        .bet-btn { background: #3d4449; color: white; border: none; padding: 10px 15px; border-radius: 50%; cursor: pointer; }
-        .play-btn { background-color: #2eb85c; color: black; border: none; width: 100%; padding: 20px; border-radius: 15px; font-size: 20px; font-weight: bold; cursor: pointer; }
+        body { font-family: Arial; background-color: #12191c; color: white; text-align: center; padding: 20px; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; color: #2eb85c; font-weight: bold; }
+        .btn { padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold; border: none; width: 45%; }
+        .dep-btn { background: #2eb85c; color: black; text-decoration: none; display: inline-block; }
+        .with-btn { background: #3d4449; color: white; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; background: #1c2529; padding: 10px; border-radius: 10px; }
+        .number { width: 30px; height: 35px; background: #2c3439; display: flex; align-items: center; justify-content: center; border-radius: 5px; cursor: pointer; border: 1px solid #3d4449; }
+        .number.selected { background: #2eb85c; color: black; }
+        .number.drawn { background: #f1c40f; color: black; box-shadow: 0 0 10px #f1c40f; }
+        .play-btn { background: #2eb85c; color: black; width: 100%; padding: 20px; border-radius: 10px; font-size: 18px; font-weight: bold; margin-top: 20px; border: none; }
     </style>
 </head>
 <body>
-
     <div class="header">
-        <div style="color: #2eb85c; font-weight: bold; font-size: 22px;">KENO ROYAL</div>
-        <div id="balanceDisplay" style="color: #2eb85c; font-weight: bold; font-size: 20px;">0.00 ETB</div>
+        <span>KENO ROYAL</span>
+        <span id="balance">0.00 ETB</span>
     </div>
-
-    <div class="action-btns">
-        <a href="https://t.me/RunChickenRunBot?start=deposit" target="_blank" class="btn-link dep-btn">💰 ዲፖዚት</a>
-        <a href="https://t.me/RunChickenRunBot?start=withdraw_request" target="_blank" class="btn-link with-btn">💸 ውዝድራው</a>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <a href="https://t.me/RunChickenRunBot?start=deposit" class="btn dep-btn">💰 ዲፖዚት</a>
+        <button onclick="goToBot()" class="btn with-btn">💸 ውዝድራው</button>
     </div>
-
-    <div class="timer-box">⏳ ቀጣይ እጣ በ: <span id="timer">50</span> ሰከንድ</div>
     <div class="grid" id="grid"></div>
-
-    <div class="bet-control">
-        <button class="bet-btn" onclick="updateBet(-10)">-</button>
-        <span id="betDisplay" style="color: #2eb85c; font-weight: bold;">20 ETB</span>
-        <button class="bet-btn" onclick="updateBet(10)">+</button>
-    </div>
-
-    <button class="play-btn" onclick="startDraw()">ውርርድ ተጫወት</button>
+    <button class="play-btn" onclick="startDraw()">ውርርድ ተጫወት (20 ETB)</button>
 
     <script>
         const grid = document.getElementById('grid');
         for (let i = 1; i <= 80; i++) {
-            const div = document.createElement('div');
-            div.className = 'number'; div.id = 'n' + i; div.innerText = i;
-            div.onclick = function() { this.classList.toggle('selected'); };
-            grid.appendChild(div);
+            let d = document.createElement('div'); d.className = 'number'; d.innerText = i;
+            d.onclick = function() { this.classList.toggle('selected'); };
+            grid.appendChild(d);
         }
 
-        let currentBet = 20;
-        let userBalance = 0;
-
-        function updateBet(val) {
-            currentBet += val;
-            if (currentBet < 20) currentBet = 20; 
-            document.getElementById('betDisplay').innerText = currentBet + " ETB";
+        function goToBot() {
+            // ተጠቃሚው ወደ ቦቱ እንዲሄድና መረጃ እንዲልክ ያደርጋል
+            window.location.href = "https://t.me/RunChickenRunBot?start=Withdraw_Request";
         }
 
         function startDraw() {
-            let selectedNums = document.querySelectorAll('.selected');
-            if (selectedNums.length === 0) return alert("ቁጥር ይምረጡ!");
-            
+            let selected = document.querySelectorAll('.selected');
+            if (selected.length === 0) return alert("ቁጥር ይምረጡ!");
             document.querySelectorAll('.number').forEach(n => n.classList.remove('drawn'));
-            let count = 0;
-            let hits = 0;
-
+            let count = 0, hits = 0;
             let inv = setInterval(() => {
                 let r = Math.floor(Math.random() * 80) + 1;
-                let numDiv = document.getElementById('n' + r);
-                numDiv.classList.add('drawn');
-                if (numDiv.classList.contains('selected')) hits++;
+                let n = document.querySelectorAll('.number')[r-1];
+                n.classList.add('drawn');
+                if (n.classList.contains('selected')) hits++;
                 count++;
                 if (count >= 20) {
                     clearInterval(inv);
-                    calculateWin(hits);
+                    let win = hits > 2 ? 40 : 0; // ለምሳሌ በ 2 ሲባዛ
+                    if (win > 1500) win = 1500; // ከፍተኛ ማሸነፊያ 1500
+                    if (win > 0) alert("እንኳን ደስ አለዎት! " + win + " ብር አሸንፈዋል። ውዝድራው በመንካት ለቦቱ ይላኩ።");
                 }
-            }, 300);
+            }, 200);
         }
-
-        function calculateWin(hits) {
-            let winAmount = hits > 2 ? currentBet * 2 : 0;
-            if (winAmount > 1500) winAmount = 1500;
-            if (winAmount > 0) {
-                alert("እንኳን ደስ አለዎት! " + winAmount + " ብር አሸንፈዋል! እባክዎ የውዝድራው (Withdraw) በተኑን በመንካት ስክሪንሹት ለቦቱ ይላኩ።");
-                userBalance += winAmount;
-                document.getElementById('balanceDisplay').innerText = userBalance.toFixed(2) + " ETB";
-            }
-        }
-
-        let time = 50;
-        setInterval(() => {
-            time--; if (time < 0) { time = 50; startDraw(); }
-            document.getElementById('timer').innerText = time;
-        }, 1000);
     </script>
 </body>
 </html>
