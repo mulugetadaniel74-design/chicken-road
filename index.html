@@ -1,46 +1,75 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KENO ROYAL - ዳንኤል</title>
+    <style>
+        body { background-color: #121212; color: white; text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+        .header-info { background: #1e1e1e; padding: 10px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #444; font-size: 13px; display: flex; justify-content: space-around; flex-wrap: wrap; }
+        .info-item { color: #f1c40f; font-weight: bold; margin: 5px; }
+        h1 { color: #f1c40f; font-size: 24px; margin: 5px 0; }
+        .balance-box { background: #2c3e50; padding: 10px; border-radius: 8px; margin: 10px auto; width: 85%; border-left: 5px solid #f1c40f; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 400px; margin: 15px auto; background: #222; padding: 8px; border-radius: 10px; }
+        .num { background: #333; padding: 12px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; border: 1px solid #444; }
+        .selected { background: #f1c40f !important; color: black; box-shadow: 0 0 8px #f1c40f; }
+        .withdraw-section { background: #1a1a1a; padding: 15px; border-radius: 10px; margin: 20px auto; width: 85%; border: 1px dashed #555; }
+        input { width: 70%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; font-size: 16px; }
+        .action-btn { width: 90%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 8px auto; display: block; font-size: 16px; text-decoration: none; }
+        .play-btn { background: #27ae60; color: white; }
+        .withdraw-btn { background: #c0392b; color: white; }
+        .deposit-btn { background: #e67e22; color: white; }
+    </style>
+</head>
 <body>
-    <h1>🎰 KENO ROYAL 🎰</h1>
-    <div style="background: #444; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-        💰 ሂሳብዎ: <span id="balance">0.00</span> ብር
+
+    <div class="header-info">
+        <div class="info-item">🎫 ቲኬት: 15+ ብር</div>
+        <div class="info-item">💰 ዲፖዚት: 100+ ብር</div>
+        <div class="info-item">💸 መውጫ: 300 - 1000 ብር</div>
     </div>
-    
-    <p id="msg">እባክዎ እስከ 10 ቁጥሮችን ይምረጡ</p>
-    
+
+    <h1>🎰 KENO ROYAL 🎰</h1>
+
+    <div class="balance-box">
+        💰 የካፒታል መጠን: <span id="balance">0.00</span> ብር
+    </div>
+
     <div class="grid" id="grid"></div>
 
-    <div class="controls">
-        <button class="btn play-btn" onclick="checkGame()">አሁኑኑ ይጫወቱ</button>
-        <button class="btn clear-btn" onclick="location.reload()">ሁሉንም አጥፋ</button>
-    </div>
+    <button class="action-btn play-btn" onclick="alert('እባክዎ መጀመሪያ ዲፖዚት ያድርጉ!')">አሁን ይጫወቱ (Bet)</button>
+    
+    <a href="https://t.me/Godis1256" class="action-btn deposit-btn">💳 ብር ለማስገባት (Deposit)</a>
 
-    <div style="margin-top: 30px;">
-        <a href="tg://resolve?domain=Godis1256" style="display:inline-block; background:#e67e22; color:white; padding:10px; text-decoration:none; border-radius:5px; margin:5px;">💰 ብር አስገባ</a>
-        <a href="tg://resolve?domain=Godis1256" style="display:inline-block; background:#27ae60; color:white; padding:10px; text-decoration:none; border-radius:5px; margin:5px;">💸 ብር አውጣ</a>
+    <div class="withdraw-section">
+        <h3>💸 ብር ለማውጣት (Withdraw)</h3>
+        <p style="font-size: 12px; color: #aaa;">ከ 300 እስከ 1000 ብር ማውጣት ይችላሉ</p>
+        <input type="number" id="withdrawAmount" placeholder="የሚወጣው መጠን...">
+        <button class="action-btn withdraw-btn" onclick="sendWithdraw()">ብር አውጣ</button>
     </div>
 
     <script>
-        let selectedCount = 0;
+        // ቁጥሮቹን መደርደር
         const grid = document.getElementById('grid');
         for (let i = 1; i <= 80; i++) {
             let div = document.createElement('div');
             div.className = 'num';
             div.innerText = i;
-            div.onclick = function() {
-                if(this.classList.contains('selected')) {
-                    this.classList.remove('selected');
-                    selectedCount--;
-                } else if(selectedCount < 10) {
-                    this.classList.add('selected');
-                    selectedCount++;
-                } else {
-                    alert("ከ 10 ቁጥር በላይ መምረጥ አይቻልም!");
-                }
-            };
+            div.onclick = function() { this.classList.toggle('selected'); };
             grid.appendChild(div);
         }
-        function checkGame() {
-            if(selectedCount === 0) alert("እባክዎ መጀመሪያ ቁጥር ይምረጡ!");
-            else alert("ሂሳብዎ በቂ አይደለም። እባክዎ መጀመሪያ ዲፖዚት ያድርጉ!");
+
+        // ብር ለማውጣት ወደ ቴሌግራም የሚልክ ፈንክሽን
+        function sendWithdraw() {
+            const amount = document.getElementById('withdrawAmount').value;
+            if (amount < 300 || amount > 1000) {
+                alert("እባክዎ ከ 300 እስከ 1000 ብር መካከል ያስገቡ!");
+            } else {
+                // መልእክቱን አዘጋጅቶ ወደ አንተ ቴሌግራም ይልካል
+                const message = encodeURIComponent("ሰላም ዳንኤል፣ እኔ ከኬኖ ሮያል " + amount + " ብር ማውጣት እፈልጋለሁ።");
+                window.location.href = "https://t.me/Godis1256?text=" + message;
+            }
         }
     </script>
 </body>
+</html>
