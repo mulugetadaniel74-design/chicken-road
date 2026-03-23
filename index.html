@@ -3,71 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL - ዳንኤል</title>
+    <title>KENO ROYAL - Dynamic Odds</title>
     <style>
         body { background-color: #121212; color: white; text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        .header-info { background: #1e1e1e; padding: 10px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #444; font-size: 13px; display: flex; justify-content: space-around; flex-wrap: wrap; }
-        .info-item { color: #f1c40f; font-weight: bold; margin: 5px; }
-        h1 { color: #f1c40f; font-size: 24px; margin: 5px 0; }
-        .balance-box { background: #2c3e50; padding: 10px; border-radius: 8px; margin: 10px auto; width: 85%; border-left: 5px solid #f1c40f; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 400px; margin: 15px auto; background: #222; padding: 8px; border-radius: 10px; }
+        .header-info { background: #1e1e1e; padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #444; font-size: 13px; display: flex; justify-content: space-around; }
+        .info-item { color: #f1c40f; font-weight: bold; }
+        .timer-box { background: #c0392b; padding: 10px; border-radius: 5px; margin: 10px auto; width: fit-content; font-size: 18px; font-weight: bold; border: 2px solid #fff; }
+        
+        /* የኦድ ማሳያ ሳጥን */
+        .odds-display { background: #2c3e50; padding: 15px; border-radius: 10px; margin: 10px auto; width: 90%; border-left: 5px solid #27ae60; text-align: left; }
+        .odds-display h4 { margin: 0 0 5px 0; color: #27ae60; }
+        .highlight { color: #f1c40f; font-size: 18px; font-weight: bold; }
+
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 400px; margin: 10px auto; background: #222; padding: 8px; border-radius: 10px; }
         .num { background: #333; padding: 12px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; border: 1px solid #444; }
-        .selected { background: #f1c40f !important; color: black; box-shadow: 0 0 8px #f1c40f; }
-        .withdraw-section { background: #1a1a1a; padding: 15px; border-radius: 10px; margin: 20px auto; width: 85%; border: 1px dashed #555; }
-        input { width: 80%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #f1c40f; font-size: 16px; text-align: center; background: #000; color: white; }
+        .selected { background: #3498db !important; color: white; transform: scale(1.1); border: 1px solid #fff; }
+        .winner { background: #27ae60 !important; color: white; animation: blink 0.5s infinite alternate; }
+        
         .action-btn { width: 90%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 16px; text-decoration: none; }
-        .play-btn { background: #27ae60; color: white; }
-        .deposit-btn { background: #e67e22 !important; color: white !important; }
-        .withdraw-btn { background: #c0392b; color: white; }
+        .deposit-btn { background: #e67e22; color: white; }
     </style>
 </head>
 <body>
 
     <div class="header-info">
-        <div class="info-item">🎫 ቲኬት: 15+ ብር</div>
+        <div class="info-item">🎫 ቲኬት: 15 ብር</div>
         <div class="info-item">💰 ዲፖዚት: 100+ ብር</div>
-        <div class="info-item">💸 መውጫ: 300 - 1000 ብር</div>
     </div>
 
-    <h1>🎰 KENO ROYAL 🎰</h1>
+    <div class="timer-box">ቀጣይ Draw በ: <span id="timer">60</span> ሰከንድ</div>
 
-    <div class="balance-box">
-        💰 የካፒታል መጠን: <span id="balance">0.00</span> ብር
+    <div class="odds-display">
+        <h4>የተመረጠ: <span id="count-display" class="highlight">0</span> ቁጥር</h4>
+        <div>ኦድ (Odd): <span id="odd-display" class="highlight">0.00</span></div>
+        <div>ሊያሸንፉ የሚችሉት: <span id="win-display" class="highlight">0.00</span> ብር</div>
     </div>
 
     <div class="grid" id="grid"></div>
 
-    <button class="action-btn play-btn" onclick="alert('እባክዎ መጀመሪያ ዲፖዚት ያድርጉ!')">አሁን ይጫወቱ (Bet)</button>
-    
-    <a href="https://t.me/Godis1256" target="_blank" class="action-btn deposit-btn">💳 ብር ለማስገባት (Deposit)</a>
-
-    <div class="withdraw-section">
-        <h3>💸 ብር ለማውጣት (Withdraw)</h3>
-        <p style="font-size: 12px; color: #aaa;">ከ 300 እስከ 1000 ብር ማውጣት ይችላሉ</p>
-        <input type="number" id="withdrawAmount" placeholder="የሚወጣው መጠን...">
-        <button class="action-btn withdraw-btn" onclick="sendWithdraw()">ብር አውጣ</button>
-    </div>
+    <a href="https://t.me/Godis1256" class="action-btn deposit-btn">💳 ብር ለማስገባት (Deposit)</a>
 
     <script>
-        // ቁጥሮቹን መደርደር
         const grid = document.getElementById('grid');
+        const timerDisplay = document.getElementById('timer');
+        const countDisplay = document.getElementById('count-display');
+        const oddDisplay = document.getElementById('odd-display');
+        const winDisplay = document.getElementById('win-display');
+        
+        let timeLeft = 60;
+        let selectedCount = 0;
+        const ticketPrice = 15;
+
+        // የኦድ ሰንጠረዥ (1-5 ቁጥሮች)
+        const oddsTable = {
+            0: 0,
+            1: 3.0,   // 1 ቁጥር ሲመረጥ 15 x 3 = 45 ብር
+            2: 10.0,  // 2 ቁጥር ሲመረጥ 15 x 10 = 150 ብር
+            3: 25.0,  // 3 ቁጥር ሲመረጥ 15 x 25 = 375 ብር
+            4: 50.0,  // 4 ቁጥር ሲመረጥ 15 x 50 = 750 ብር
+            5: 100.0  // 5 ቁጥር ሲመረጥ 15 x 100 = 1500 ብር
+        };
+
         for (let i = 1; i <= 80; i++) {
             let div = document.createElement('div');
             div.className = 'num';
+            div.id = 'n' + i;
             div.innerText = i;
-            div.onclick = function() { this.classList.toggle('selected'); };
+            div.onclick = function() {
+                if (!this.classList.contains('selected')) {
+                    if (selectedCount < 5) {
+                        this.classList.add('selected');
+                        selectedCount++;
+                    } else {
+                        alert("በአንድ ጫወታ መቁረጥ የሚቻለው 5 ቁጥሮችን ብቻ ነው!");
+                    }
+                } else {
+                    this.classList.remove('selected');
+                    selectedCount--;
+                }
+                updateOdds();
+            };
             grid.appendChild(div);
         }
 
-        // የብር ማውጫ ሲስተም
-        function sendWithdraw() {
-            const amount = document.getElementById('withdrawAmount').value;
-            if (amount === "" || amount < 300 || amount > 1000) {
-                alert("እባክዎ ከ 300 እስከ 1000 ብር መካከል ያስገቡ!");
-            } else {
-                const message = encodeURIComponent("ሰላም ዳንኤል፣ እኔ ከኬኖ ሮያል " + amount + " ብር ማውጣት እፈልጋለሁ።");
-                window.open("https://t.me/Godis1256?text=" + message, "_blank");
+        function updateOdds() {
+            const currentOdd = oddsTable[selectedCount];
+            countDisplay.innerText = selectedCount;
+            oddDisplay.innerText = currentOdd.toFixed(2);
+            winDisplay.innerText = (currentOdd * ticketPrice).toFixed(2);
+        }
+
+        setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                drawNumbers();
+                timeLeft = 60;
             }
+        }, 1000);
+
+        function drawNumbers() {
+            document.querySelectorAll('.num').forEach(n => n.classList.remove('winner'));
+            let winners = [];
+            while (winners.length < 20) {
+                let r = Math.floor(Math.random() * 80) + 1;
+                if (winners.indexOf(r) === -1) winners.push(r);
+            }
+            winners.forEach((num, index) => {
+                setTimeout(() => {
+                    document.getElementById('n' + num).classList.add('winner');
+                }, index * 100);
+            });
         }
     </script>
 </body>
