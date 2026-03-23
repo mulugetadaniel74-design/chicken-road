@@ -14,11 +14,11 @@
         .num { background: #333; padding: 12px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; border: 1px solid #444; }
         .selected { background: #f1c40f !important; color: black; box-shadow: 0 0 8px #f1c40f; }
         .withdraw-section { background: #1a1a1a; padding: 15px; border-radius: 10px; margin: 20px auto; width: 85%; border: 1px dashed #555; }
-        input { width: 70%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; font-size: 16px; text-align: center; }
-        .action-btn { width: 90%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 8px auto; display: block; font-size: 16px; text-decoration: none; }
+        input { width: 80%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #f1c40f; font-size: 16px; text-align: center; background: #000; color: white; }
+        .action-btn { width: 90%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 16px; text-decoration: none; }
         .play-btn { background: #27ae60; color: white; }
+        .deposit-btn { background: #e67e22 !important; color: white !important; }
         .withdraw-btn { background: #c0392b; color: white; }
-        .deposit-btn { background: #e67e22; color: white; }
     </style>
 </head>
 <body>
@@ -39,7 +39,7 @@
 
     <button class="action-btn play-btn" onclick="alert('እባክዎ መጀመሪያ ዲፖዚት ያድርጉ!')">አሁን ይጫወቱ (Bet)</button>
     
-    <a href="https://t.me/Godis1256" class="action-btn deposit-btn">💳 ብር ለማስገባት (Deposit)</a>
+    <a href="https://t.me/Godis1256" target="_blank" class="action-btn deposit-btn">💳 ብር ለማስገባት (Deposit)</a>
 
     <div class="withdraw-section">
         <h3>💸 ብር ለማውጣት (Withdraw)</h3>
@@ -49,6 +49,7 @@
     </div>
 
     <script>
+        // ቁጥሮቹን መደርደር
         const grid = document.getElementById('grid');
         for (let i = 1; i <= 80; i++) {
             let div = document.createElement('div');
@@ -58,13 +59,14 @@
             grid.appendChild(div);
         }
 
+        // የብር ማውጫ ሲስተም
         function sendWithdraw() {
             const amount = document.getElementById('withdrawAmount').value;
-            if (amount < 300 || amount > 1000) {
+            if (amount === "" || amount < 300 || amount > 1000) {
                 alert("እባክዎ ከ 300 እስከ 1000 ብር መካከል ያስገቡ!");
             } else {
                 const message = encodeURIComponent("ሰላም ዳንኤል፣ እኔ ከኬኖ ሮያል " + amount + " ብር ማውጣት እፈልጋለሁ።");
-                window.location.href = "https://t.me/Godis1256?text=" + message;
+                window.open("https://t.me/Godis1256?text=" + message, "_blank");
             }
         }
     </script>
