@@ -14,7 +14,7 @@
         .num { background: #333; padding: 12px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; border: 1px solid #444; }
         .selected { background: #f1c40f !important; color: black; box-shadow: 0 0 8px #f1c40f; }
         .withdraw-section { background: #1a1a1a; padding: 15px; border-radius: 10px; margin: 20px auto; width: 85%; border: 1px dashed #555; }
-        input { width: 70%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; font-size: 16px; }
+        input { width: 70%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; font-size: 16px; text-align: center; }
         .action-btn { width: 90%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 8px auto; display: block; font-size: 16px; text-decoration: none; }
         .play-btn { background: #27ae60; color: white; }
         .withdraw-btn { background: #c0392b; color: white; }
@@ -49,7 +49,6 @@
     </div>
 
     <script>
-        // ቁጥሮቹን መደርደር
         const grid = document.getElementById('grid');
         for (let i = 1; i <= 80; i++) {
             let div = document.createElement('div');
@@ -59,13 +58,11 @@
             grid.appendChild(div);
         }
 
-        // ብር ለማውጣት ወደ ቴሌግራም የሚልክ ፈንክሽን
         function sendWithdraw() {
             const amount = document.getElementById('withdrawAmount').value;
             if (amount < 300 || amount > 1000) {
                 alert("እባክዎ ከ 300 እስከ 1000 ብር መካከል ያስገቡ!");
             } else {
-                // መልእክቱን አዘጋጅቶ ወደ አንተ ቴሌግራም ይልካል
                 const message = encodeURIComponent("ሰላም ዳንኤል፣ እኔ ከኬኖ ሮያል " + amount + " ብር ማውጣት እፈልጋለሁ።");
                 window.location.href = "https://t.me/Godis1256?text=" + message;
             }
