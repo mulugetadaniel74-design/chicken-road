@@ -3,94 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL - Dynamic Odds</title>
+    <title>KENO ROYAL - PRO EDITION</title>
     <style>
-        body { background-color: #121212; color: white; text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        .header-info { background: #1e1e1e; padding: 10px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #444; font-size: 13px; display: flex; justify-content: space-around; }
-        .info-item { color: #f1c40f; font-weight: bold; }
-        .timer-box { background: #c0392b; padding: 10px; border-radius: 5px; margin: 10px auto; width: fit-content; font-size: 18px; font-weight: bold; border: 2px solid #fff; }
+        :root { --gold: #f1c40f; --dark: #121212; --card: #1e1e1e; }
+        body { background-color: var(--dark); color: white; text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
         
-        /* የኦድ ማሳያ ሳጥን */
-        .odds-display { background: #2c3e50; padding: 15px; border-radius: 10px; margin: 10px auto; width: 90%; border-left: 5px solid #27ae60; text-align: left; }
-        .odds-display h4 { margin: 0 0 5px 0; color: #27ae60; }
-        .highlight { color: #f1c40f; font-size: 18px; font-weight: bold; }
+        .header-section { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 10px; }
+        .timer-badge { background: #c0392b; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 20px; display: inline-block; box-shadow: 0 0 10px rgba(192,57,43,0.5); }
+        
+        .bet-control { background: #2c3e50; padding: 15px; border-radius: 12px; margin: 10px auto; width: 90%; display: flex; justify-content: space-between; align-items: center; }
+        input[type="number"] { width: 80px; padding: 8px; border-radius: 5px; border: none; font-size: 16px; font-weight: bold; text-align: center; }
 
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 400px; margin: 10px auto; background: #222; padding: 8px; border-radius: 10px; }
-        .num { background: #333; padding: 12px 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; border: 1px solid #444; }
-        .selected { background: #3498db !important; color: white; transform: scale(1.1); border: 1px solid #fff; }
-        .winner { background: #27ae60 !important; color: white; animation: blink 0.5s infinite alternate; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin: 10px auto; width: 95%; }
+        .stat-box { background: var(--card); padding: 10px; border-radius: 10px; border: 1px solid #444; text-align: left; }
+        .highlight { color: var(--gold); font-size: 18px; font-weight: bold; }
+
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 10px auto; background: #000; padding: 8px; border-radius: 12px; border: 2px solid #333; }
+        .num { background: #333; padding: 14px 0; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; border: 1px solid #444; transition: 0.2s; position: relative; }
+        .selected { background: #3498db !important; color: white; transform: scale(1.05); box-shadow: 0 0 10px #3498db; }
+        .winner { background: var(--gold) !important; color: black !important; animation: pop 0.4s ease-out; box-shadow: 0 0 15px var(--gold); z-index: 2; }
         
-        .action-btn { width: 90%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 16px; text-decoration: none; }
-        .deposit-btn { background: #e67e22; color: white; }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+        .history-section { background: var(--card); margin-top: 15px; padding: 10px; border-radius: 10px; text-align: left; }
+        .history-list { font-size: 12px; color: #aaa; overflow-x: auto; white-space: nowrap; padding: 5px; }
+
+        .action-btn { width: 95%; padding: 16px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 18px; text-transform: uppercase; }
+        .deposit-btn { background: linear-gradient(to right, #e67e22, #d35400); color: white; text-decoration: none; }
     </style>
 </head>
 <body>
 
-    <div class="header-info">
-        <div class="info-item">🎫 ቲኬት: 15 ብር</div>
-        <div class="info-item">💰 ዲፖዚት: 100+ ብር</div>
+    <div class="header-section">
+        <h2 style="margin:0; color:var(--gold);">🎰 KENO ROYAL PRO 🎰</h2>
+        <div class="timer-badge">ቀጣይ Draw: <span id="timer">60</span>s</div>
     </div>
 
-    <div class="timer-box">ቀጣይ Draw በ: <span id="timer">60</span> ሰከንድ</div>
+    <div class="bet-control">
+        <span>መቆራጫ መጠን (ብር):</span>
+        <input type="number" id="betAmount" value="15" min="15" oninput="updateStats()">
+    </div>
 
-    <div class="odds-display">
-        <h4>የተመረጠ: <span id="count-display" class="highlight">0</span> ቁጥር</h4>
-        <div>ኦድ (Odd): <span id="odd-display" class="highlight">0.00</span></div>
-        <div>ሊያሸንፉ የሚችሉት: <span id="win-display" class="highlight">0.00</span> ብር</div>
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div>የተመረጠ: <span id="count-display" class="highlight">0</span></div>
+            <div>ኦድ (Odd): <span id="odd-display" class="highlight">0.00</span></div>
+        </div>
+        <div class="stat-box">
+            <div style="font-size: 12px;">ሊያሸንፉ የሚችሉት:</div>
+            <div id="win-display" class="highlight" style="font-size: 24px;">0.00</div>
+        </div>
     </div>
 
     <div class="grid" id="grid"></div>
 
-    <a href="https://t.me/Godis1256" class="action-btn deposit-btn">💳 ብር ለማስገባት (Deposit)</a>
+    <a href="https://t.me/Godis1256" class="action-btn deposit-btn">💳 ብር አስገባ / Deposit</a>
+
+    <div class="history-section">
+        <strong style="font-size: 14px; margin-left: 10px;">የመጨረሻ ዙሮች ውጤት:</strong>
+        <div id="history" class="history-list">ገና ጨዋታ አልተጀመረም...</div>
+    </div>
+
+    <audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+    <audio id="drawSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
 
     <script>
         const grid = document.getElementById('grid');
         const timerDisplay = document.getElementById('timer');
-        const countDisplay = document.getElementById('count-display');
-        const oddDisplay = document.getElementById('odd-display');
-        const winDisplay = document.getElementById('win-display');
+        const historyDisplay = document.getElementById('history');
+        const clickSound = document.getElementById('clickSound');
+        const drawSound = document.getElementById('drawSound');
         
         let timeLeft = 60;
-        let selectedCount = 0;
-        const ticketPrice = 15;
+        let selectedNumbers = [];
+        const oddsTable = { 0:0, 1:3.0, 2:10.0, 3:25.0, 4:50.0, 5:100.0 };
 
-        // የኦድ ሰንጠረዥ (1-5 ቁጥሮች)
-        const oddsTable = {
-            0: 0,
-            1: 3.0,   // 1 ቁጥር ሲመረጥ 15 x 3 = 45 ብር
-            2: 10.0,  // 2 ቁጥር ሲመረጥ 15 x 10 = 150 ብር
-            3: 25.0,  // 3 ቁጥር ሲመረጥ 15 x 25 = 375 ብር
-            4: 50.0,  // 4 ቁጥር ሲመረጥ 15 x 50 = 750 ብር
-            5: 100.0  // 5 ቁጥር ሲመረጥ 15 x 100 = 1500 ብር
-        };
-
+        // Grid መፍጠር
         for (let i = 1; i <= 80; i++) {
             let div = document.createElement('div');
             div.className = 'num';
             div.id = 'n' + i;
             div.innerText = i;
             div.onclick = function() {
-                if (!this.classList.contains('selected')) {
-                    if (selectedCount < 5) {
-                        this.classList.add('selected');
-                        selectedCount++;
-                    } else {
-                        alert("በአንድ ጫወታ መቁረጥ የሚቻለው 5 ቁጥሮችን ብቻ ነው!");
-                    }
-                } else {
+                clickSound.play();
+                if (this.classList.contains('selected')) {
                     this.classList.remove('selected');
-                    selectedCount--;
+                    selectedNumbers = selectedNumbers.filter(n => n !== i);
+                } else if (selectedNumbers.length < 5) {
+                    this.classList.add('selected');
+                    selectedNumbers.push(i);
+                } else {
+                    alert("ቢበዛ 5 ቁጥር ብቻ መምረጥ ይቻላል!");
                 }
-                updateOdds();
+                updateStats();
             };
             grid.appendChild(div);
         }
 
-        function updateOdds() {
-            const currentOdd = oddsTable[selectedCount];
-            countDisplay.innerText = selectedCount;
-            oddDisplay.innerText = currentOdd.toFixed(2);
-            winDisplay.innerText = (currentOdd * ticketPrice).toFixed(2);
+        function updateStats() {
+            const bet = document.getElementById('betAmount').value;
+            const count = selectedNumbers.length;
+            const odd = oddsTable[count];
+            document.getElementById('count-display').innerText = count;
+            document.getElementById('odd-display').innerText = odd.toFixed(2);
+            document.getElementById('win-display').innerText = (odd * bet).toFixed(2) + " ብር";
         }
 
         setInterval(() => {
@@ -103,17 +119,27 @@
         }, 1000);
 
         function drawNumbers() {
+            drawSound.play();
             document.querySelectorAll('.num').forEach(n => n.classList.remove('winner'));
             let winners = [];
             while (winners.length < 20) {
                 let r = Math.floor(Math.random() * 80) + 1;
-                if (winners.indexOf(r) === -1) winners.push(r);
+                if (!winners.includes(r)) winners.push(r);
             }
+
             winners.forEach((num, index) => {
                 setTimeout(() => {
                     document.getElementById('n' + num).classList.add('winner');
-                }, index * 100);
+                    if (index === 19) addToHistory(winners);
+                }, index * 150);
             });
+        }
+
+        function addToHistory(nums) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const item = `<div>[${time}] የወጡ: ${nums.slice(0, 5).join(', ')}...</div>`;
+            if (historyDisplay.innerText.includes("ገና")) historyDisplay.innerHTML = "";
+            historyDisplay.innerHTML = item + historyDisplay.innerHTML;
         }
     </script>
 </body>
