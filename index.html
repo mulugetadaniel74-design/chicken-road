@@ -3,143 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL - PRO EDITION</title>
+    <title>KENO ROYAL PRO</title>
     <style>
-        :root { --gold: #f1c40f; --dark: #121212; --card: #1e1e1e; }
-        body { background-color: var(--dark); color: white; text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        
-        .header-section { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 10px; }
-        .timer-badge { background: #c0392b; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 20px; display: inline-block; box-shadow: 0 0 10px rgba(192,57,43,0.5); }
-        
-        .bet-control { background: #2c3e50; padding: 15px; border-radius: 12px; margin: 10px auto; width: 90%; display: flex; justify-content: space-between; align-items: center; }
-        input[type="number"] { width: 80px; padding: 8px; border-radius: 5px; border: none; font-size: 16px; font-weight: bold; text-align: center; }
-
-        .stats-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin: 10px auto; width: 95%; }
-        .stat-box { background: var(--card); padding: 10px; border-radius: 10px; border: 1px solid #444; text-align: left; }
-        .highlight { color: var(--gold); font-size: 18px; font-weight: bold; }
-
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 10px auto; background: #000; padding: 8px; border-radius: 12px; border: 2px solid #333; }
-        .num { background: #333; padding: 14px 0; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; border: 1px solid #444; transition: 0.2s; position: relative; }
-        .selected { background: #3498db !important; color: white; transform: scale(1.05); box-shadow: 0 0 10px #3498db; }
-        .winner { background: var(--gold) !important; color: black !important; animation: pop 0.4s ease-out; box-shadow: 0 0 15px var(--gold); z-index: 2; }
-        
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-
-        .history-section { background: var(--card); margin-top: 15px; padding: 10px; border-radius: 10px; text-align: left; }
-        .history-list { font-size: 12px; color: #aaa; overflow-x: auto; white-space: nowrap; padding: 5px; }
-
-        .action-btn { width: 95%; padding: 16px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 18px; text-transform: uppercase; }
-        .deposit-btn { background: linear-gradient(to right, #e67e22, #d35400); color: white; text-decoration: none; }
+        body { background-color: #121212; color: white; text-align: center; font-family: sans-serif; margin: 0; padding: 10px; }
+        .header { background: #1e1e1e; padding: 10px; border-radius: 10px; border-bottom: 3px solid #f1c40f; margin-bottom: 10px; }
+        .timer { background: #c0392b; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 20px; display: inline-block; margin: 10px; }
+        .bet-box { background: #2c3e50; padding: 10px; border-radius: 10px; margin: 10px auto; width: 90%; }
+        input { width: 60px; padding: 5px; text-align: center; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; max-width: 400px; margin: 10px auto; background: #000; padding: 5px; border-radius: 10px; }
+        .num { background: #333; padding: 12px 0; border-radius: 4px; cursor: pointer; font-size: 13px; border: 1px solid #444; }
+        .selected { background: #3498db !important; border: 1px solid white; }
+        .winner { background: #f1c40f !important; color: black !important; font-weight: bold; transform: scale(1.1); box-shadow: 0 0 10px #f1c40f; }
+        .history { background: #1a1a1a; padding: 10px; margin-top: 15px; border-radius: 10px; text-align: left; font-size: 12px; height: 100px; overflow-y: auto; }
+        .btn { width: 95%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; display: block; margin: 10px auto; text-decoration: none; }
+        .dep-btn { background: #e67e22; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="header-section">
-        <h2 style="margin:0; color:var(--gold);">🎰 KENO ROYAL PRO 🎰</h2>
-        <div class="timer-badge">ቀጣይ Draw: <span id="timer">60</span>s</div>
+    <div class="header">
+        <h2 style="margin:0; color:#f1c40f;">🎰 KENO ROYAL PRO</h2>
+        <div class="timer">ቀጣይ: <span id="timer">60</span>s</div>
     </div>
 
-    <div class="bet-control">
-        <span>መቆራጫ መጠን (ብር):</span>
-        <input type="number" id="betAmount" value="15" min="15" oninput="updateStats()">
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-box">
-            <div>የተመረጠ: <span id="count-display" class="highlight">0</span></div>
-            <div>ኦድ (Odd): <span id="odd-display" class="highlight">0.00</span></div>
-        </div>
-        <div class="stat-box">
-            <div style="font-size: 12px;">ሊያሸንፉ የሚችሉት:</div>
-            <div id="win-display" class="highlight" style="font-size: 24px;">0.00</div>
-        </div>
+    <div class="bet-box">
+        መቆራጫ: <input type="number" id="bet" value="15" oninput="update()"> ብር | 
+        ኦድ: <span id="odd" style="color:#f1c40f">0.0</span> | 
+        ያሸንፋሉ: <span id="win" style="color:#27ae60">0</span>
     </div>
 
     <div class="grid" id="grid"></div>
 
-    <a href="https://t.me/Godis1256" class="action-btn deposit-btn">💳 ብር አስገባ / Deposit</a>
+    <a href="https://t.me/Godis1256" class="btn dep-btn">💳 ብር አስገባ (Deposit)</a>
 
-    <div class="history-section">
-        <strong style="font-size: 14px; margin-left: 10px;">የመጨረሻ ዙሮች ውጤት:</strong>
-        <div id="history" class="history-list">ገና ጨዋታ አልተጀመረም...</div>
+    <div class="history">
+        <strong>የመጨረሻ ዙሮች፡</strong>
+        <div id="logs">ገና አልተጀመረም...</div>
     </div>
 
-    <audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
-    <audio id="drawSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
-
     <script>
+        let selected = [];
+        const odds = {0:0, 1:3, 2:10, 3:25, 4:50, 5:100};
         const grid = document.getElementById('grid');
-        const timerDisplay = document.getElementById('timer');
-        const historyDisplay = document.getElementById('history');
-        const clickSound = document.getElementById('clickSound');
-        const drawSound = document.getElementById('drawSound');
-        
-        let timeLeft = 60;
-        let selectedNumbers = [];
-        const oddsTable = { 0:0, 1:3.0, 2:10.0, 3:25.0, 4:50.0, 5:100.0 };
 
-        // Grid መፍጠር
-        for (let i = 1; i <= 80; i++) {
-            let div = document.createElement('div');
-            div.className = 'num';
-            div.id = 'n' + i;
-            div.innerText = i;
-            div.onclick = function() {
-                clickSound.play();
-                if (this.classList.contains('selected')) {
+        // ቁጥሮችን መፍጠር
+        for(let i=1; i<=80; i++) {
+            let d = document.createElement('div');
+            d.className = 'num'; d.id = 'n'+i; d.innerText = i;
+            d.onclick = function() {
+                if(this.classList.contains('selected')) {
                     this.classList.remove('selected');
-                    selectedNumbers = selectedNumbers.filter(n => n !== i);
-                } else if (selectedNumbers.length < 5) {
+                    selected = selected.filter(n => n !== i);
+                } else if(selected.length < 5) {
                     this.classList.add('selected');
-                    selectedNumbers.push(i);
-                } else {
-                    alert("ቢበዛ 5 ቁጥር ብቻ መምረጥ ይቻላል!");
-                }
-                updateStats();
+                    selected.push(i);
+                } else { alert("ቢበዛ 5 ቁጥር!"); }
+                update();
             };
-            grid.appendChild(div);
+            grid.appendChild(d);
         }
 
-        function updateStats() {
-            const bet = document.getElementById('betAmount').value;
-            const count = selectedNumbers.length;
-            const odd = oddsTable[count];
-            document.getElementById('count-display').innerText = count;
-            document.getElementById('odd-display').innerText = odd.toFixed(2);
-            document.getElementById('win-display').innerText = (odd * bet).toFixed(2) + " ብር";
+        function update() {
+            let b = document.getElementById('bet').value;
+            let o = odds[selected.length];
+            document.getElementById('odd').innerText = o.toFixed(1);
+            document.getElementById('win').innerText = (o * b).toFixed(0);
         }
 
+        let time = 60;
         setInterval(() => {
-            timeLeft--;
-            timerDisplay.innerText = timeLeft;
-            if (timeLeft <= 0) {
-                drawNumbers();
-                timeLeft = 60;
-            }
+            time--;
+            document.getElementById('timer').innerText = time;
+            if(time <= 0) { draw(); time = 60; }
         }, 1000);
 
-        function drawNumbers() {
-            drawSound.play();
+        function draw() {
             document.querySelectorAll('.num').forEach(n => n.classList.remove('winner'));
             let winners = [];
-            while (winners.length < 20) {
-                let r = Math.floor(Math.random() * 80) + 1;
-                if (!winners.includes(r)) winners.push(r);
+            while(winners.length < 20) {
+                let r = Math.floor(Math.random()*80)+1;
+                if(!winners.includes(r)) winners.push(r);
             }
-
-            winners.forEach((num, index) => {
-                setTimeout(() => {
-                    document.getElementById('n' + num).classList.add('winner');
-                    if (index === 19) addToHistory(winners);
-                }, index * 150);
+            winners.forEach((n, i) => {
+                setTimeout(() => { document.getElementById('n'+n).classList.add('winner'); }, i * 100);
             });
-        }
-
-        function addToHistory(nums) {
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const item = `<div>[${time}] የወጡ: ${nums.slice(0, 5).join(', ')}...</div>`;
-            if (historyDisplay.innerText.includes("ገና")) historyDisplay.innerHTML = "";
-            historyDisplay.innerHTML = item + historyDisplay.innerHTML;
+            let log = `<div>[${new Date().toLocaleTimeString()}] የወጡ፡ ${winners.slice(0,5).join(',')}...</div>`;
+            document.getElementById('logs').innerHTML = log + document.getElementById('logs').innerHTML;
         }
     </script>
 </body>
