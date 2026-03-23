@@ -1,172 +1,24 @@
-<!DOCTYPE html>
-<html lang="am">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL - VERIFIED DEPOSIT</title>
-    <style>
-        :root { --gold: #f1c40f; --dark: #121212; --card: #1e1e1e; --green: #27ae60; --white: #ffffff; }
-        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+function requestDeposit() {
+    // መልእክቱ በግልጽ እንዲቀመጥ
+    let msg = "ሰላም ዳንኤል፣ በቴሌብር (telebirr) ብር ማስገባት እፈልጋለሁ። አሁን የላኩበትን Screenshot እልክልሃለሁ።";
+    
+    // የቴሌግራም ሊንክ አጻጻፍ ለውጥ
+    let telegramUrl = "https://t.me/Godis1256?text=" + encodeURIComponent(msg);
+    
+    // በተኑን ሲነካው በቀጥታ እንዲከፍት
+    window.location.href = telegramUrl; 
+}
+
+function requestWithdraw() {
+    let amt = document.getElementById('withAmount').value;
+    if(amt < 300 || amt > 1000) {
+        alert("እባክዎ ከ 300 እስከ 1000 ብር መካከል ያስገቡ!");
+    } else {
+        let msg = "ሰላም ዳንኤል፣ እኔ ከኬኖ ሮያል " + amt + " ብር ማውጣት እፈልጋለሁ።";
+        let telegramUrl = "https://t.me/Godis1256?text=" + encodeURIComponent(msg);
         
-        .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 15px; }
-        .balance-display { font-size: 24px; font-weight: bold; color: var(--gold); margin: 10px 0; border: 2px solid var(--gold); display: inline-block; padding: 8px 25px; border-radius: 50px; background: rgba(241,196,15,0.1); }
-        .timer-box { background: #c0392b; color: white; padding: 5px 15px; border-radius: 5px; font-weight: bold; font-size: 18px; margin: 10px; display: inline-block; }
-
-        .bet-input-box { background: var(--card); padding: 15px; border-radius: 10px; margin: 10px auto; width: 90%; border: 1px solid #444; }
-        input[type="number"] { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 10px; width: 100px; text-align: center; font-size: 18px; border-radius: 5px; font-weight: bold; }
-
-        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 95%; margin: 10px auto; }
-        .stat { background: var(--card); border: 1px solid #444; padding: 10px; border-radius: 8px; text-align: left; }
-        .stat-val { color: var(--gold); font-size: 18px; font-weight: bold; }
-
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 15px auto; padding: 10px; background: #000; border-radius: 12px; }
-        .num { background: #333; border: 1px solid #444; padding: 14px 0; cursor: pointer; font-weight: bold; transition: 0.2s; color: #ccc; border-radius: 5px; }
-        .selected { background: #3498db !important; color: white !important; border: 1px solid white; }
-        .winner { background: var(--gold) !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 15px var(--gold); animation: pop 0.5s ease-out; }
+        // በቀጥታ ወደ ቴሌግራም እንዲወስደው
+        window.location.href = telegramUrl;
+    }
+}
         
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-
-        .action-btn { width: 95%; padding: 16px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 18px; text-decoration: none; transition: 0.3s; text-transform: uppercase; }
-        .dep-btn { background: linear-gradient(to right, #2ecc71, #27ae60); color: white; box-shadow: 0 4px 10px rgba(46,204,113,0.3); }
-        .with-btn { background: #c0392b; color: white; border: 1px solid white; }
-
-        .withdraw-section { background: var(--card); border: 2px dashed #444; padding: 20px; margin: 25px auto; width: 90%; border-radius: 15px; }
-        
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
-        .result-card { background: var(--card); padding: 40px; border-radius: 20px; border: 2px solid var(--gold); text-align: center; }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <h2 style="margin:0; color:var(--gold);">🎰 KENO ROYAL 🎰</h2>
-        <div class="balance-display">💰 <span id="balance">0.00</span></div>
-        <br>
-        <div class="timer-box">DRAW: <span id="timer">60</span>s</div>
-    </div>
-
-    <div style="margin-bottom: 20px;">
-        <p style="font-size:13px; color:#aaa;">በቴሌብር (telebirr) ብር ካስገቡ በኋላ Screenshot ይላኩ!</p>
-        <button onclick="requestDeposit()" class="action-btn dep-btn">📲 ብር አስገባ (DEPOSIT)</button>
-    </div>
-
-    <div class="bet-input-box">
-        መቆራጫ (ሚኒመም 15): <input type="number" id="betAmount" value="15" min="15" oninput="updateStats()">
-    </div>
-
-    <div class="stats">
-        <div class="stat">የተመረጠ: <span id="count" class="stat-val">0</span> / 5</div>
-        <div class="stat">ሊያሸንፉ የሚችሉት: <br> <span id="potentialWin" class="stat-val" style="font-size:22px; color:var(--green);">0.00</span></div>
-    </div>
-
-    <div class="grid" id="grid"></div>
-
-    <div class="withdraw-section">
-        <h3>💸 ብር አውጣ (WITHDRAW)</h3>
-        <p style="font-size:14px; color:#aaa;">ከ 300 - 1000 ብር ብቻ</p>
-        <input type="number" id="withAmount" placeholder="መጠን..." style="width:180px; margin-bottom:15px;">
-        <button class="action-btn with-btn" onclick="requestWithdraw()">ብር አውጣ</button>
-    </div>
-
-    <div id="overlay" class="overlay">
-        <div class="result-card">
-            <h1 id="resTitle">አሸነፉ!</h1>
-            <div id="resAmt" style="font-size:32px; font-weight:bold; color:white; margin:20px 0;">+150.00 ብር</div>
-            <button onclick="document.getElementById('overlay').style.display='none'" style="background:var(--gold); padding:10px 30px; border-radius:10px; font-weight:bold; cursor:pointer;">እሺ</button>
-        </div>
-    </div>
-
-    <script>
-        let currentBalance = 0.00;
-        let selected = [];
-        const odds = {0:0, 1:3, 2:10, 3:25, 4:50, 5:100};
-        const grid = document.getElementById('grid');
-
-        // Initialize Grid
-        for(let i=1; i<=80; i++) {
-            let d = document.createElement('div');
-            d.className = 'num'; d.id = 'n'+i; d.innerText = i;
-            d.onclick = function() {
-                if(this.classList.contains('selected')) {
-                    this.classList.remove('selected');
-                    selected = selected.filter(n => n !== i);
-                } else if(selected.length < 5) {
-                    this.classList.add('selected');
-                    selected.push(i);
-                }
-                updateStats();
-            };
-            grid.appendChild(d);
-        }
-
-        function updateStats() {
-            let b = parseFloat(document.getElementById('betAmount').value) || 0;
-            let o = odds[selected.length];
-            document.getElementById('count').innerText = selected.length;
-            document.getElementById('potentialWin').innerText = (o * b).toFixed(2);
-        }
-
-        function requestDeposit() {
-            let msg = encodeURIComponent("ሰላም ዳንኤል፣ በቴሌብር (telebirr) ብር ማስገባት እፈልጋለሁ። አሁን የላኩበትን Screenshot እልክልሃለሁ።");
-            window.open("https://t.me/Godis1256?text=" + msg, "_blank");
-            alert("ወደ ዳንኤል ቴሌግራም እየሄዱ ነው። እባክዎ የከፈሉበትን Screenshot እዚያ ይላኩ!");
-        }
-
-        function requestWithdraw() {
-            let amt = document.getElementById('withAmount').value;
-            if(amt < 300 || amt > 1000) {
-                alert("እባክዎ ከ 300 እስከ 1000 ብር መካከል ያስገቡ!");
-            } else {
-                let msg = encodeURIComponent("ሰላም ዳንኤል፣ እኔ ከኬኖ ሮያል " + amt + " ብር ማውጣት እፈልጋለሁ።");
-                window.open("https://t.me/Godis1256?text=" + msg, "_blank");
-                alert("የማውጣት ጥያቄዎ ተልኳል!");
-            }
-        }
-
-        let time = 60;
-        setInterval(() => {
-            time--;
-            document.getElementById('timer').innerText = time;
-            if(time <= 0) { draw(); time = 60; }
-        }, 1000);
-
-        function draw() {
-            let bet = parseFloat(document.getElementById('betAmount').value);
-            if(selected.length > 0) {
-                 if(currentBalance < bet) { 
-                     alert("በቂ ካፒታል የለዎትም! እባክዎ መጀመሪያ በቴሌብር ብር ያስገቡ።"); 
-                     return; 
-                 }
-                 currentBalance -= bet;
-                 document.getElementById('balance').innerText = currentBalance.toFixed(2);
-            }
-
-            document.querySelectorAll('.num').forEach(n => n.classList.remove('winner'));
-            let winners = [];
-            while(winners.length < 20) {
-                let r = Math.floor(Math.random()*80)+1;
-                if(!winners.includes(r)) winners.push(r);
-            }
-
-            winners.forEach((n, i) => {
-                setTimeout(() => { 
-                    document.getElementById('n'+n).classList.add('winner'); 
-                    if(i === 19) checkResult(winners, bet);
-                }, i * 150);
-            });
-        }
-
-        function checkResult(winNums, bet) {
-            let matches = selected.filter(n => winNums.includes(n)).length;
-            let winAmt = odds[matches] * bet;
-            if(winAmt > 0) {
-                currentBalance += winAmt;
-                document.getElementById('resTitle').innerText = "አሸነፉ!";
-                document.getElementById('resAmt').innerText = "+" + winAmt.toFixed(2) + " ብር";
-                document.getElementById('overlay').style.display = 'flex';
-            }
-            document.getElementById('balance').innerText = currentBalance.toFixed(2);
-        }
-    </script>
-</body>
-</html>
