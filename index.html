@@ -1,209 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="am">
 <head>
-  <title>Keno Pro</title>
-  <style>
-    body { background:#111; color:#fff; font-family:Arial; text-align:center; }
-
-    .grid {
-      display:grid;
-      grid-template-columns:repeat(10,1fr);
-      gap:5px;
-      max-width:400px;
-      margin:auto;
-    }
-
-    button {
-      padding:10px;
-      border:none;
-      background:#333;
-      color:#fff;
-      border-radius:5px;
-    }
-
-    .selected { background:orange; }
-    .win { background:green; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KENO ROYAL PRO</title>
+    <style>
+        :root { --gold: #f1c40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; }
+        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+        .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 15px; }
+        .balance-display { font-size: 24px; font-weight: bold; color: var(--gold); border: 2px solid var(--gold); display: inline-block; padding: 8px 25px; border-radius: 50px; background: rgba(241,196,15,0.1); margin: 10px 0; }
+        .timer-badge { background: #e74c3c; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+        .bet-box { background: var(--card); padding: 15px; border-radius: 10px; margin: 10px auto; width: 90%; border: 1px solid #444; }
+        input[type="number"] { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 10px; width: 80px; text-align: center; font-size: 18px; border-radius: 5px; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 15px auto; padding: 10px; background: #000; border-radius: 12px; }
+        .num { background: #333; border: 1px solid #444; padding: 14px 0; cursor: pointer; font-weight: bold; color: #ccc; border-radius: 5px; transition: 0.2s; }
+        .selected { background: #3498db !important; color: white !important; }
+        .winner { background: var(--gold) !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 15px var(--gold); }
+        .matched { background: var(--green) !important; color: white !important; }
+        .action-btn { width: 95%; padding: 16px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 18px; text-decoration: none; text-align: center; }
+        .dep-btn { background: #e67e22; color: white; }
+        .with-btn { background: #c0392b; color: white; }
+        .withdraw-section { background: var(--card); border: 1px solid #444; padding: 20px; margin-top: 20px; border-radius: 15px; }
+    </style>
 </head>
-
 <body>
 
-<h2>🎰 KENO PRO (INDEX ONLY)</h2>
+    <div class="header">
+        <h2 style="margin:0; color:var(--gold);">🎰 KENO ROYAL PRO 🎰</h2>
+        <div class="timer-badge">ቀጣይ Draw: <span id="timer">60</span>s</div><br>
+        <div class="balance-display">💰 <span id="balance">0.00</span> ETB</div>
+    </div>
 
-<!-- LOGIN -->
-<div id="loginBox">
-  <input id="user" placeholder="Username">
-  <input id="pass" type="password" placeholder="Password">
-  <button onclick="login()">LOGIN</button>
-</div>
+    <div class="bet-box">
+        መቆራጫ (ሚኒመም 15): <input type="number" id="betAmount" value="15" min="15">
+    </div>
 
-<!-- GAME -->
-<div id="game" style="display:none;">
+    <div class="grid" id="grid"></div>
 
-<h3>Balance: <span id="balance">0</span> ETB</h3>
+    <button onclick="requestDeposit()" class="action-btn dep-btn">💳 ብር አስገባ / DEPOSIT</button>
 
-<input id="bet" type="number" placeholder="Bet">
-<button onclick="play()">PLAY</button>
+    <div class="withdraw-section">
+        <h3>💸 ብር አውጣ (WITHDRAW)</h3>
+        <p style="font-size:12px; color:#aaa;">ከ 300 - 1000 ብር ብቻ</p>
+        <input type="number" id="withAmount" value="300" style="margin-bottom:10px;"><br>
+        <button class="action-btn with-btn" onclick="requestWithdraw()">ብር አውጣ</button>
+    </div>
 
-<h3 id="timer">Next draw: 10s</h3>
+    <script>
+        let currentBalance = 0.00;
+        let selected = [];
+        const odds = {0:0, 1:2, 2:10, 3:25, 4:50, 5:100};
+        const grid = document.getElementById('grid');
 
-<div class="grid" id="board"></div>
+        // Grid መፍጠር
+        for(let i=1; i<=80; i++) {
+            let d = document.createElement('div');
+            d.className = 'num'; d.id = 'n'+i; d.innerText = i;
+            d.onclick = function() {
+                if(this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    selected = selected.filter(n => n !== i);
+                } else if(selected.length < 5) {
+                    this.classList.add('selected');
+                    selected.push(i);
+                }
+            };
+            grid.appendChild(d);
+        }
 
-<h4 id="selected">Selected: []</h4>
-<h4 id="result">Result: []</h4>
+        function requestDeposit() {
+            window.location.href = "tg://resolve?domain=Godis1256&text=ብር ማስገባት እፈልጋለሁ";
+        }
 
-<h4>History:</h4>
-<div id="history"></div>
+        function requestWithdraw() {
+            let amt = document.getElementById('withAmount').value;
+            if(amt >= 300 && amt <= 1000) {
+                alert("የማውጣት ጥያቄዎ ተልኳል!");
+                window.location.href = "tg://resolve?domain=Godis1256&text=" + amt + " ብር ማውጣት እፈልጋለሁ";
+            } else {
+                alert("እባክዎ ከ 300 እስከ 1000 ብር መካከል ያስገቡ!");
+            }
+        }
 
-</div>
+        let time = 60;
+        setInterval(() => {
+            time--;
+            document.getElementById('timer').innerText = time;
+            if(time <= 0) { draw(); time = 60; }
+        }, 1000);
 
-<script>
-// LOCAL STORAGE USER
-let currentUser = "";
-let selected = [];
-let timer = 10;
+        function draw() {
+            let bet = parseFloat(document.getElementById('betAmount').value);
+            if(selected.length > 0 && currentBalance >= bet) {
+                currentBalance -= bet;
+                document.getElementById('balance').innerText = currentBalance.toFixed(2);
+            }
 
-// login/register
-function login(){
-  let u = document.getElementById("user").value;
-  let p = document.getElementById("pass").value;
+            document.querySelectorAll('.num').forEach(n => {
+                n.classList.remove('winner');
+                n.classList.remove('matched');
+            });
 
-  let users = JSON.parse(localStorage.getItem("users")) || {};
+            let winners = [];
+            while(winners.length < 20) {
+                let r = Math.floor(Math.random()*80)+1;
+                if(!winners.includes(r)) winners.push(r);
+            }
 
-  if(!users[u]){
-    users[u] = { password:p, balance:1000 };
-  }
+            winners.forEach((n, i) => {
+                setTimeout(() => {
+                    let el = document.getElementById('n'+n);
+                    el.classList.add('winner');
+                    if(selected.includes(n)) el.classList.add('matched');
+                    if(i === 19) checkResult(winners, bet);
+                }, i * 100);
+            });
+        }
 
-  if(users[u].password === p){
-    currentUser = u;
-    localStorage.setItem("users", JSON.stringify(users));
-
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("game").style.display="block";
-
-    updateBalance();
-  } else {
-    alert("Wrong password");
-  }
-}
-
-// balance
-function updateBalance(){
-  let users = JSON.parse(localStorage.getItem("users"));
-  document.getElementById("balance").innerText =
-    users[currentUser].balance;
-}
-
-// create board
-const board = document.getElementById("board");
-for(let i=1;i<=80;i++){
-  let btn = document.createElement("button");
-  btn.innerText = i;
-  btn.onclick = () => selectNumber(i, btn);
-  board.appendChild(btn);
-}
-
-function selectNumber(n, btn){
-  if(selected.includes(n)){
-    selected = selected.filter(x=>x!==n);
-    btn.classList.remove("selected");
-  } else {
-    if(selected.length >= 10) return alert("Max 10");
-    selected.push(n);
-    btn.classList.add("selected");
-  }
-
-  document.getElementById("selected").innerText =
-    "Selected: " + selected.join(",");
-}
-
-// play
-function play(){
-  let bet = Number(document.getElementById("bet").value);
-  let users = JSON.parse(localStorage.getItem("users"));
-
-  if(bet <= 0) return alert("Enter bet");
-  if(bet > users[currentUser].balance) return alert("No balance");
-
-  users[currentUser].balance -= bet;
-
-  let result = draw();
-  let matches = selected.filter(n=>result.includes(n));
-  let win = matches.length * 10;
-
-  users[currentUser].balance += win;
-
-  localStorage.setItem("users", JSON.stringify(users));
-
-  showResult(result, matches.length, win);
-  updateBalance();
-  saveHistory(result, win);
-}
-
-// draw
-function draw(){
-  let r=[];
-  while(r.length<20){
-    let n=Math.floor(Math.random()*80)+1;
-    if(!r.includes(n)) r.push(n);
-  }
-  return r;
-}
-
-// show result
-function showResult(result, match, win){
-  document.getElementById("result").innerText =
-    "Result: " + result.join(",");
-
-  highlight(result);
-
-  alert("Matched: "+match+" | Win: "+win);
-}
-
-// highlight
-function highlight(result){
-  document.querySelectorAll(".grid button").forEach(btn=>{
-    let n=Number(btn.innerText);
-    btn.classList.remove("win");
-
-    if(result.includes(n)){
-      btn.classList.add("win");
-    }
-  });
-}
-
-// history
-function saveHistory(result, win){
-  let h = JSON.parse(localStorage.getItem("history")) || [];
-  h.unshift({result, win});
-
-  if(h.length>10) h.pop();
-
-  localStorage.setItem("history", JSON.stringify(h));
-  showHistory();
-}
-
-function showHistory(){
-  let h = JSON.parse(localStorage.getItem("history")) || [];
-  let div = document.getElementById("history");
-
-  div.innerHTML = h.map(x =>
-    "🎯 "+x.result.join(",")+" | 💰 "+x.win
-  ).join("<br>");
-}
-
-// timer
-setInterval(()=>{
-  timer--;
-  document.getElementById("timer").innerText =
-    "Next draw: "+timer+"s";
-
-  if(timer===0){
-    timer=10;
-  }
-},1000);
-
-</script>
-
+        function checkResult(winNums, bet) {
+            let matches = selected.filter(n => winNums.includes(n)).length;
+            let winAmt = odds[matches] * bet;
+            if(winAmt > 0) {
+                currentBalance += winAmt;
+                alert("እንኳን ደስ አለዎት! " + matches + " ቁጥሮች ገጥመው " + winAmt + " ብር አሸንፈዋል!");
+            }
+            document.getElementById('balance').innerText = currentBalance.toFixed(2);
+        }
+    </script>
 </body>
 </html>
