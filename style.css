@@ -2,20 +2,28 @@ body {
     background-color: #1a1a1a;
     color: white;
     text-align: center;
-    font-family: Arial, sans-serif;
-}
-.container {
+    font-family: sans-serif;
     padding: 20px;
 }
+
+h1 { font-size: 22px; color: #f1c40f; }
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 30px;
+}
+
 .btn {
     display: block;
-    width: 80%;
-    margin: 15px auto;
     padding: 15px;
     text-decoration: none;
+    color: white;
     font-weight: bold;
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 18px;
 }
-.dep-btn { background-color: #ff9800; color: white; }
-.wit-btn { background-color: #4caf50; color: white; }
+
+.dep-btn { background-color: #e67e22; } /* ብርቱካናማ ለዲፖዚት */
+.wit-btn { background-color: #27ae60; } /* አረንጓዴ ለውዝድራው */
