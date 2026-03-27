@@ -5,22 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KENO ROYAL PRO</title>
     <style>
-        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; }
-        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; }
-        .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 15px; }
-        .balance-display { font-size: 22px; font-weight: bold; color: var(--gold); border: 2px solid var(--gold); display: inline-block; padding: 8px 20px; border-radius: 25px; margin: 10px 0; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 400px; margin: 10px auto; }
-        .num { background: #333; border: 1px solid #444; padding: 10px 0; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 14px; transition: 0.2s; }
-        .selected { background: #3498db !important; transform: scale(1.1); box-shadow: 0 0 8px #3498db; }
+        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; --blue: #3498db; }
+        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+        .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 10px; }
+        .balance-display { font-size: 24px; font-weight: bold; color: var(--gold); border: 2px solid var(--gold); display: inline-block; padding: 8px 25px; border-radius: 30px; margin: 5px 0; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 10px auto; }
+        .num { background: #333; border: 1px solid #444; padding: 12px 0; cursor: pointer; font-weight: bold; border-radius: 5px; font-size: 14px; transition: 0.2s; }
+        .selected { background: var(--blue) !important; transform: scale(1.05); box-shadow: 0 0 10px var(--blue); }
         .winner { background: var(--gold) !important; color: black !important; animation: pop 0.3s ease; }
-        .matched { background: var(--green) !important; color: white !important; border: 2px solid white; }
-        @keyframes pop { 0% { transform: scale(0.8); } 100% { transform: scale(1); } }
-        .bet-box, .withdraw-section { background: var(--card); padding: 15px; border-radius: 15px; margin-top: 15px; border: 1px solid #444; }
-        input { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 8px; width: 80px; text-align: center; border-radius: 5px; font-size: 16px; }
-        .action-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin: 8px 0; }
+        .matched { background: var(--green) !important; color: white !important; border: 2px solid white; box-shadow: 0 0 15px var(--green); }
+        @keyframes pop { 0% { transform: scale(0.7); } 100% { transform: scale(1); } }
+        .bet-box, .withdraw-section { background: var(--card); padding: 15px; border-radius: 15px; margin-top: 10px; border: 1px solid #444; }
+        input { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 8px; width: 80px; text-align: center; border-radius: 5px; font-size: 18px; }
+        .action-btn { width: 100%; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin: 5px 0; transition: 0.3s; }
         .dep-btn { background: #e67e22; color: white; }
         .with-btn { background: #c0392b; color: white; }
-        .draw-btn { background: var(--green); color: white; }
+        .draw-btn { background: var(--green); color: white; font-size: 18px; }
+        .action-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -37,22 +38,19 @@
     <div class="grid" id="grid"></div>
 
     <button class="action-btn draw-btn" onclick="draw()">ይጀምር (DRAW)</button>
-    
     <button onclick="requestDeposit()" class="action-btn dep-btn">💳 ብር አስገባ / DEPOSIT</button>
 
     <div class="withdraw-section">
         <h3>💸 ብር አውጣ (WITHDRAW)</h3>
-        <p style="font-size:12px; color:#aaa;">ከ 300 - 1000 ብር ብቻ</p>
-        <input type="number" id="withAmount" value="300" min="300" max="1000"><br>
+        <input type="number" id="withAmount" value="300" min="300"><br>
         <button class="action-btn with-btn" onclick="requestWithdraw()">ብር አውጣ</button>
     </div>
 
     <script>
-        // ያንተ መረጃዎች
         const botToken = '8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw';
         const chatId = '7313437942';
 
-        let currentBalance = 0.00;
+        let currentBalance = 0.00; 
         let selected = [];
         const grid = document.getElementById('grid');
 
@@ -72,38 +70,75 @@
             grid.appendChild(d);
         }
 
-        // መልእክት ወደ ቦት መላኪያ
         function sendToTelegram(message) {
             const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
             fetch(url).then(res => {
-                if(res.ok) alert("ጥያቄዎ በስኬት ተልኳል!");
-                else alert("መላክ አልተቻለም፣ ድጋሚ ይሞክሩ።");
+                if(res.ok) alert("ጥያቄዎ ለአስተዳዳሪው ተልኳል!");
             });
         }
 
         function requestDeposit() {
-            let msg = "<b>📥 የዴፖዚት ጥያቄ</b>\n\nአንድ ተጠቃሚ ብር ማስገባት ይፈልጋል።";
-            sendToTelegram(msg);
+            sendToTelegram("<b>📥 የዴፖዚት ጥያቄ</b>\nአንድ ተጠቃሚ ብር ማስገባት ይፈልጋል።");
         }
 
         function requestWithdraw() {
             let amt = document.getElementById('withAmount').value;
-            if (amt >= 300 && amt <= 1000) {
+            if (amt >= 300) {
                 let phone = prompt("ብር የሚላክበትን ስልክ ቁጥር ያስገቡ፦");
                 if (phone) {
-                    let msg = `<b>💸 የውዝድሮው ጥያቄ</b>\n\n<b>መጠን:</b> ${amt} ETB\n<b>ስልክ:</b> ${phone}`;
-                    sendToTelegram(msg);
+                    sendToTelegram(`<b>💸 የውዝድሮው ጥያቄ</b>\n<b>መጠን:</b> ${amt} ETB\n<b>ስልክ:</b> ${phone}`);
                 }
-            } else {
-                alert("እባክዎ ከ 300 እስከ 1000 ብር መሃል ያስገቡ!");
-            }
+            } else { alert("ዝቅተኛው ማውጫ 300 ብር ነው!"); }
         }
 
         function draw() {
             let bet = parseFloat(document.getElementById('betAmount').value);
-            if (selected.length === 0) { alert("ቁጥር ይምረጡ!"); return; }
-            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም!"); return; }
-            // ጨዋታው እዚህ ይቀጥላል...
+            if (selected.length === 0) { alert("እባክዎ ቁጥር ይምረጡ!"); return; }
+            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም! መጀመሪያ ዴፖዚት ያድርጉ።"); return; }
+
+            currentBalance -= bet;
+            updateUI();
+
+            document.querySelectorAll('.num').forEach(n => n.classList.remove('winner', 'matched'));
+
+            let winners = [];
+            while (winners.length < 20) {
+                let r = Math.floor(Math.random() * 80) + 1;
+                if (!winners.includes(r)) winners.push(r);
+            }
+
+            winners.forEach((n, i) => {
+                setTimeout(() => {
+                    let el = document.getElementById('n' + n);
+                    el.classList.add('winner');
+                    if (selected.includes(n)) el.classList.add('matched');
+                    if (i === 19) checkWin(winners, bet);
+                }, i * 100);
+            });
+        }
+
+        function checkWin(winNums, bet) {
+            let matches = selected.filter(n => winNums.includes(n)).length;
+            let multiplier = 0;
+
+            // የአሸናፊነት ህግ (እንደ ፍላጎትህ መቀየር ትችላለህ)
+            if (matches === 2) multiplier = 2;
+            if (matches === 3) multiplier = 5;
+            if (matches === 4) multiplier = 20;
+            if (matches >= 5) multiplier = 100;
+
+            if (multiplier > 0) {
+                let winAmt = bet * multiplier;
+                currentBalance += winAmt;
+                alert(`እንኳን ደስ አለዎት! ${matches} ቁጥሮች ገጥመው ${winAmt} ብር አሸንፈዋል! (x${multiplier})`);
+            } else {
+                alert("ለጥቂት አልገጠመም! ድጋሚ ይሞክሩ።");
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('balance').innerText = currentBalance.toFixed(2);
         }
     </script>
 </body>
