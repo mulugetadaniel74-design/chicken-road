@@ -10,13 +10,13 @@
         .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 15px; }
         .balance-display { font-size: 22px; font-weight: bold; color: var(--gold); border: 2px solid var(--gold); display: inline-block; padding: 8px 20px; border-radius: 25px; margin: 10px 0; }
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 400px; margin: 10px auto; }
-        .num { background: #333; border: 1px solid #444; padding: 10px 0; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 14px; }
+        .num { background: #333; border: 1px solid #444; padding: 10px 0; cursor: pointer; font-weight: bold; border-radius: 4px; font-size: 14px; transition: 0.2s; }
         .selected { background: #3498db !important; transform: scale(1.1); box-shadow: 0 0 8px #3498db; }
         .winner { background: var(--gold) !important; color: black !important; animation: pop 0.3s ease; }
         .matched { background: var(--green) !important; color: white !important; border: 2px solid white; }
         @keyframes pop { 0% { transform: scale(0.8); } 100% { transform: scale(1); } }
         .bet-box, .withdraw-section { background: var(--card); padding: 15px; border-radius: 15px; margin-top: 15px; border: 1px solid #444; }
-        input { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 8px; width: 70px; text-align: center; border-radius: 5px; font-size: 16px; }
+        input { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 8px; width: 80px; text-align: center; border-radius: 5px; font-size: 16px; }
         .action-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin: 8px 0; }
         .dep-btn { background: #e67e22; color: white; }
         .with-btn { background: #c0392b; color: white; }
@@ -38,7 +38,7 @@
 
     <button class="action-btn draw-btn" onclick="draw()">ይጀምር (DRAW)</button>
     
-    <button onclick="requestDeposit()" class="action-btn dep-btn">💳 ብር አስገባ (የከፈሉበትን ሪሲፕት ይላኩ)</button>
+    <button onclick="requestDeposit()" class="action-btn dep-btn">💳 ብር አስገባ / DEPOSIT</button>
 
     <div class="withdraw-section">
         <h3>💸 ብር አውጣ (WITHDRAW)</h3>
@@ -48,11 +48,15 @@
     </div>
 
     <script>
+        // ያንተ መረጃዎች
+        const botToken = '8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw';
+        const chatId = '7313437942';
+
         let currentBalance = 0.00;
         let selected = [];
         const grid = document.getElementById('grid');
 
-        // ግሪዱን መፍጠር
+        // ቁጥሮቹን መፍጠር
         for (let i = 1; i <= 80; i++) {
             let d = document.createElement('div');
             d.className = 'num'; d.id = 'n' + i; d.innerText = i;
@@ -68,18 +72,28 @@
             grid.appendChild(d);
         }
 
-        // DEPOSIT ስራ
-        function requestDeposit() {
-            let msg = "ሰላም፣ ብር ማስገባት እፈልጋለሁ። የከፈልኩበትን ሪሲፕት ከስር እልካለሁ፦";
-            window.location.href = `tg://resolve?domain=Godis1256&text=${encodeURIComponent(msg)}`;
+        // መልእክት ወደ ቦት መላኪያ
+        function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
+            fetch(url).then(res => {
+                if(res.ok) alert("ጥያቄዎ በስኬት ተልኳል!");
+                else alert("መላክ አልተቻለም፣ ድጋሚ ይሞክሩ።");
+            });
         }
 
-        // WITHDRAW ስራ
+        function requestDeposit() {
+            let msg = "<b>📥 የዴፖዚት ጥያቄ</b>\n\nአንድ ተጠቃሚ ብር ማስገባት ይፈልጋል።";
+            sendToTelegram(msg);
+        }
+
         function requestWithdraw() {
             let amt = document.getElementById('withAmount').value;
             if (amt >= 300 && amt <= 1000) {
-                let msg = `የገንዘብ ማውጫ ጥያቄ፦\n------------------------\nመጠን፦ ${amt} ETB\n\nእባክዎ ብር የሚላክበትን ስልክ ቁጥር እዚህ ጋር ይጻፉ፦ `;
-                window.location.href = `tg://resolve?domain=Godis1256&text=${encodeURIComponent(msg)}`;
+                let phone = prompt("ብር የሚላክበትን ስልክ ቁጥር ያስገቡ፦");
+                if (phone) {
+                    let msg = `<b>💸 የውዝድሮው ጥያቄ</b>\n\n<b>መጠን:</b> ${amt} ETB\n<b>ስልክ:</b> ${phone}`;
+                    sendToTelegram(msg);
+                }
             } else {
                 alert("እባክዎ ከ 300 እስከ 1000 ብር መሃል ያስገቡ!");
             }
@@ -88,13 +102,8 @@
         function draw() {
             let bet = parseFloat(document.getElementById('betAmount').value);
             if (selected.length === 0) { alert("ቁጥር ይምረጡ!"); return; }
-            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም! መጀመሪያ ዴፖዚት ያድርጉ።"); return; }
-            
-            currentBalance -= bet;
-            document.getElementById('balance').innerText = currentBalance.toFixed(2);
-            
-            // የድልድል ሎጂክ እዚህ ይቀጥላል...
-            alert("ጨዋታው ተጀምሯል!");
+            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም!"); return; }
+            // ጨዋታው እዚህ ይቀጥላል...
         }
     </script>
 </body>
