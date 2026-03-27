@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL PRO</title>
+    <title>KENO ROYAL PRO - ADMIN EDITION</title>
     <style>
         :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; --blue: #3498db; }
         body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
@@ -47,14 +47,25 @@
     </div>
 
     <script>
+        // --- የግል መረጃዎች ---
         const botToken = '8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw';
         const chatId = '7313437942';
+        const adminPass = "1234"; // ይህንን መቀየር ትችላለህ
 
         let currentBalance = 0.00; 
         let selected = [];
         const grid = document.getElementById('grid');
 
-        // ቁጥሮቹን መፍጠር
+        // ገጹ ሲከፈት የቆየ ባላንስ ካለ መጫኛ
+        window.onload = function() {
+            let saved = localStorage.getItem('keno_balance');
+            if (saved) {
+                currentBalance = parseFloat(saved);
+                updateUI();
+            }
+        };
+
+        // ግሪዱን መፍጠር
         for (let i = 1; i <= 80; i++) {
             let d = document.createElement('div');
             d.className = 'num'; d.id = 'n' + i; d.innerText = i;
@@ -70,10 +81,11 @@
             grid.appendChild(d);
         }
 
+        // ቴሌግራም መላኪያ
         function sendToTelegram(message) {
             const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
             fetch(url).then(res => {
-                if(res.ok) alert("ጥያቄዎ ለአስተዳዳሪው ተልኳል!");
+                if(res.ok) alert("ጥያቄዎ ተልኳል!");
             });
         }
 
@@ -91,10 +103,25 @@
             } else { alert("ዝቅተኛው ማውጫ 300 ብር ነው!"); }
         }
 
+        // --- ADMIN ቁልፍ (Ctrl + B) ---
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'b') { 
+                let pass = prompt("አድሚን ፓስወርድ ያስገቡ፦");
+                if (pass === adminPass) {
+                    let add = parseFloat(prompt("የሚጨመር የብር መጠን፦"));
+                    if (!isNaN(add)) {
+                        currentBalance += add;
+                        updateUI();
+                        alert(add + " ብር ተጨምሯል!");
+                    }
+                }
+            }
+        });
+
         function draw() {
             let bet = parseFloat(document.getElementById('betAmount').value);
-            if (selected.length === 0) { alert("እባክዎ ቁጥር ይምረጡ!"); return; }
-            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም! መጀመሪያ ዴፖዚት ያድርጉ።"); return; }
+            if (selected.length === 0) { alert("ቁጥር ይምረጡ!"); return; }
+            if (currentBalance < bet) { alert("ባላንስ የሎትም!"); return; }
 
             currentBalance -= bet;
             updateUI();
@@ -113,32 +140,29 @@
                     el.classList.add('winner');
                     if (selected.includes(n)) el.classList.add('matched');
                     if (i === 19) checkWin(winners, bet);
-                }, i * 100);
+                }, i * 80);
             });
         }
 
         function checkWin(winNums, bet) {
             let matches = selected.filter(n => winNums.includes(n)).length;
-            let multiplier = 0;
+            let mult = 0;
+            if (matches === 2) mult = 2;
+            if (matches === 3) mult = 5;
+            if (matches === 4) mult = 20;
+            if (matches >= 5) mult = 100;
 
-            // የአሸናፊነት ህግ (እንደ ፍላጎትህ መቀየር ትችላለህ)
-            if (matches === 2) multiplier = 2;
-            if (matches === 3) multiplier = 5;
-            if (matches === 4) multiplier = 20;
-            if (matches >= 5) multiplier = 100;
-
-            if (multiplier > 0) {
-                let winAmt = bet * multiplier;
-                currentBalance += winAmt;
-                alert(`እንኳን ደስ አለዎት! ${matches} ቁጥሮች ገጥመው ${winAmt} ብር አሸንፈዋል! (x${multiplier})`);
-            } else {
-                alert("ለጥቂት አልገጠመም! ድጋሚ ይሞክሩ።");
+            if (mult > 0) {
+                let win = bet * mult;
+                currentBalance += win;
+                alert(`አሸንፈዋል! ${matches} ቁጥሮች ገጥመው ${win} ብር ተጨምሯል!`);
             }
             updateUI();
         }
 
         function updateUI() {
             document.getElementById('balance').innerText = currentBalance.toFixed(2);
+            localStorage.setItem('keno_balance', currentBalance);
         }
     </script>
 </body>
