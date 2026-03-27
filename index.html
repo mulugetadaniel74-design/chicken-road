@@ -5,67 +5,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KENO ROYAL PRO</title>
     <style>
-        :root { --gold: #f1c40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; }
-        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 15px; }
-        .balance-display { font-size: 24px; font-weight: bold; color: var(--gold); border: 2px solid var(--gold); display: inline-block; padding: 8px 25px; border-radius: 50px; background: rgba(241,196,15,0.1); margin: 10px 0; }
-        .timer-badge { background: #e74c3c; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
-        .bet-box { background: var(--card); padding: 15px; border-radius: 10px; margin: 10px auto; width: 90%; border: 1px solid #444; }
-        input[type="number"] { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 10px; width: 80px; text-align: center; font-size: 18px; border-radius: 5px; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 15px auto; padding: 10px; background: #000; border-radius: 12px; }
-        .num { background: #333; border: 1px solid #444; padding: 14px 0; cursor: pointer; font-weight: bold; color: #ccc; border-radius: 5px; transition: 0.2s; }
-        .selected { background: #3498db !important; color: white !important; }
-        .winner { background: var(--gold) !important; color: black !important; transform: scale(1.1); box-shadow: 0 0 15px var(--gold); }
-        .matched { background: var(--green) !important; color: white !important; }
-        .action-btn { width: 95%; padding: 16px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 10px auto; display: block; font-size: 18px; text-decoration: none; text-align: center; }
+        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; }
+        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        
+        .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 20px; }
+        .balance-display { font-size: 24px; font-weight: bold; color: var(--gold); border: 2px solid var(--gold); display: inline-block; padding: 10px 25px; border-radius: 30px; margin: 10px 0; }
+        
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 450px; margin: 15px auto; }
+        .num { background: #333; border: 1px solid #444; padding: 12px 0; cursor: pointer; font-weight: bold; border-radius: 5px; transition: 0.2s; }
+        
+        .selected { background: #3498db !important; transform: scale(1.1); box-shadow: 0 0 10px #3498db; }
+        
+        @keyframes pop {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .winner { background: var(--gold) !important; color: black !important; animation: pop 0.3s ease; }
+        .matched { background: var(--green) !important; color: white !important; box-shadow: 0 0 15px var(--green); border: 2px solid white; }
+
+        .bet-box, .withdraw-section { background: var(--card); padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid #444; }
+        input { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 10px; width: 80px; text-align: center; border-radius: 5px; font-size: 18px; }
+        
+        .action-btn { width: 90%; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin: 10px 0; transition: 0.3s; }
         .dep-btn { background: #e67e22; color: white; }
         .with-btn { background: #c0392b; color: white; }
-        .withdraw-section { background: var(--card); border: 1px solid #444; padding: 20px; margin-top: 20px; border-radius: 15px; }
+        .draw-btn { background: var(--green); color: white; font-size: 20px; }
+        .action-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h2 style="margin:0; color:var(--gold);">🎰 KENO ROYAL PRO 🎰</h2>
-        <div class="timer-badge">ቀጣይ Draw: <span id="timer">60</span>s</div><br>
+        <div id="timer-badge" style="background:#e74c3c; padding:5px; border-radius:10px; margin-top:10px;">ቀጣይ Draw: <span id="timer">60</span>s</div>
         <div class="balance-display">💰 <span id="balance">0.00</span> ETB</div>
     </div>
 
     <div class="bet-box">
-        መቆራጫ (ሚኒመም 15): <input type="number" id="betAmount" value="15" min="15">
+        መወራረድ (ሚኒመም 15): <input type="number" id="betAmount" value="15" min="15">
     </div>
 
     <div class="grid" id="grid"></div>
 
+    <button class="action-btn draw-btn" onclick="draw()">ይጀምር (DRAW)</button>
     <button onclick="requestDeposit()" class="action-btn dep-btn">💳 ብር አስገባ / DEPOSIT</button>
 
     <div class="withdraw-section">
         <h3>💸 ብር አውጣ (WITHDRAW)</h3>
-        <p style="font-size:12px; color:#aaa;">ከ 300 - 1000 ብር ብቻ</p>
         <input type="number" id="withAmount" value="300" style="margin-bottom:10px;"><br>
         <button class="action-btn with-btn" onclick="requestWithdraw()">ብር አውጣ</button>
     </div>
 
     <script>
-        let currentBalance = 0.00;
+        let currentBalance = 100.00; // ለሙከራ 100 ብር ተሰጥቷል
         let selected = [];
-        const odds = {0:0, 1:2, 2:10, 3:25, 4:50, 5:100};
         const grid = document.getElementById('grid');
+        document.getElementById('balance').innerText = currentBalance.toFixed(2);
 
-        // Grid መፍጠር
-        for(let i=1; i<=80; i++) {
+        // ግሪዱን መፍጠር (1-80)
+        for (let i = 1; i <= 80; i++) {
             let d = document.createElement('div');
-            d.className = 'num'; d.id = 'n'+i; d.innerText = i;
+            d.className = 'num'; d.id = 'n' + i; d.innerText = i;
             d.onclick = function() {
-                if(this.classList.contains('selected')) {
+                if (this.classList.contains('selected')) {
                     this.classList.remove('selected');
                     selected = selected.filter(n => n !== i);
-                } else if(selected.length < 5) {
-                    this.classList.add('selected');
-                    selected.push(i);
+                } else {
+                    if (selected.length < 10) {
+                        this.classList.add('selected');
+                        selected.push(i);
+                    } else { alert("ቢበዛ 10 ቁጥር ብቻ መምረጥ ይችላሉ!"); }
                 }
             };
             grid.appendChild(d);
+        }
+
+        function draw() {
+            let bet = parseFloat(document.getElementById('betAmount').value);
+            if (selected.length === 0) { alert("እባክዎ ቁጥር ይምረጡ!"); return; }
+            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም!"); return; }
+
+            currentBalance -= bet;
+            updateBalance();
+
+            // Clear previous
+            document.querySelectorAll('.num').forEach(n => n.classList.remove('winner', 'matched'));
+
+            let winners = [];
+            while (winners.length < 20) {
+                let r = Math.floor(Math.random() * 80) + 1;
+                if (!winners.includes(r)) winners.push(r);
+            }
+
+            winners.forEach((n, i) => {
+                setTimeout(() => {
+                    let el = document.getElementById('n' + n);
+                    el.classList.add('winner');
+                    if (selected.includes(n)) el.classList.add('matched');
+                    if (i === 19) checkResult(winners, bet);
+                }, i * 100);
+            });
+        }
+
+        function checkResult(winNums, bet) {
+            let matches = selected.filter(n => winNums.includes(n)).length;
+            let winAmt = 0;
+            if (matches >= 2) winAmt = bet * (matches * 0.5); // ቀላል የክፍያ ስሌት
+
+            if (winAmt > 0) {
+                currentBalance += winAmt;
+                alert("እንኳን ደስ አለዎት! " + matches + " ቁጥሮች ገጥመው " + winAmt + " ብር አሸንፈዋል!");
+            }
+            updateBalance();
+        }
+
+        function updateBalance() {
+            document.getElementById('balance').innerText = currentBalance.toFixed(2);
         }
 
         function requestDeposit() {
@@ -74,58 +131,18 @@
 
         function requestWithdraw() {
             let amt = document.getElementById('withAmount').value;
-            if(amt >= 300 && amt <= 1000) {
-                alert("የማውጣት ጥያቄዎ ተልኳል!");
-                window.location.href = "tg://resolve?domain=Godis1256&text=" + amt + " ብር ማውጣት እፈልጋለሁ";
-            } else {
-                alert("እባክዎ ከ 300 እስከ 1000 ብር መካከል ያስገቡ!");
-            }
+            if (amt >= 300) {
+                window.location.href = `tg://resolve?domain=Godis1256&text=Withdraw_${amt}_ETB`;
+            } else { alert("ዝቅተኛው ማውጫ 300 ብር ነው!"); }
         }
 
+        // Timer
         let time = 60;
         setInterval(() => {
             time--;
             document.getElementById('timer').innerText = time;
-            if(time <= 0) { draw(); time = 60; }
+            if (time <= 0) time = 60;
         }, 1000);
-
-        function draw() {
-            let bet = parseFloat(document.getElementById('betAmount').value);
-            if(selected.length > 0 && currentBalance >= bet) {
-                currentBalance -= bet;
-                document.getElementById('balance').innerText = currentBalance.toFixed(2);
-            }
-
-            document.querySelectorAll('.num').forEach(n => {
-                n.classList.remove('winner');
-                n.classList.remove('matched');
-            });
-
-            let winners = [];
-            while(winners.length < 20) {
-                let r = Math.floor(Math.random()*80)+1;
-                if(!winners.includes(r)) winners.push(r);
-            }
-
-            winners.forEach((n, i) => {
-                setTimeout(() => {
-                    let el = document.getElementById('n'+n);
-                    el.classList.add('winner');
-                    if(selected.includes(n)) el.classList.add('matched');
-                    if(i === 19) checkResult(winners, bet);
-                }, i * 100);
-            });
-        }
-
-        function checkResult(winNums, bet) {
-            let matches = selected.filter(n => winNums.includes(n)).length;
-            let winAmt = odds[matches] * bet;
-            if(winAmt > 0) {
-                currentBalance += winAmt;
-                alert("እንኳን ደስ አለዎት! " + matches + " ቁጥሮች ገጥመው " + winAmt + " ብር አሸንፈዋል!");
-            }
-            document.getElementById('balance').innerText = currentBalance.toFixed(2);
-        }
     </script>
 </body>
 </html>
