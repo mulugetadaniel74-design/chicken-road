@@ -3,36 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL PRO - ADMIN EDITION</title>
+    <title>KENO ROYAL PRO</title>
     <style>
-        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; --blue: #3498db; }
+        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; --blue: #3498db; --red: #e74c3c; --orange: #f39c12; }
         body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        .header { background: var(--card); padding: 15px; border-radius: 15px; border-bottom: 4px solid var(--gold); margin-bottom: 10px; }
-        .balance-display { font-size: 24px; font-weight: bold; color: var(--gold); border: 2px solid var(--gold); display: inline-block; padding: 8px 25px; border-radius: 30px; margin: 5px 0; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 10px auto; }
-        .num { background: #333; border: 1px solid #444; padding: 12px 0; cursor: pointer; font-weight: bold; border-radius: 5px; font-size: 14px; transition: 0.2s; }
-        .selected { background: var(--blue) !important; transform: scale(1.05); box-shadow: 0 0 10px var(--blue); }
+        .header { background: var(--card); padding: 20px; border-radius: 0 0 25px 25px; border-bottom: 5px solid var(--gold); margin-bottom: 15px; }
+        .balance-container { border: 3px solid var(--gold); display: inline-block; padding: 10px 30px; border-radius: 40px; margin: 10px 0; }
+        .balance-display { font-size: 28px; font-weight: bold; color: var(--gold); }
+        .bet-input-box { background: var(--card); padding: 15px; border-radius: 12px; margin: 10px auto; max-width: 400px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 450px; margin: 15px auto; padding: 5px; }
+        .num { background: #2c2c2c; border: 1px solid #444; padding: 12px 0; cursor: pointer; font-weight: bold; border-radius: 6px; font-size: 15px; transition: 0.2s; color: #ccc; }
+        .selected { background: var(--blue) !important; color: white; transform: scale(1.05); box-shadow: 0 0 10px var(--blue); }
         .winner { background: var(--gold) !important; color: black !important; animation: pop 0.3s ease; }
         .matched { background: var(--green) !important; color: white !important; border: 2px solid white; box-shadow: 0 0 15px var(--green); }
         @keyframes pop { 0% { transform: scale(0.7); } 100% { transform: scale(1); } }
-        .bet-box, .withdraw-section { background: var(--card); padding: 15px; border-radius: 15px; margin-top: 10px; border: 1px solid #444; }
-        input { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 8px; width: 80px; text-align: center; border-radius: 5px; font-size: 18px; }
-        .action-btn { width: 100%; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin: 5px 0; transition: 0.3s; }
-        .dep-btn { background: #e67e22; color: white; }
-        .with-btn { background: #c0392b; color: white; }
-        .draw-btn { background: var(--green); color: white; font-size: 18px; }
-        .action-btn:active { transform: scale(0.95); }
+        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 8px; width: 80px; text-align: center; border-radius: 8px; font-size: 20px; font-weight: bold; }
+        .action-btn { width: 100%; max-width: 450px; padding: 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 18px; margin: 8px 0; transition: 0.3s; }
+        .draw-btn { background: var(--green); color: white; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4); }
+        .dep-btn { background: var(--orange); color: white; }
+        .with-section { background: var(--card); padding: 20px; border-radius: 20px; margin: 15px auto; max-width: 450px; border: 1px solid #333; }
+        .with-btn { background: var(--red); color: white; }
+        .action-btn:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2 style="margin:0; color:var(--gold);">🎰 KENO ROYAL PRO 🎰</h2>
-        <div class="balance-display">💰 <span id="balance">0.00</span> ETB</div>
+        <h2 style="margin:0; color:var(--gold); letter-spacing: 2px;">🎰 KENO ROYAL PRO 🎰</h2>
+        <div class="balance-container">
+            <span class="balance-display">💰 <span id="balance">0.00</span> ETB</span>
+        </div>
     </div>
 
-    <div class="bet-box">
-        መወራረድ (ሚኒመም 15): <input type="number" id="betAmount" value="15" min="15">
+    <div class="bet-input-box">
+        <span>መወራረድ (ሚኒመም 15):</span>
+        <input type="number" id="betAmount" value="15" min="15">
     </div>
 
     <div class="grid" id="grid"></div>
@@ -40,9 +45,9 @@
     <button class="action-btn draw-btn" onclick="draw()">ይጀምር (DRAW)</button>
     <button onclick="requestDeposit()" class="action-btn dep-btn">💳 ብር አስገባ / DEPOSIT</button>
 
-    <div class="withdraw-section">
-        <h3>💸 ብር አውጣ (WITHDRAW)</h3>
-        <input type="number" id="withAmount" value="300" min="300"><br>
+    <div class="with-section">
+        <h3 style="margin-top:0;">💸 ብር አውጣ (WITHDRAW)</h3>
+        <input type="number" id="withAmount" value="300" min="300" style="margin-bottom:10px;"><br>
         <button class="action-btn with-btn" onclick="requestWithdraw()">ብር አውጣ</button>
     </div>
 
@@ -50,13 +55,13 @@
         // --- የግል መረጃዎች ---
         const botToken = '8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw';
         const chatId = '7313437942';
-        const adminPass = "1234"; // ይህንን መቀየር ትችላለህ
+        const adminPass = "1234"; 
 
         let currentBalance = 0.00; 
         let selected = [];
         const grid = document.getElementById('grid');
 
-        // ገጹ ሲከፈት የቆየ ባላንስ ካለ መጫኛ
+        // ገጹ ሲከፈት የቆየ ባላንስ መጫኛ
         window.onload = function() {
             let saved = localStorage.getItem('keno_balance');
             if (saved) {
@@ -85,12 +90,12 @@
         function sendToTelegram(message) {
             const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
             fetch(url).then(res => {
-                if(res.ok) alert("ጥያቄዎ ተልኳል!");
+                if(res.ok) alert("ጥያቄዎ ተልኳል! በቅርቡ እናነጋግርዎታለን።");
             });
         }
 
         function requestDeposit() {
-            sendToTelegram("<b>📥 የዴፖዚት ጥያቄ</b>\nአንድ ተጠቃሚ ብር ማስገባት ይፈልጋል።");
+            sendToTelegram("<b>📥 የዴፖዚት ጥያቄ</b>\nተጠቃሚው ብር ማስገባት ይፈልጋል።");
         }
 
         function requestWithdraw() {
@@ -120,8 +125,8 @@
 
         function draw() {
             let bet = parseFloat(document.getElementById('betAmount').value);
-            if (selected.length === 0) { alert("ቁጥር ይምረጡ!"); return; }
-            if (currentBalance < bet) { alert("ባላንስ የሎትም!"); return; }
+            if (selected.length === 0) { alert("እባክዎ ቁጥር ይምረጡ!"); return; }
+            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም! መጀመሪያ ዴፖዚት ያድርጉ።"); return; }
 
             currentBalance -= bet;
             updateUI();
@@ -155,7 +160,7 @@
             if (mult > 0) {
                 let win = bet * mult;
                 currentBalance += win;
-                alert(`አሸንፈዋል! ${matches} ቁጥሮች ገጥመው ${win} ብር ተጨምሯል!`);
+                alert(`እንኳን ደስ አለዎት! ${matches} ቁጥሮች ገጥመው ${win} ብር አሸንፈዋል!`);
             }
             updateUI();
         }
