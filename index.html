@@ -7,22 +7,24 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        body { background:#121212; color:white; text-align:center; font-family:sans-serif; }
-        .grid { display:grid; grid-template-columns:repeat(10, 1fr); gap:5px; max-width:400px; margin:20px auto; }
-        .num { background:#333; padding:10px; border-radius:5px; cursor:pointer; }
+        body { background:#121212; color:white; text-align:center; font-family:sans-serif; margin:0; }
+        .grid { display:grid; grid-template-columns:repeat(10, 1fr); gap:5px; max-width:400px; margin:20px auto; padding:10px; }
+        .num { background:#333; padding:10px; border-radius:5px; cursor:pointer; font-weight:bold; }
         .selected { background:#3498db !important; }
         .hit { background:#ffc40f !important; color:black; }
-        button { padding:15px; margin:10px; border-radius:10px; border:none; font-weight:bold; cursor:pointer; }
-        .draw { background:#2ecc71; color:white; width:200px; }
-        .add { background:#e67e22; color:white; }
+        button { padding:15px; margin:10px; border-radius:10px; border:none; font-weight:bold; cursor:pointer; width:80%; max-width:300px; }
+        .draw { background:#2ecc71; color:white; }
+        .add { background:#e67e22; color:white; width:40%; }
     </style>
 </head>
 <body>
-    <h2>🎰 CHICKEN KENO</h2>
-    <p>መለያ: <span id="myID">...</span></p>
-    <h3 style="color:#ffc40f;">💰 <span id="balance">0.00</span> ETB</h3>
+    <h2 style="color:#ffc40f; margin-top:20px;">🎰 CHICKEN KENO</h2>
+    <p style="font-size:12px; color:#888;">መለያ: <span id="myID">...</span></p>
+    <h3 style="background:#000; display:inline-block; padding:10px 30px; border-radius:10px; border:1px solid #ffc40f;">💰 <span id="balance">0.00</span> ETB</h3>
+    
     <div class="grid" id="grid"></div>
-    <button class="draw" onclick="startDraw()">DRAW (ይጀምር)</button>
+    
+    <button class="draw" onclick="startDraw()">DRAW (ይጀምር)</button><br>
     <button class="add" onclick="adminAdd()">ADD 💰</button>
 
     <script>
@@ -38,13 +40,18 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // መለያን በቋሚነት ማስቀመጥ
         let uID = localStorage.getItem('keno_id') || "USER-" + Math.floor(1000+Math.random()*9000);
         localStorage.setItem('keno_id', uID);
         document.getElementById('myID').innerText = uID;
 
+        // ተጠቃሚውን መመዝገብ እና ብር መከታተል
         db.ref('users/' + uID).on('value', (s) => {
-            if(!s.exists()) { db.ref('users/' + uID).set({balance: 50}); }
-            document.getElementById('balance').innerText = (s.val().balance || 0).toFixed(2);
+            if(!s.exists()) { 
+                db.ref('users/' + uID).set({balance: 50}); // አዲስ ለሆነ ሰው 50 ብር ስጦታ
+            } else {
+                document.getElementById('balance').innerText = (s.val().balance || 0).toFixed(2);
+            }
         });
 
         const grid = document.getElementById('grid');
@@ -53,29 +60,38 @@
             let d = document.createElement('div');
             d.className='num'; d.innerText=i; d.id='n'+i;
             d.onclick=()=>{
-                if(d.classList.contains('selected')){ d.classList.remove('selected'); selected=selected.filter(n=>n!=i); }
-                else if(selected.length<10){ d.classList.add('selected'); selected.push(i); }
+                if(d.classList.contains('selected')){ 
+                    d.classList.remove('selected'); 
+                    selected=selected.filter(n=>n!=i); 
+                } else if(selected.length<10){ 
+                    d.classList.add('selected'); 
+                    selected.push(i); 
+                }
             };
             grid.appendChild(d);
         }
 
         function startDraw(){
-            if(selected.length==0) return alert("ቁጥር ይምረጡ");
+            if(selected.length==0) return alert("እባክህ ቁጥር ምረጥ!");
             db.ref('users/'+uID+'/balance').once('value', (s)=>{
-                let bal = s.val();
-                if(bal < 15) return alert("በቂ ብር የለም");
+                let bal = s.val() || 0;
+                if(bal < 15) return alert("በቂ ብር የለም!");
+                
                 db.ref('users/'+uID).update({balance: bal - 15});
-                let count=0; let drawn=[];
+                document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
+                
+                let drawn=[];
                 let itv = setInterval(()=>{
                     let r = Math.floor(Math.random()*80)+1;
                     if(!drawn.includes(r)){
-                        drawn.push(r); document.getElementById('n'+r).classList.add('hit');
+                        drawn.push(r); 
+                        document.getElementById('n'+r).classList.add('hit');
                         if(drawn.length==20){
                             clearInterval(itv);
                             let hits = drawn.filter(n=>selected.includes(n)).length;
                             let win = hits >= 3 ? 15 * (hits - 1) : 0;
-                            db.ref('users/'+uID).update({balance: bal - 15 + win});
-                            alert("Hits: " + hits + " | Win: " + win);
+                            db.ref('users/'+uID).update({balance: (bal - 15 + win)});
+                            alert("Hits: " + hits + " | Win: " + win + " ETB");
                         }
                     }
                 }, 100);
@@ -83,12 +99,14 @@
         }
 
         function adminAdd(){
-            if(prompt("Pass")=="1234"){
-                let id = prompt("ID:");
-                let amt = parseFloat(prompt("Amt:"));
+            if(prompt("Admin Password:")=="1234"){
+                let id = prompt("User ID ያስገቡ (ለምሳሌ USER-4173):");
+                let amt = parseFloat(prompt("የብር መጠን:"));
                 db.ref('users/'+id).once('value', (s)=>{
-                    if(s.exists()) db.ref('users/'+id).update({balance: s.val().balance + amt});
-                    else alert("የለም");
+                    if(s.exists()){
+                        db.ref('users/'+id).update({balance: (s.val().balance || 0) + amt});
+                        alert("ብር ተጨምሯል!");
+                    } else { alert("User አልተገኘም!"); }
                 });
             }
         }
