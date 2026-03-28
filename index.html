@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL PRO - SECURE</title>
+    <title>KENO ROYAL PRO - OFFICIAL</title>
     <style>
-        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; --blue: #3498db; --red: #e74c3c; }
+        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; --red: #e74c3c; }
         body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
         .header { background: var(--card); padding: 15px; border-radius: 0 0 25px 25px; border-bottom: 4px solid var(--gold); margin-bottom: 10px; }
         .user-id { font-size: 14px; color: #aaa; margin-top: 5px; }
         .balance-container { border: 3px solid var(--gold); display: inline-block; padding: 10px 25px; border-radius: 40px; margin: 10px 0; cursor: pointer; -webkit-user-select: none; }
         .balance-display { font-size: 26px; font-weight: bold; color: var(--gold); }
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 10px auto; }
-        .num { background: #2c2c2c; border: 1px solid #444; padding: 10px 0; font-weight: bold; border-radius: 5px; font-size: 14px; }
-        .selected { background: var(--blue) !important; color: white; }
+        .num { background: #2c2c2c; border: 1px solid #444; padding: 10px 0; font-weight: bold; border-radius: 5px; cursor: pointer; }
+        .selected { background: #3498db !important; color: white; }
         .action-btn { width: 100%; max-width: 450px; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin: 5px 0; }
         .draw-btn { background: var(--green); color: white; }
         .dep-btn { background: #f39c12; color: white; }
         .with-btn { background: var(--red); color: white; }
-        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 5px; width: 70px; text-align: center; border-radius: 5px; font-size: 18px; }
+        .rules { font-size: 12px; color: #888; margin-top: 10px; text-align: left; max-width: 450px; margin-inline: auto; }
+        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 5px; width: 80px; text-align: center; border-radius: 5px; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -31,13 +32,22 @@
         </div>
     </div>
 
-    <div style="margin: 5px;">መወራረድ (ሚኒመም 15): <input type="number" id="betAmount" value="15" min="15"></div>
+    <div style="margin: 10px;">
+        የውርርድ መጠን: <input type="number" id="betAmount" value="15" min="15">
+    </div>
 
     <div class="grid" id="grid"></div>
 
     <button class="action-btn draw-btn" onclick="draw()">ይጀምር (DRAW)</button>
-    <button onclick="requestDeposit()" class="action-btn dep-btn">💳 ብር አስገባ / DEPOSIT</button>
-    <button class="action-btn with-btn" onclick="requestWithdraw()">💸 ብር አውጣ (WITHDRAW)</button>
+    <button onclick="requestDeposit()" class="action-btn dep-btn">💳 ብር አስገባ (Min 100)</button>
+    <button class="action-btn with-btn" onclick="requestWithdraw()">💸 ብር አውጣ (Min 300)</button>
+
+    <div class="rules">
+        <b>መመሪያዎች፦</b><br>
+        • ዝቅተኛ ውርርድ (Minimum Bet) 15 ETB ነው።<br>
+        • ዝቅተኛ ተቀማጭ (Minimum Deposit) 100 ETB ነው።<br>
+        • ዝቅተኛ መውጫ (Minimum Withdraw) 300 ETB ነው።
+    </div>
 
     <script>
         const botToken = '8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw';
@@ -48,7 +58,6 @@
         let selected = [];
         let userID = "";
 
-        // ID መፍጠሪያ
         function getID() {
             let id = localStorage.getItem('keno_user_id');
             if (!id) {
@@ -69,30 +78,36 @@
             fetch(url);
         }
 
-        // --- አድሚን ብር ለመጨመር (ባላንሱ ላይ ተጭኖ መያዝ) ---
+        // --- አድሚን ብር ለመጨመር ---
         let timer;
         const trigger = document.getElementById('adminTrigger');
         trigger.addEventListener('touchstart', () => {
             timer = setTimeout(() => {
                 let pass = prompt("አድሚን ፓስወርድ ያስገቡ፦");
                 if (pass === adminPass) {
-                    let add = parseFloat(prompt("የሚጨመር የብር መጠን፦"));
-                    if (!isNaN(add)) {
+                    let add = parseFloat(prompt("ለተጫዋቹ የሚጨመር የብር መጠን፦"));
+                    if (!isNaN(add) && add > 0) {
                         currentBalance += add;
                         updateUI();
-                        sendToTelegram(`✅ <b>ባላንስ ተጨምሯል!</b>\nID: ${userID}\nመጠን: ${add} ETB\nአሁን ያለው: ${currentBalance} ETB`);
+                        sendToTelegram(`✅ <b>ባላንስ ተጨምሯል!</b>\nID: ${userID}\nመጠን: ${add} ETB`);
                         alert("ተጨምሯል!");
                     }
                 }
-            }, 1500);
+            }, 2000);
         });
         trigger.addEventListener('touchend', () => clearTimeout(timer));
 
-        // Withdraw ሲደረግ ወዲያውኑ ይቀንሳል
+        // Withdraw (Min 300)
         function requestWithdraw() {
-            let amount = parseFloat(prompt("የሚወጣ የብር መጠን ያስገቡ፦"));
-            if (isNaN(amount) || amount <= 0) return;
-            
+            if (currentBalance < 300) {
+                alert("ለማውጣት ቢያንስ 300 ብር ባላንስ ያስፈልግዎታል!");
+                return;
+            }
+            let amount = parseFloat(prompt("የሚወጣ የብር መጠን (ቢያንስ 300)፦"));
+            if (isNaN(amount) || amount < 300) {
+                alert("እባክዎ ከ300 ብር በላይ ያስገቡ!");
+                return;
+            }
             if (amount > currentBalance) {
                 alert("በቂ ባላንስ የሎትም!");
                 return;
@@ -100,24 +115,25 @@
 
             let phone = prompt("ብር የሚላክበት ስልክ ቁጥር፦");
             if (phone) {
-                // መጀመሪያ ከባላንሱ ይቀንሳል!
                 currentBalance -= amount;
                 updateUI();
-
-                // ከዚያ ለአንተ ይላካል
-                let msg = `🔴 <b>የመውጫ ጥያቄ (Withdraw)</b>\n━━━━━━━━━━━━━\n<b>መለያ (ID):</b> ${userID}\n<b>መጠን:</b> ${amount} ETB\n<b>ስልክ:</b> ${phone}\n<b>ቀሪ ባላንስ:</b> ${currentBalance} ETB`;
-                sendToTelegram(msg);
-                alert("ጥያቄዎ ተልኳል። ብሩ ከባላንስዎ ላይ ቀንሷል!");
+                sendToTelegram(`🔴 <b>የመውጫ ጥያቄ</b>\nID: ${userID}\nመጠን: ${amount} ETB\nስልክ: ${phone}`);
+                alert("ጥያቄው ተልኳል፣ ብሩ ወዲያውኑ ቀንሷል!");
             }
         }
 
+        // Deposit (Min 100)
         function requestDeposit() {
-            let msg = `📥 <b>የተቀማጭ ጥያቄ (Deposit)</b>\nID: ${userID}\nተጫዋቹ ብር ማስገባት ይፈልጋል።`;
-            sendToTelegram(msg);
-            alert("ጥያቄው ተልኳል! እባክዎ አስተዳዳሪውን ያነጋግሩ።");
+            let amount = parseFloat(prompt("የሚያስገቡትን የብር መጠን ይጥቀሱ (ቢያንስ 100)፦"));
+            if (isNaN(amount) || amount < 100) {
+                alert("ማስገባት የሚቻለው ከ100 ብር በላይ ብቻ ነው!");
+                return;
+            }
+            sendToTelegram(`📥 <b>የተቀማጭ ጥያቄ</b>\nID: ${userID}\nመጠን: ${amount} ETB`);
+            alert("ጥያቄው ተልኳል! ለአስተዳዳሪው ይደውሉ።");
         }
 
-        // ግሪድ መፍጠሪያ
+        // Grid
         const grid = document.getElementById('grid');
         for (let i = 1; i <= 80; i++) {
             let d = document.createElement('div');
@@ -136,11 +152,13 @@
 
         function draw() {
             let bet = parseFloat(document.getElementById('betAmount').value);
+            if (bet < 15) { alert("ዝቅተኛ ውርርድ 15 ብር ነው!"); return; }
             if (selected.length === 0) { alert("ቁጥር ይምረጡ!"); return; }
             if (currentBalance < bet) { alert("ባላንስ የሎትም!"); return; }
+            
             currentBalance -= bet;
             updateUI();
-            alert("ጨዋታው ተጀምሯል!");
+            alert("ጨዋታው ተጀምሯል! መልካም ዕድል!");
         }
 
         window.onload = function() {
