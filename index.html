@@ -1,193 +1,21 @@
-<!DOCTYPE html>
-<html lang="am">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL - MULTI-USER</title>
-    <style>
-        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; --red: #e74c3c; --blue: #3498db; }
-        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        .header { background: var(--card); padding: 15px; border-radius: 0 0 25px 25px; border-bottom: 4px solid var(--gold); margin-bottom: 10px; }
-        .user-id { font-size: 14px; color: #aaa; margin-top: 5px; }
-        .balance-container { border: 3px solid var(--gold); display: inline-block; padding: 10px 25px; border-radius: 40px; margin: 10px 0; cursor: pointer; }
-        .balance-display { font-size: 26px; font-weight: bold; color: var(--gold); }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 10px auto; }
-        .num { background: #2c2c2c; border: 1px solid #444; padding: 10px 0; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s; }
-        .selected { background: var(--blue) !important; color: white; }
-        .hit { background: var(--gold) !important; color: black; transform: scale(1.1); }
-        .action-btn { width: 100%; max-width: 450px; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin: 5px 0; }
-        .draw-btn { background: var(--green); color: white; }
-        .dep-btn { background: #f39c12; color: white; }
-        .with-btn { background: var(--red); color: white; }
-        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 5px; width: 80px; text-align: center; border-radius: 5px; font-size: 18px; }
-        #status { margin-top: 10px; font-weight: bold; color: var(--gold); min-height: 20px; }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <h3 style="margin:0; color:var(--gold);">🎰 KENO ROYAL PRO</h3>
-        <div class="user-id">የተጫዋች መለያ (ID): <span id="displayID" onclick="adminPanel()" style="text-decoration: underline;">...</span></div>
-        <div class="balance-container">
-            <span class="balance-display">💰 <span id="balance">0.00</span> ETB</span>
-        </div>
-        <div id="status">ቁጥሮችን ይምረጡ</div>
-    </div>
-
-    <div style="margin: 10px;">
-        የውርርድ መጠን: <input type="number" id="betAmount" value="15" min="15">
-    </div>
-
-    <div class="grid" id="grid"></div>
-
-    <button class="action-btn draw-btn" id="drawBtn" onclick="startKenoDraw()">ይጀምር (DRAW)</button>
-    <button onclick="requestDeposit()" class="action-btn dep-btn">💳 ብር አስገባ (Min 100)</button>
-    <button onclick="requestWithdraw()" class="action-btn with-btn">💸 ብር አውጣ (Min 300)</button>
-
-    <script>
-        const botToken = '8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw';
-        const chatId = '7313437942';
-        const adminPass = "1234";
-
-        let currentBalance = 0.00;
-        let selectedNumbers = [];
-        let userID = "";
-
-        // ID ማመንጫ - አንድ ጊዜ ብቻ
-        function initUser() {
-            userID = localStorage.getItem('keno_user_id');
-            if (!userID) {
-                userID = "USER-" + Math.floor(1000 + Math.random() * 9000);
-                localStorage.setItem('keno_user_id', userID);
-                localStorage.setItem('keno_balance_' + userID, "0"); // ለዚህ ID ብቻ ባላንስ
-            }
-            currentBalance = parseFloat(localStorage.getItem('keno_balance_' + userID) || 0);
-            document.getElementById('displayID').innerText = userID;
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('balance').innerText = currentBalance.toFixed(2);
-            localStorage.setItem('keno_balance_' + userID, currentBalance);
-        }
-
-        function sendToTelegram(msg) {
-            fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&parse_mode=HTML&text=${encodeURIComponent(msg)}`);
-        }
-
-        // --- አድሚን ብር ለመጨመር (በ ID መፈለጊያ) ---
-        function adminPanel() {
-            let pass = prompt("አድሚን ፓስወርድ ያስገቡ፦");
-            if (pass === adminPass) {
-                let targetID = prompt("ብር የሚጨመርለት ተጫዋች ID ያስገቡ (ለምሳሌ፦ USER-1234)፦");
-                if (targetID) {
-                    let amount = parseFloat(prompt(targetID + " ላይ የሚጨመር የብር መጠን፦"));
-                    if (!isNaN(amount)) {
-                        // መለያው የራሱ ከሆነ ወዲያውኑ ይጨምራል
-                        if (targetID === userID) {
-                            currentBalance += amount;
+        // --- አድሚን ብር ለመጨመር ---
+        let timer;
+        const trigger = document.getElementById('adminTrigger');
+        trigger.addEventListener('touchstart', () => {
+            timer = setTimeout(() => {
+                let pass = prompt("አድሚን ፓስወርድ ያስገቡ፦");
+                if (pass === adminPass) {
+                    let username = prompt("ለማስገባት የፈለጉትን ሰው ዩዘርኔም ያስገቡ፦");
+                    if (username) {
+                        let add = parseFloat(prompt("ለተጫዋቹ የሚጨመር የብር መጠን፦"));
+                        if (!isNaN(add) && add > 0) {
+                            currentBalance += add;
                             updateUI();
-                        } else {
-                            // ለሌላ ሰው ከሆነ በዳታቤዝ በኩል መሆን አለበት (ለጊዜው ቴሌግራም ላይ ይልካል)
-                            sendToTelegram(`🔔 <b>ADMIN ACTION</b>\nID: ${targetID}\nAmount: +${amount} ETB`);
+                            sendToTelegram(`✅ <b>ባላንስ ተጨምሯል!</b>\nUsername: ${username}\nመጠን: ${add} ETB`);
+                            alert("ተጨምሯል!");
                         }
-                        alert("ተፈጽሟል!");
                     }
                 }
-            }
-        }
-
-        // Withdraw ገደብ
-        function requestWithdraw() {
-            if (currentBalance < 300) {
-                alert("ስህተት፦ ለማውጣት ቢያንስ 300 ብር ባላንስ ሊኖርዎት ይገባል!");
-                return;
-            }
-            let amount = parseFloat(prompt("የሚወጣ መጠን (Min 300)፦"));
-            if (amount >= 300 && amount <= currentBalance) {
-                let phone = prompt("ብር የሚላክበት ስልክ ቁጥር፦");
-                currentBalance -= amount;
-                updateUI();
-                sendToTelegram(`🔴 <b>WITHDRAW</b>\nID: ${userID}\nAmount: ${amount} ETB\nPhone: ${phone}`);
-                alert("ጥያቄው ተልኳል!");
-            } else {
-                alert("ያልተፈቀደ መጠን ወይም በቂ ባላንስ የሎትም!");
-            }
-        }
-
-        function requestDeposit() {
-            let amount = parseFloat(prompt("የሚያስገቡት የብር መጠን (Min 100)፦"));
-            if (amount >= 100) {
-                sendToTelegram(`📥 <b>DEPOSIT ጥያቄ</b>\nID: ${userID}\nAmount: ${amount} ETB`);
-                alert("ጥያቄው ተልኳል! ለአስተዳዳሪው ይደውሉ።");
-            } else {
-                alert("ከ100 ብር በታች ማስገባት አይቻልም!");
-            }
-        }
-
-        // Grid መፍጠሪያ
-        const grid = document.getElementById('grid');
-        for (let i = 1; i <= 80; i++) {
-            let d = document.createElement('div');
-            d.className = 'num'; d.id = 'n' + i; d.innerText = i;
-            d.onclick = function() {
-                if (this.classList.contains('selected')) {
-                    this.classList.remove('selected');
-                    selectedNumbers = selectedNumbers.filter(n => n !== i);
-                } else if (selectedNumbers.length < 10) {
-                    this.classList.add('selected');
-                    selectedNumbers.push(i);
-                }
-            };
-            grid.appendChild(d);
-        }
-
-        // ጨዋታው እንዲታይ (Animation)
-        function startKenoDraw() {
-            let bet = parseFloat(document.getElementById('betAmount').value);
-            if (selectedNumbers.length === 0) { alert("ቁጥሮችን ይምረጡ!"); return; }
-            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም!"); return; }
-
-            currentBalance -= bet;
-            updateUI();
-            
-            document.getElementById('drawBtn').disabled = true;
-            document.querySelectorAll('.num').forEach(el => el.classList.remove('hit'));
-            
-            let drawn = [];
-            let hits = 0;
-            let count = 0;
-
-            let interval = setInterval(() => {
-                let rand;
-                do { rand = Math.floor(Math.random() * 80) + 1; } while (drawn.includes(rand));
-                drawn.push(rand);
-                
-                let el = document.getElementById('n' + rand);
-                el.classList.add('hit');
-                
-                if (selectedNumbers.includes(rand)) { hits++; }
-                
-                count++;
-                document.getElementById('status').innerText = "ቁጥሮች እየወጡ ነው፦ " + count + "/20";
-
-                if (count === 20) {
-                    clearInterval(interval);
-                    document.getElementById('drawBtn').disabled = false;
-                    finishGame(hits, bet);
-                }
-            }, 300); // በየ 0.3 ሰከንዱ አንድ ቁጥር ይወጣል
-        }
-
-        function finishGame(hits, bet) {
-            let win = 0;
-            if (hits >= 2) win = bet * (hits * 0.5); // ቀላል የክፍያ ስሌት
-            currentBalance += win;
-            updateUI();
-            document.getElementById('status').innerText = `ጨዋታ ተጠናቀቀ! ${hits} ቁጥሮች መትተዋል! ድል፦ ${win} ETB`;
-        }
-
-        window.onload = initUser;
-    </script>
-</body>
-</html>
+            }, 2000); // 2 ሴኮንድ ተጭነህ ስትይዘው ይሰራል
+        });
+        trigger.addEventListener('touchend', () => clearTimeout(timer));
