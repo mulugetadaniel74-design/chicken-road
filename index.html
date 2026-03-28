@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DANIEL KENO ROYAL - PRO V4</title>
+    <title>DANIEL KENO ROYAL - PRO V5</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
@@ -19,7 +19,7 @@
         .ticket-sidebar { flex: 0.8; min-width: 280px; background: #111; border-radius: 15px; padding: 15px; border: 1px solid #333; max-height: 400px; overflow-y: auto; }
 
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin: 10px auto; }
-        .num { background: #333; border: 1px solid #444; padding: 10px 0; font-weight: bold; border-radius: 5px; font-size: 0.9rem; transition: 0.3s; }
+        .num { background: #333; border: 1px solid #444; padding: 10px 0; font-weight: bold; border-radius: 5px; font-size: 0.9rem; }
         .selected { background: var(--blue) !important; color: white; }
         .hit { background: var(--gold) !important; color: black; box-shadow: 0 0 15px var(--gold); }
 
@@ -32,9 +32,10 @@
 
         .btn-main { width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; background: var(--green); color: white; margin: 10px 0; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); }
-        .modal-content { background: var(--card); margin: 15% auto; padding: 25px; width: 85%; border-radius: 15px; border: 1px solid var(--gold); text-align: left; }
+        .modal-content { background: var(--card); margin: 10% auto; padding: 25px; width: 85%; border-radius: 15px; border: 1px solid var(--gold); text-align: left; }
         
-        .input-field { width: 90%; background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 10px; border-radius: 5px; margin-top: 10px; font-weight: bold; }
+        .input-field { width: 95%; background: #000; color: var(--gold); border: 1px solid #444; padding: 12px; border-radius: 8px; margin-top: 10px; font-weight: bold; }
+        select.input-field { width: 100%; }
     </style>
 </head>
 <body>
@@ -42,7 +43,7 @@
 <div class="header">
     <h3 style="margin:0; color:var(--gold);">🎰 DANIEL KENO ROYAL</h3>
     <div class="balance-box">💰 <span id="balance">0.00</span> ETB</div>
-    <div class="u-id-display">የእርሶ መለያ (ID): <span id="myID" style="color:var(--gold);">...</span></div>
+    <div class="u-id-display">መለያ (ID): <span id="myID" style="color:var(--gold);">...</span></div>
 </div>
 
 <div class="main-layout">
@@ -76,17 +77,29 @@
 <div id="depModal" class="modal"><div class="modal-content">
     <h3 style="color:var(--blue);">📥 ብር ለማስገባት</h3>
     <p>ስም: <b>Daniel Mulugeta</b><br>Telebirr: <b>0986980130</b><br>አቢሲኒያ: <b>153682704</b></p>
-    <p style="color:var(--gold);">* ቢያንስ 100 ብር እና በላይ</p>
-    <p>የእርሶን ID ለባለቤቱ ይላኩ።</p>
+    <p style="color:var(--gold);">* ቢያንስ 100 ብር</p>
     <button onclick="closeModal('depModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; border-radius:5px;">ዝጋ</button>
 </div></div>
 
 <div id="witModal" class="modal"><div class="modal-content">
-    <h3 style="color:var(--red);">📤 ብር ለማውጣት</h3>
-    <p>የሚወጣ መጠን (Min 300 ETB):</p>
-    <input type="number" id="witAmt" class="input-field" placeholder="መጠን ያስገቡ...">
-    <button onclick="requestWithdraw()" style="background:var(--green); color:white; width:100%; padding:12px; border:none; border-radius:8px; margin-top:15px; font-weight:bold;">አረጋግጥ (Confirm)</button>
-    <button onclick="closeModal('witModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; border-radius:5px; margin-top:10px;">ተመለስ</button>
+    <h3 style="color:var(--red); margin-top:0;">📤 ብር ለማውጣት</h3>
+    
+    <label style="font-size:12px; color:#888;">የሚወጣ መጠን (Min 300):</label>
+    <input type="number" id="witAmt" class="input-field" placeholder="ምሳሌ: 500">
+    
+    <label style="font-size:12px; color:#888; display:block; margin-top:10px;">የክፍያ መንገድ:</label>
+    <select id="witMethod" class="input-field">
+        <option value="Telebirr">Telebirr</option>
+        <option value="CBE (የኢትዮጵያ ንግድ ባንክ)">CBE (ንግድ ባንክ)</option>
+        <option value="Abyssinia Bank">Abyssinia Bank</option>
+        <option value="Other Bank">ሌላ ባንክ</option>
+    </select>
+    
+    <label style="font-size:12px; color:#888; display:block; margin-top:10px;">አካውንት ቁጥር እና ሙሉ ስም:</label>
+    <input type="text" id="witAccount" class="input-field" placeholder="ቁጥር እና ስም እዚህ ይጻፉ...">
+    
+    <button onclick="requestWithdraw()" style="background:var(--green); color:white; width:100%; padding:12px; border:none; border-radius:8px; margin-top:20px; font-weight:bold;">ጥያቄ ላክ (Send Request)</button>
+    <button onclick="closeModal('witModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; border-radius:8px; margin-top:10px;">ተመለስ</button>
 </div></div>
 
 <script>
@@ -151,33 +164,25 @@
         });
     }
 
-    // የብር መሙያ አድሚን ሲስተም
-    function adminAction() {
-        let pass = prompt("Admin Password:");
-        if(pass === "1234") {
-            let targetID = prompt("ገንዘብ የሚሞላለት የተጫዋች ID (ለምሳሌ USER-1234):");
-            let amount = parseFloat(prompt("የሚሞላው የብር መጠን:"));
-            if(targetID && amount > 0) {
-                db.ref('users/' + targetID).once('value', s => {
-                    if(s.exists()){
-                        let currentBal = s.val().balance || 0;
-                        db.ref('users/' + targetID).update({balance: currentBal + amount});
-                        alert("ተሳክቷል! ለ " + targetID + " " + amount + " ብር ተሞልቷል።");
-                    } else { alert("ይህ ID አልተገኘም! እባክዎ በትክክል መጻፍዎን ያረጋግጡ።"); }
-                });
-            }
-        } else if (pass !== null) { alert("የተሳሳተ ሚስጥር ቁጥር!"); }
-    }
-
     function requestWithdraw() {
         let amt = parseFloat(document.getElementById('witAmt').value);
-        if(amt < 300) return alert("ዝቅተኛው ማውጫ 300 ብር ነው!");
+        let method = document.getElementById('witMethod').value;
+        let accountInfo = document.getElementById('witAccount').value;
+
+        if(!amt || amt < 300) return alert("ዝቅተኛው ማውጫ 300 ብር ነው!");
+        if(!accountInfo) return alert("እባክዎ አካውንት ቁጥር እና ስም ያስገቡ!");
+
         db.ref('users/' + uID + '/balance').once('value', s => {
             let bal = s.val() || 0;
             if(bal < amt) return alert("በአካውንትዎ በቂ ብር የለም!");
+            
+            // ባላንሱን ቀንሶ ለባለቤቱ በቴሌግራም ይልካል
             db.ref('users/' + uID).update({balance: bal - amt});
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=Withdraw Request! ID:${uID} Amt:${amt}`);
-            alert("ጥያቄዎ ተልኳል! ባለቤቱ ሲያረጋግጥ ይላክለዎታል።");
+            
+            let message = `🔔 Withdraw Request!\n👤 ID: ${uID}\n💰 Amount: ${amt} ETB\n🏦 Method: ${method}\n📝 Account: ${accountInfo}`;
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`);
+            
+            alert("ጥያቄዎ ተልኳል! በ 24 ሰዓት ውስጥ ይላክልዎታል።");
             closeModal('witModal');
         });
     }
@@ -226,6 +231,22 @@
             }
         });
         activeBets = []; isDrawing = false; timeLeft = 60;
+    }
+
+    function adminAction() {
+        let pass = prompt("Admin Password:");
+        if(pass === "1234") {
+            let targetID = prompt("User ID:");
+            let amount = parseFloat(prompt("Amount:"));
+            if(targetID && amount > 0) {
+                db.ref('users/' + targetID).once('value', s => {
+                    if(s.exists()){
+                        db.ref('users/' + targetID).update({balance: (s.val().balance || 0) + amount});
+                        alert("Done!");
+                    } else alert("Not Found!");
+                });
+            }
+        }
     }
 
     function showModal(id) { document.getElementById(id).style.display = "block"; }
