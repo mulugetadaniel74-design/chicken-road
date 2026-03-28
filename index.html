@@ -3,126 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHICKEN KENO ROYAL</title>
+    <title>CHICKEN KENO</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; }
-        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
-        .header { background: var(--card); padding: 15px; border-bottom: 4px solid var(--gold); }
-        .balance-box { border: 2px solid var(--gold); display: inline-block; padding: 10px 30px; border-radius: 15px; margin: 10px 0; background: #000; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 450px; margin: 15px auto; padding: 10px; }
-        .num { background: #2c2c2c; border: 1px solid #444; padding: 12px 0; font-weight: bold; border-radius: 8px; cursor: pointer; }
-        .selected { background: #3498db !important; color: white; }
-        .hit { background: var(--gold) !important; color: black; box-shadow: 0 0 10px var(--gold); }
-        .action-btn { width: 90%; max-width: 400px; padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: bold; margin: 5px; }
-        .draw-btn { background: var(--green); color: white; }
-        .admin-btn { background: #e67e22; color: white; width: 30%; font-size: 14px; }
-        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 10px; width: 80px; text-align: center; border-radius: 8px; }
+        body { background:#121212; color:white; text-align:center; font-family:sans-serif; }
+        .grid { display:grid; grid-template-columns:repeat(10, 1fr); gap:5px; max-width:400px; margin:20px auto; }
+        .num { background:#333; padding:10px; border-radius:5px; cursor:pointer; }
+        .selected { background:#3498db !important; }
+        .hit { background:#ffc40f !important; color:black; }
+        button { padding:15px; margin:10px; border-radius:10px; border:none; font-weight:bold; cursor:pointer; }
+        .draw { background:#2ecc71; color:white; width:200px; }
+        .add { background:#e67e22; color:white; }
     </style>
 </head>
 <body>
+    <h2>🎰 CHICKEN KENO</h2>
+    <p>መለያ: <span id="myID">...</span></p>
+    <h3 style="color:#ffc40f;">💰 <span id="balance">0.00</span> ETB</h3>
+    <div class="grid" id="grid"></div>
+    <button class="draw" onclick="startDraw()">DRAW (ይጀምር)</button>
+    <button class="add" onclick="adminAdd()">ADD 💰</button>
 
-<div class="header">
-    <h2 style="margin:0; color:var(--gold);">🎰 CHICKEN KENO</h2>
-    <div style="font-size:12px; color:#888;">መለያ: <span id="myID">...</span></div>
-    <div class="balance-box">💰 <span id="balance">0.00</span> ETB</div>
-    <div id="status" style="color:var(--green);">ቁጥሮችን ይምረጡ!</div>
-</div>
-
-<div style="margin: 15px;">ወራጅ: <input type="number" id="betAmount" value="15"></div>
-<div class="grid" id="grid"></div>
-
-<button class="action-btn draw-btn" id="drawBtn" onclick="startDraw()">ይጀምር (DRAW)</button>
-<button class="action-btn admin-btn" onclick="adminAddMoney()">ADD 💰</button>
-
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBM9vbTCQT39mjHMWN5Yk8f7aEXVMZWXUA",
-        authDomain: "chickenkeno-c41fa.firebaseapp.com",
-        projectId: "chickenkeno-c41fa",
-        databaseURL: "https://chickenkeno-c41fa-default-rtdb.firebaseio.com",
-        storageBucket: "chickenkeno-c41fa.appspot.com",
-        messagingSenderId: "423384148862",
-        appId: "1:423384148862:web:99e9faebe83982f95be12f"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    let uID = localStorage.getItem('keno_user_id') || "USER-" + Math.floor(1000 + Math.random() * 9000);
-    localStorage.setItem('keno_user_id', uID);
-    document.getElementById('myID').innerText = uID;
-
-    // ተጠቃሚውን መዝግብ (ሁልጊዜ መኖሩን ያረጋግጣል)
-    database.ref('users/' + uID).once('value', (s) => {
-        if(!s.exists()) { database.ref('users/' + uID).set({ balance: 100 }); } // በነጻ 100 ብር ለመጀመር
-    });
-
-    database.ref('users/' + uID + '/balance').on('value', (snap) => {
-        let bal = snap.val() || 0;
-        document.getElementById('balance').innerText = bal.toFixed(2);
-    });
-
-    const grid = document.getElementById('grid');
-    let selected = [];
-    for (let i = 1; i <= 80; i++) {
-        let d = document.createElement('div');
-        d.className = 'num'; d.id = 'num-' + i; d.innerText = i;
-        d.onclick = function() {
-            if (this.classList.contains('selected')) {
-                this.classList.remove('selected');
-                selected = selected.filter(n => n !== i);
-            } else if (selected.length < 10) {
-                this.classList.add('selected');
-                selected.push(i);
-            }
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBM9vbTCQT39mjHMWN5Yk8f7aEXVMZWXUA",
+            authDomain: "chickenkeno-c41fa.firebaseapp.com",
+            projectId: "chickenkeno-c41fa",
+            databaseURL: "https://chickenkeno-c41fa-default-rtdb.firebaseio.com",
+            storageBucket: "chickenkeno-c41fa.appspot.com",
+            messagingSenderId: "423384148862",
+            appId: "1:423384148862:web:99e9faebe83982f95be12f"
         };
-        grid.appendChild(d);
-    }
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-    function startDraw() {
-        if (selected.length === 0) { alert("መጀመሪያ ቁጥር ይምረጡ!"); return; }
-        
-        let bet = parseFloat(document.getElementById('betAmount').value);
-        database.ref('users/' + uID + '/balance').once('value', (s) => {
-            let currentBal = s.val() || 0;
-            if (currentBal < bet) { alert("በቂ ብር የለም!"); return; }
+        let uID = localStorage.getItem('keno_id') || "USER-" + Math.floor(1000+Math.random()*9000);
+        localStorage.setItem('keno_id', uID);
+        document.getElementById('myID').innerText = uID;
 
-            database.ref('users/' + uID).update({ balance: currentBal - bet });
-            document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
-            
-            let drawn = []; let hits = 0;
-            let intv = setInterval(() => {
-                let r = Math.floor(Math.random() * 80) + 1;
-                if(!drawn.includes(r)) {
-                    drawn.push(r);
-                    document.getElementById('num-' + r).classList.add('hit');
-                    if (selected.includes(r)) hits++;
-                    if (drawn.length === 20) {
-                        clearInterval(intv);
-                        let win = hits >= 3 ? bet * (hits - 1.5) : 0;
-                        database.ref('users/' + uID).update({ balance: currentBal - bet + win });
-                        document.getElementById('status').innerText = `Hits: ${hits} | Win: ${win} ETB`;
-                    }
-                }
-            }, 100);
+        db.ref('users/' + uID).on('value', (s) => {
+            if(!s.exists()) { db.ref('users/' + uID).set({balance: 50}); }
+            document.getElementById('balance').innerText = (s.val().balance || 0).toFixed(2);
         });
-    }
 
-    function adminAddMoney() {
-        let p = prompt("Admin Pass:");
-        if (p === "1234") {
-            let id = prompt("User ID:");
-            let amt = parseFloat(prompt("Amount:"));
-            database.ref('users/' + id).once('value', (s) => {
-                if(s.exists()){
-                    let cur = s.val().balance || 0;
-                    database.ref('users/' + id).update({ balance: cur + amt });
-                    alert("ተሳክቷል!");
-                } else { alert("User አልተገኘም!"); }
+        const grid = document.getElementById('grid');
+        let selected = [];
+        for(let i=1; i<=80; i++){
+            let d = document.createElement('div');
+            d.className='num'; d.innerText=i; d.id='n'+i;
+            d.onclick=()=>{
+                if(d.classList.contains('selected')){ d.classList.remove('selected'); selected=selected.filter(n=>n!=i); }
+                else if(selected.length<10){ d.classList.add('selected'); selected.push(i); }
+            };
+            grid.appendChild(d);
+        }
+
+        function startDraw(){
+            if(selected.length==0) return alert("ቁጥር ይምረጡ");
+            db.ref('users/'+uID+'/balance').once('value', (s)=>{
+                let bal = s.val();
+                if(bal < 15) return alert("በቂ ብር የለም");
+                db.ref('users/'+uID).update({balance: bal - 15});
+                let count=0; let drawn=[];
+                let itv = setInterval(()=>{
+                    let r = Math.floor(Math.random()*80)+1;
+                    if(!drawn.includes(r)){
+                        drawn.push(r); document.getElementById('n'+r).classList.add('hit');
+                        if(drawn.length==20){
+                            clearInterval(itv);
+                            let hits = drawn.filter(n=>selected.includes(n)).length;
+                            let win = hits >= 3 ? 15 * (hits - 1) : 0;
+                            db.ref('users/'+uID).update({balance: bal - 15 + win});
+                            alert("Hits: " + hits + " | Win: " + win);
+                        }
+                    }
+                }, 100);
             });
         }
-    }
-</script>
+
+        function adminAdd(){
+            if(prompt("Pass")=="1234"){
+                let id = prompt("ID:");
+                let amt = parseFloat(prompt("Amt:"));
+                db.ref('users/'+id).once('value', (s)=>{
+                    if(s.exists()) db.ref('users/'+id).update({balance: s.val().balance + amt});
+                    else alert("የለም");
+                });
+            }
+        }
+    </script>
 </body>
 </html>
