@@ -14,11 +14,10 @@
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 450px; margin: 15px auto; padding: 10px; }
         .num { background: #2c2c2c; border: 1px solid #444; padding: 12px 0; font-weight: bold; border-radius: 8px; cursor: pointer; }
         .selected { background: #3498db !important; color: white; }
-        .hit { background: var(--gold) !important; color: black; animation: flash 0.5s; }
-        @keyframes flash { from { opacity: 0.5; } to { opacity: 1; } }
+        .hit { background: var(--gold) !important; color: black; transition: 0.2s; }
         .action-btn { width: 90%; max-width: 400px; padding: 15px; border: none; border-radius: 12px; cursor: pointer; font-size: 18px; font-weight: bold; margin: 5px; }
-        .draw-btn { background: var(--green); color: white; width: 65%; }
-        .admin-btn { background: #e67e22; color: white; width: 25%; font-size: 14px; }
+        .draw-btn { background: var(--green); color: white; width: 60%; }
+        .admin-btn { background: #e67e22; color: white; width: 30%; font-size: 14px; }
         .deposit-btn { background: #3498db; color: white; }
         .withdraw-btn { background: #e74c3c; color: white; }
         input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 10px; width: 80px; text-align: center; border-radius: 8px; }
@@ -30,20 +29,20 @@
     <h2 style="margin:0; color:var(--gold);">🎰 CHICKEN KENO</h2>
     <div style="font-size:12px; color:#888;">መለያ: <span id="adminBtn">...</span></div>
     <div class="balance-container">💰 <span id="balance">0.00</span> ETB</div>
-    <div id="status" style="color:var(--green);">ቁጥሮችን ይምረጡ (Min 15 ETB)</div>
+    <div id="status" style="color:var(--green);">ቁጥሮችን ይምረጡ</div>
     <div id="timer" style="color:var(--gold); font-size: 14px;">ቀጣይ ዙር: <span id="seconds">60</span>s</div>
 </div>
 
 <div style="margin: 10px;">ወራጅ: <input type="number" id="betAmount" value="15"></div>
 <div class="grid" id="grid"></div>
 
-<div style="display: flex; justify-content: center; align-items: center;">
-    <button class="action-btn draw-btn" id="drawBtn" onclick="manualDraw()">ይጀምር (DRAW)</button>
+<div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+    <button class="action-btn draw-btn" id="drawBtn" onclick="manualDraw()">DRAW</button>
     <button class="action-btn admin-btn" onclick="adminAddMoney()">ADD 💰</button>
 </div>
 
-<button class="action-btn deposit-btn" onclick="showDepositInfo()">ገንዘብ አስገባ (Deposit)</button>
-<button class="action-btn withdraw-btn" onclick="requestWithdraw()">ገንዘብ አውጣ (Withdraw)</button>
+<button class="action-btn deposit-btn" onclick="showDepositInfo()">Deposit</button>
+<button class="action-btn withdraw-btn" onclick="requestWithdraw()">Withdraw</button>
 
 <script>
     const firebaseConfig = {
@@ -63,8 +62,9 @@
     let selected = [];
     let timeLeft = 60;
 
-    if (!userID) {
-        userID = "USER-" + Math.floor(1000 + Math.random() * 9000);
+    // --- ተጠቃሚውን በትክክል የመመዝገቢያ ኮድ ---
+    if (!userID || userID === "null") {
+        userID = "ID-" + Math.floor(1000 + Math.random() * 9000);
         localStorage.setItem('keno_user_id', userID);
         database.ref('users/' + userID).set({ balance: 0 });
     }
@@ -92,10 +92,10 @@
     }
 
     function adminAddMoney() {
-        let pass = prompt("አድሚን ፓስወርድ:");
+        let pass = prompt("Password:");
         if (pass === "1234") {
-            let target = prompt("የተጠቃሚ ID (e.g. USER-4173):");
-            let amt = parseFloat(prompt("የሚጨመር ብር:"));
+            let target = prompt("User ID (e.g. ID-4173):");
+            let amt = parseFloat(prompt("Amount:"));
             database.ref('users/' + target).once('value', (s) => {
                 if(s.exists()){
                     let cur = s.val().balance || 0;
@@ -107,11 +107,11 @@
     }
 
     function showDepositInfo() {
-        alert("💰 Telebirr: 0986980130\nAbyssinia: 153682704\nDaniel Mulugeta\nScreenshot ለ @Godis1256 ይላኩ።");
+        alert("💰 Telebirr: 0986980130\nDaniel Mulugeta\n@Godis1256");
     }
 
     function requestWithdraw() {
-        let amt = parseFloat(prompt("የሚወጣ ብር (Min 300):"));
+        let amt = parseFloat(prompt("Amount (Min 300):"));
         if (amt >= 300 && currentBalance >= amt) {
             const token = "8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw";
             const adminId = "7313437942";
@@ -122,7 +122,7 @@
     }
 
     function manualDraw() {
-        if (selected.length === 0) { alert("እባክዎ ቁጥር ይምረጡ!"); return; }
+        if (selected.length === 0) { alert("ቁጥር ይምረጡ!"); return; }
         startDraw();
     }
 
@@ -136,23 +136,25 @@
 
         let drawn = []; let hits = 0; let count = 0;
         let interval = setInterval(() => {
-            let r; do { r = Math.floor(Math.random() * 80) + 1; } while (drawn.includes(r));
-            drawn.push(r);
-            document.getElementById('num-' + r).classList.add('hit');
-            if (selected.includes(r)) hits++;
-            count++;
+            let r = Math.floor(Math.random() * 80) + 1;
+            if(!drawn.includes(r)) {
+                drawn.push(r);
+                document.getElementById('num-' + r).classList.add('hit');
+                if (selected.includes(r)) hits++;
+                count++;
+            }
             if (count === 20) {
                 clearInterval(interval);
                 document.getElementById('drawBtn').disabled = false;
                 let win = hits >= 3 ? bet * (hits - 1.5) : 0;
                 if (win > 0) database.ref('users/' + userID).update({ balance: currentBalance + win });
                 document.getElementById('status').innerText = `Hits: ${hits} | Win: ${win.toFixed(2)} ETB`;
-                timeLeft = 60; // ቆጣሪውን አድስ
+                timeLeft = 60; 
             }
         }, 200);
     }
 
-    // የ1 ደቂቃ ቆጣሪ
+    // በየ 1 ሰከንዱ የሚቀንስ ቆጣሪ
     setInterval(() => {
         timeLeft--;
         document.getElementById('seconds').innerText = timeLeft;
@@ -161,7 +163,7 @@
                 startDraw();
             } else {
                 timeLeft = 60;
-                document.getElementById('status').innerText = "ቁጥር ስላልመረጡ ጨዋታው አልተጀመረም";
+                document.getElementById('status').innerText = "ቁጥር ይምረጡ!";
             }
         }
     }, 1000);
