@@ -14,15 +14,19 @@
         .timer-text { font-size: 32px; font-weight: bold; color: var(--red); margin: 10px; }
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 420px; margin: 10px auto; padding: 10px; }
         .num { background: #333; border: 1px solid #444; padding: 12px 0; font-weight: bold; border-radius: 6px; cursor: pointer; }
-        .selected { background: var(--blue) !important; }
+        .selected { background: var(--blue) !important; color: white; }
         .hit { background: var(--gold) !important; color: #000; box-shadow: 0 0 15px var(--gold); }
-        .btn-pay { width: 45%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; color: white; margin-top: 10px; }
+        .btn-pay { width: 45%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; color: white; margin-top: 10px; cursor: pointer; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
         .modal-content { background: var(--card); margin: 15% auto; padding: 25px; width: 85%; border-radius: 15px; border: 1px solid var(--gold); text-align: left; }
         input { width: 90%; padding: 12px; margin: 10px 0; background: #000; color: var(--gold); border: 1px solid var(--gold); }
+        /* አዲስ የውጤት ምልክት ስታይል */
+        #gameStatus { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; font-weight: bold; z-index: 2000; display: none; text-shadow: 2px 2px 10px black; }
     </style>
 </head>
 <body>
+
+<div id="gameStatus"></div>
 
 <div class="header">
     <h2 style="color:var(--gold); margin:0;">🎰 CHICKEN KENO ROYAL</h2>
@@ -36,7 +40,7 @@
 
 <div style="margin:15px;">
     <input type="number" id="betAmount" value="15" min="15" style="width:60px; text-align:center;">
-    <button onclick="buyTicket()" style="background:var(--green); color:white; padding:15px; width:80%; border:none; border-radius:10px; font-weight:bold;">ትኬት ቁረጥ (BUY)</button>
+    <button onclick="buyTicket()" id="buyBtn" style="background:var(--green); color:white; padding:15px; width:80%; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">ትኬት ቁረጥ (BUY)</button>
 </div>
 
 <div style="display:flex; justify-content:center; gap:10px;">
@@ -44,22 +48,22 @@
     <button onclick="showModal('witModal')" class="btn-pay" style="background:var(--red);">Withdraw 📤</button>
 </div>
 
-<button onclick="adminAction()" style="background:#222; border:none; color:#444; margin-top:20px;">Admin ⚙️</button>
+<button onclick="adminAction()" style="background:#222; border:none; color:#444; margin-top:20px; cursor:pointer;">Admin ⚙️</button>
 
 <div id="depModal" class="modal"><div class="modal-content">
     <h3 style="color:var(--gold);">ብር ለማስገባት (Deposit)</h3>
     <p>Telebirr: <b>0986980130</b><br>አብሲንያ: <b>153682704</b></p>
     <p>ደረሰኝ እና ID: <b class="u-id-text"></b> ለ <b>@Godis1256</b> ይላኩ።</p>
     <p style="color:var(--red);">* Minimum Deposit: 100 ETB</p>
-    <button onclick="closeModal('depModal')" style="background:var(--red); color:white; width:100%; padding:10px; border:none;">ዝጋ</button>
+    <button onclick="closeModal('depModal')" style="background:var(--red); color:white; width:100%; padding:10px; border:none; cursor:pointer;">ዝጋ</button>
 </div></div>
 
 <div id="witModal" class="modal"><div class="modal-content">
     <h3 style="color:var(--gold);">ብር ለማውጣት (Withdraw)</h3>
     <input type="number" id="witAmt" placeholder="መጠን (Min 300)">
     <input type="text" id="witPhone" placeholder="ባንክ እና ስልክ ቁጥር">
-    <button onclick="requestWithdraw()" style="background:var(--green); color:white; width:100%; padding:12px; border:none;">ጥያቄ ላክ</button>
-    <button onclick="closeModal('witModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; margin-top:5px;">ተመለስ</button>
+    <button onclick="requestWithdraw()" style="background:var(--green); color:white; width:100%; padding:12px; border:none; cursor:pointer;">ጥያቄ ላክ</button>
+    <button onclick="closeModal('witModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; margin-top:5px; cursor:pointer;">ተመለስ</button>
 </div></div>
 
 <script>
@@ -82,13 +86,16 @@
     document.getElementById('myID').innerText = uID;
     document.querySelectorAll('.u-id-text').forEach(el => el.innerText = uID);
 
-    // ተጠቃሚውን ወዲያውኑ መመዝገብ (Admin ላይ ብር እንዲጨምር)
-    db.ref('users/' + uID).once('value', s => { 
-        if(!s.exists()) db.ref('users/' + uID).set({balance: 0}); 
-    });
-    
-    db.ref('users/' + uID + '/balance').on('value', s => {
-        document.getElementById('balance').innerText = (s.val() || 0).toFixed(2);
+    let isTicketBought = false;
+    let currentBalance = 0;
+
+    db.ref('users/' + uID).on('value', s => {
+        if(!s.exists()) {
+            db.ref('users/' + uID).set({balance: 0});
+        } else {
+            currentBalance = s.val().balance || 0;
+            document.getElementById('balance').innerText = currentBalance.toFixed(2);
+        }
     });
 
     const grid = document.getElementById('grid');
@@ -96,7 +103,11 @@
     for(let i=1; i<=80; i++) {
         let d = document.createElement('div');
         d.className='num'; d.id='n'+i; d.innerText=i;
-        d.onclick=()=>{ d.classList.toggle('selected'); toggleNum(i); };
+        d.onclick=()=>{ 
+            if(isTicketBought) return; // ቲኬት ከተቆረጠ በኋላ መቀየር አይቻልም
+            d.classList.toggle('selected'); 
+            toggleNum(i); 
+        };
         grid.appendChild(d);
     }
 
@@ -105,17 +116,40 @@
         else if(selectedNums.length < 10) selectedNums.push(n);
     }
 
+    // *** BUY በተን እንዲሰራ ***
+    function buyTicket() {
+        let amt = parseFloat(document.getElementById('betAmount').value);
+        if(selectedNums.length === 0) return alert("እባክዎ ቁጥር ይምረጡ!");
+        if(currentBalance < amt) return alert("በቂ ባላንስ የሎትም!");
+        if(isTicketBought) return alert("ቲኬት አስቀድመው ቆርጠዋል!");
+
+        // ብር መቀነስ
+        db.ref('users/' + uID).update({balance: currentBalance - amt});
+        isTicketBought = true;
+        document.getElementById('buyBtn').innerText = "ተቆርጧል ✅";
+        document.getElementById('buyBtn').style.background = "#888";
+        alert(amt + " ብር ተቆርጧል። እጣውን ይጠብቁ!");
+    }
+
     let timeLeft = 60;
     setInterval(() => {
         timeLeft--;
-        document.getElementById('timerDisplay').innerText = `00:${timeLeft < 10 ? '0'+timeLeft : timeLeft}`;
+        let displaySec = timeLeft < 0 ? 0 : timeLeft;
+        document.getElementById('timerDisplay').innerText = `00:${displaySec < 10 ? '0'+displaySec : displaySec}`;
         
-        // **አዲስ ማስተካከያ**፡ Countdown 55 ሲደርስ የድሮ ውጤቶች ይጠፋሉ
         if(timeLeft === 55) {
             document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
+            document.getElementById('gameStatus').style.display = "none";
         }
         
-        if(timeLeft <= 0) { runDraw(); timeLeft = 60; }
+        if(timeLeft <= 0) { 
+            runDraw(); 
+            timeLeft = 60; 
+            // አዲስ ዙር ሲጀምር በተኑን መመለስ
+            isTicketBought = false;
+            document.getElementById('buyBtn').innerText = "ትኬት ቁረጥ (BUY)";
+            document.getElementById('buyBtn').style.background = "var(--green)";
+        }
     }, 1000);
 
     async function runDraw() {
@@ -126,22 +160,46 @@
         }
         drawn.forEach(n => document.getElementById('n'+n).classList.add('hit'));
 
-        if(selectedNums.length > 0) {
+        if(isTicketBought) {
             let hits = selectedNums.filter(n => drawn.includes(n)).length;
-            let win = hits >= 2 ? 30 : 0; // ለምሳሌ
             
-            // ቴሌግራም መላኪያ
-            let status = win > 0 ? "💰 WON" : "📉 LOST";
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${status} ID:${uID} Win:${win}`);
+            // የአከፋፈል ሎጂክ (እንደ ምርጫህ ቀይረው)
+            let winMultiplier = [0, 0, 2, 3, 5, 10, 20, 50, 100, 500, 1000]; 
+            let bet = parseFloat(document.getElementById('betAmount').value);
+            let win = bet * winMultiplier[hits];
+
+            let statusEl = document.getElementById('gameStatus');
+            statusEl.style.display = "block";
 
             if(win > 0) {
-                db.ref('users/' + uID + '/balance').once('value', s => {
-                    db.ref('users/' + uID).update({balance: (s.val()||0) + win});
-                });
+                statusEl.innerHTML = `💰 አሸነፉ! <br> +${win} ETB`;
+                statusEl.style.color = "var(--green)";
+                db.ref('users/' + uID).update({balance: currentBalance + win});
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=✅ WON! ID:${uID} Bet:${bet} Win:${win} Hits:${hits}`);
+            } else {
+                statusEl.innerHTML = `📉 ተበሉ! <br> ${hits} Hits`;
+                statusEl.style.color = "var(--red)";
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=❌ LOST ID:${uID} Bet:${bet} Hits:${hits}`);
             }
+
             selectedNums = [];
             document.querySelectorAll('.num').forEach(n => n.classList.remove('selected'));
         }
+    }
+
+    function requestWithdraw() {
+        let amt = parseFloat(document.getElementById('witAmt').value);
+        let phone = document.getElementById('witPhone').value;
+        if(amt < 300) return alert("ዝቅተኛው 300 ብር ነው!");
+        if(currentBalance < amt) return alert("በቂ ባላንስ የሎትም!");
+        if(!phone) return alert("ባንክ እና ስልክ ያስገቡ!");
+
+        // ለባለቤቱ ሜሴጅ መላክ
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=🔔 WITHDRAW REQUEST!\nID: ${uID}\nAmount: ${amt} ETB\nDetails: ${phone}`);
+        
+        db.ref('users/' + uID).update({balance: currentBalance - amt});
+        alert("የመውጫ ጥያቄ ተልኳል። Admin ያረጋግጥልዎታል!");
+        closeModal('witModal');
     }
 
     function adminAction() {
@@ -152,17 +210,9 @@
                 if(s.exists()) {
                     db.ref('users/' + id).update({balance: (s.val().balance || 0) + amt});
                     alert("ብር ተጨምሯል!");
-                } else {
-                    alert("User አልተገኘም! መጀመሪያ ዌብሳይቱን መክፈት አለበት።");
-                }
+                } else { alert("User አልተገኘም!"); }
             });
         }
-    }
-
-    function requestWithdraw() {
-        let amt = parseFloat(document.getElementById('witAmt').value);
-        if(amt < 300) return alert("ዝቅተኛው 300 ብር ነው!");
-        // (የዊዝድራው ኮድ ይቀጥላል...)
     }
 
     function showModal(id) { document.getElementById(id).style.display = "block"; }
