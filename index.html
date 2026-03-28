@@ -36,7 +36,7 @@
 </div>
 
 <div style="margin: 15px;">
-    ወራጅ: <input type="number" id="betAmount" value="15" min="15">
+    ወራጅ (Min 15): <input type="number" id="betAmount" value="15" min="15">
 </div>
 
 <div class="grid" id="grid"></div>
@@ -47,7 +47,7 @@
 <button class="action-btn withdraw-btn" onclick="requestWithdraw()">ገንዘብ አውጣ (Withdraw)</button>
 
 <script>
-    // 1. Firebase Configuration
+    // 1. Firebase Config (ያንተ መረጃ)
     const firebaseConfig = {
         apiKey: "AIzaSyBM9vbTCQT39mjHMWN5Yk8f7aEXVMZWXUA",
         authDomain: "chickenkeno-c41fa.firebaseapp.com",
@@ -64,7 +64,7 @@
     let currentBalance = 0;
     let selected = [];
 
-    // 2. User ID Setup
+    // 2. User Setup (User Not Found መፍትሄ)
     if (!userID) {
         userID = "USER-" + Math.floor(1000 + Math.random() * 9000);
         localStorage.setItem('keno_user_id', userID);
@@ -77,7 +77,7 @@
         document.getElementById('balance').innerText = currentBalance.toFixed(2);
     });
 
-    // 3. Game Grid
+    // 3. Grid Creation
     const grid = document.getElementById('grid');
     for (let i = 1; i <= 80; i++) {
         let d = document.createElement('div');
@@ -94,36 +94,36 @@
         grid.appendChild(d);
     }
 
-    // 4. Deposit Information (ያንተ መረጃ ተጨምሯል)
+    // 4. Deposit (ያንተ የባንክ መረጃ)
     function showDepositInfo() {
         alert("💰 ገንዘብ ለማስገባት (Minimum: 100 ETB):\n\n" +
               "1. Telebirr: 0986980130\n" +
               "2. Abyssinia Bank: 153682704\n" +
               "Name: Daniel Mulugeta\n\n" +
-              "ብር ካስገቡ በኋላ የስክሪንሾት መረጃውን ለ @Godis1256 ይላኩ።");
+              "ብር ካስገቡ በኋላ ለ @Godis1256 የስክሪንሾት መረጃ ይላኩ።");
     }
 
-    // 5. Withdrawal Request (ለአንተ ማሳወቂያ ይልካል)
+    // 5. Withdrawal (አሁን በቀጥታ ለአንተ መልእክት ይልካል)
     function requestWithdraw() {
         let amt = prompt("ማውጣት የሚፈልጉትን መጠን ያስገቡ (Min: 300 ETB):");
         amt = parseFloat(amt);
         if (amt >= 300 && currentBalance >= amt) {
-            // *** እዚህ ጋር ያንተን ትክክለኛ BOT TOKEN እና Chat ID አስገባ ***
-            const token = "የአንተ_ቦት_TOKEN"; 
-            const adminId = "የአንተ_CHAT_ID"; 
-            const text = `🚨 አዲስ የዊዝድራው ጥያቄ!\n\nUser: ${userID}\nUsername: @Godis1256\nAmount: ${amt} ETB\n\nእባክህ በቴሌብር (0986980130) ላክለት።`;
+            const token = "8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw"; 
+            const adminId = "7313437942"; 
+            const text = `🚨 የዊዝድራው ጥያቄ!\n\nተጠቃሚ: ${userID}\nመጠን: ${amt} ETB\n\nእባክህ በቴሌብር (0986980130) ላክለት።`;
 
             fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${adminId}&text=${encodeURIComponent(text)}`)
             .then(() => {
                 database.ref('users/' + userID).update({ balance: currentBalance - amt });
-                alert("ጥያቄዎ ደርሶናል! ዳንኤል በቅርቡ በቴሌብር ይልክልዎታል።");
-            });
+                alert("ጥያቄዎ ተልኳል! ዳንኤል በቅርቡ ይልክልዎታል።");
+            })
+            .catch(() => alert("ስህተት ተፈጥሯል፣ እባክዎ ደግመው ይሞክሩ።"));
         } else {
             alert("ስህተት: ዝቅተኛው 300 ብር ነው ወይም በቂ ሂሳብ የለዎትም።");
         }
     }
 
-    // 6. Start Game (15 ETB Minimum)
+    // 6. Game Logic (15 ETB Min Bet)
     function startDraw() {
         let bet = parseFloat(document.getElementById('betAmount').value);
         if (bet < 15) { alert("ዝቅተኛ መወራረጃ 15 ብር ነው!"); return; }
