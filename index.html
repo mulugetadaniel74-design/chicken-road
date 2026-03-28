@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHICKEN KENO ROYAL - SECURE PAY</title>
+    <title>CHICKEN KENO LIVE</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --red: #e74c3c; --blue: #3498db; --white: #ffffff; }
-        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
-        .header { background: var(--card); padding: 10px; border-bottom: 4px solid var(--gold); position: sticky; top: 0; z-index: 100; }
-        .balance-box { border: 2px solid var(--gold); display: inline-block; padding: 5px 15px; border-radius: 10px; background: #000; font-size: 18px; color: var(--gold); }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 400px; margin: 10px auto; padding: 5px; }
-        .num { background: #2c2c2c; border: 1px solid #444; padding: 10px 0; font-weight: bold; border-radius: 5px; font-size: 14px; }
-        .hit { background: var(--gold) !important; color: black; box-shadow: 0 0 12px var(--gold); }
-        .btn-buy { background: var(--green); color: white; width: 85%; padding: 15px; font-size: 18px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
-        .modal-content { background: var(--card); margin: 15% auto; padding: 20px; width: 85%; border-radius: 15px; border: 1px solid var(--gold); }
-        input, select { background: #000; color: var(--gold); border: 1px solid var(--gold); padding: 12px; width: 90%; border-radius: 8px; margin-bottom: 10px; font-size: 16px; }
+        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --red: #e74c3c; --white: #ffffff; }
+        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: sans-serif; margin: 0; padding-bottom: 30px; }
+        .header { background: var(--card); padding: 10px; border-bottom: 3px solid var(--gold); }
+        .balance-box { border: 2px solid var(--gold); display: inline-block; padding: 5px 15px; border-radius: 10px; margin-top: 5px; color: var(--gold); font-weight: bold; }
+        .timer { font-size: 24px; color: var(--red); margin: 15px 0; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 380px; margin: 0 auto; padding: 10px; }
+        .num { background: #333; border: 1px solid #444; padding: 10px 0; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        .selected { background: #3498db !important; }
+        .hit { background: var(--gold) !important; color: black; font-weight: bold; }
+        .btn { width: 85%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .buy-btn { background: var(--green); color: white; }
+        .action-btns { display: flex; justify-content: center; gap: 10px; }
+        .small-btn { padding: 10px 20px; border-radius: 5px; border: none; font-weight: bold; color: white; }
     </style>
 </head>
 <body>
@@ -25,42 +27,23 @@
 <div class="header">
     <h3 style="margin:0; color:var(--gold);">🎰 CHICKEN KENO LIVE</h3>
     <div class="balance-box">💰 <span id="balance">0.00</span> ETB</div>
-    <div style="font-size:11px; margin-top:5px;">የእርሶ መለያ (ID): <span id="myID" style="color:var(--gold);">...</span></div>
+    <div style="font-size:11px; margin-top:5px;">ID: <span id="myID" style="color:var(--gold);">...</span></div>
 </div>
 
-<div id="timerDisplay" style="font-size:20px; color:var(--red); margin:10px;">01:00</div>
+<div class="timer" id="timerDisplay">01:00</div>
 
 <div class="grid" id="grid"></div>
 
-<button class="btn-buy" onclick="buyTicket()">ትኬት ቁረጥ (BUY TICKET)</button>
+<button class="btn buy-btn" onclick="buyTicket()">ትኬት ቁረጥ (BUY TICKET)</button>
 
-<div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
-    <button onclick="showModal('depModal')" style="background:var(--blue); color:white; border:none; padding:12px 25px; border-radius:8px; font-weight:bold;">Deposit 📥</button>
-    <button onclick="showModal('witModal')" style="background:var(--red); color:white; border:none; padding:12px 25px; border-radius:8px; font-weight:bold;">Withdraw 📤</button>
+<div class="action-btns">
+    <button onclick="showModal('depModal')" class="small-btn" style="background:#3498db;">Deposit 📥</button>
+    <button onclick="showModal('witModal')" class="small-btn" style="background:var(--red);">Withdraw 📤</button>
 </div>
-
-<div id="witModal" class="modal"><div class="modal-content">
-    <h3 style="color:var(--gold);">ብር ለማውጣት (Withdraw)</h3>
-    <p style="font-size:12px; margin-bottom:15px;">ዝቅተኛው ማውጫ 300 ብር ነው።</p>
-    
-    <input type="number" id="witAmt" placeholder="የብር መጠን (ለምሳሌ: 500)">
-    
-    <select id="witBank">
-        <option value="" disabled selected>ባንክ ይምረጡ</option>
-        <option value="Telebirr">Telebirr (ቴሌብር)</option>
-        <option value="CBE">CBE (ንግድ ባንክ)</option>
-        <option value="Abyssinia">Abyssinia (አቢሲኒያ)</option>
-        <option value="Awash">Awash (አዋሽ)</option>
-    </select>
-    
-    <input type="text" id="witPhone" placeholder="የሂሳብ/ስልክ ቁጥር">
-    
-    <button onclick="requestWithdraw()" style="background:var(--green); color:white; width:95%; border:none; padding:15px; border-radius:8px; font-weight:bold; font-size:16px;">ጥያቄውን ላክ</button>
-    <button onclick="closeModal('witModal')" style="background:#444; color:white; width:95%; border:none; padding:10px; border-radius:8px; margin-top:10px;">ተመለስ</button>
-</div></div>
+<button onclick="adminAddMoney()" style="background:#555; color:white; border:none; padding:5px 15px; border-radius:5px; margin-top:15px; font-size:12px;">Admin ⚙️</button>
 
 <script>
-    // Firebase Config (Keep your existing one)
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBM9vbTCQT39mjHMWN5Yk8f7aEXVMZWXUA",
         authDomain: "chickenkeno-c41fa.firebaseapp.com",
@@ -73,46 +56,53 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 1. UNIQUE ID ስርዓት (ማጭበርበርን የሚከላከል)
-    let uID = localStorage.getItem('keno_user_id');
-    if (!uID) {
-        // በፍጹም የማይደገም ID መፍጠር
-        uID = "DK-" + Math.floor(100000 + Math.random() * 900000);
-        localStorage.setItem('keno_user_id', uID);
-    }
+    let uID = localStorage.getItem('keno_user_id') || "USER-" + Math.floor(1000 + Math.random() * 9000);
+    localStorage.setItem('keno_user_id', uID);
     document.getElementById('myID').innerText = uID;
 
-    // 2. WITHDRAW ጥያቄ መላኪያ
-    function requestWithdraw() {
-        let amt = parseFloat(document.getElementById('witAmt').value);
-        let bank = document.getElementById('witBank').value;
-        let phone = document.getElementById('witPhone').value;
+    // ተጠቃሚውን ዳታቤዝ ላይ መመዝገብ (ለ Admin እንዲመች)
+    db.ref('users/' + uID).once('value', snap => {
+        if (!snap.exists()) {
+            db.ref('users/' + uID).set({ balance: 0 });
+        }
+    });
 
-        if (!amt || amt < 300) return alert("እባክዎ 300 ብር እና ከዚያ በላይ ያስገቡ!");
-        if (!bank) return alert("እባክዎ ባንክ ይምረጡ!");
-        if (!phone) return alert("እባክዎ ቁጥር ያስገቡ!");
+    db.ref('users/' + uID + '/balance').on('value', snap => {
+        document.getElementById('balance').innerText = (snap.val() || 0).toFixed(2);
+    });
 
-        db.ref('users/' + uID + '/balance').once('value', snap => {
-            let currentBal = snap.val() || 0;
-            if (currentBal < amt) return alert("በቂ የሂሳብ ቀሪ የለዎትም!");
-
-            // ለቦቱ የሚላክ መልእክት
-            let telegramMsg = `🔔 *አዲስ የማውጫ ጥያቄ*\n\n🆔 ID: \`${uID}\`\n💰 መጠን: *${amt} ETB*\n🏦 ባንክ: *${bank}*\n📱 ቁጥር: \`${phone}\``;
-            
-            // ቦት መላኪያ (BOT_TOKEN እና CHAT_ID ያንተን ተጠቀም)
-            fetch(`https://api.telegram.org/bot8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw/sendMessage?chat_id=7313437942&text=${encodeURIComponent(telegramMsg)}&parse_mode=Markdown`);
-
-            // ብሩን ከሂሳቡ ቀንሰው
-            db.ref('users/' + uID).update({ balance: currentBal - amt });
-            
-            alert("ጥያቄዎ ተልኳል! በቅርቡ በ " + bank + " ይላክለታል።");
-            closeModal('witModal');
-        });
+    // Grid መፍጠሪያ
+    const grid = document.getElementById('grid');
+    for (let i = 1; i <= 80; i++) {
+        let d = document.createElement('div');
+        d.className = 'num'; d.id = 'n' + i; d.innerText = i;
+        d.onclick = () => d.classList.toggle('selected');
+        grid.appendChild(d);
     }
 
-    // (ሌላው የኬኖ ኮድህ እዚህ ይቀጥላል...)
-    function showModal(id) { document.getElementById(id).style.display = "block"; }
-    function closeModal(id) { document.getElementById(id).style.display = "none"; }
+    // Timer እና Draw (ባለፈው የሰጠሁህ Smart Draw እዚህ ይቀጥላል...)
+    let timeLeft = 60;
+    setInterval(() => {
+        timeLeft--;
+        let mins = Math.floor(timeLeft / 60), secs = timeLeft % 60;
+        document.getElementById('timerDisplay').innerText = `${mins}:${secs < 10 ? '0'+secs : secs}`;
+        if (timeLeft <= 0) { timeLeft = 60; /* runDraw() function እዚህ ይገባል */ }
+    }, 1000);
+
+    function adminAddMoney() {
+        if (prompt("Password:") === "1234") {
+            let id = prompt("User ID (e.g. USER-4173):");
+            let amt = parseFloat(prompt("Amount:"));
+            db.ref('users/' + id).once('value', s => {
+                if (s.exists()) {
+                    db.ref('users/' + id).update({ balance: (s.val().balance || 0) + amt });
+                    alert("ለ " + id + " " + amt + " ብር ተጨምሯል!");
+                } else {
+                    alert("User አልተገኘም! መጀመሪያ ተጠቃሚው ዌብሳይቱን መክፈት አለበት።");
+                }
+            });
+        }
+    }
 </script>
 </body>
 </html>
