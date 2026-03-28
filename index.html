@@ -1,11 +1,156 @@
-// --- ያንተ የFirebase መረጃ (ChickenKeno ፕሮጀክት) ---
-const firebaseConfig = {
-    apiKey: "AIzaSyBM9VbTCQT39mjHWMN5Yk8F7aEXVM2WeUA",
-    authDomain: "chickenkeno-c41fa.firebaseapp.com",
-    projectId: "chickenkeno-c41fa",
-    // ከታች ያለው ሊንክ በፎቶው ላይ ያየነው ነው
-    databaseURL: "https://chickenkeno-c41fa-default-rtdb.firebaseio.com", 
-    storageBucket: "chickenkeno-c41fa.firebasestorage.app",
-    messagingSenderId: "423384148862",
-    appId: "1:423384148862:web:99e9faebe83982f968e12f"
-};
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHICKEN KENO ROYAL</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; }
+        body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
+        .header { background: var(--card); padding: 15px; border-radius: 0 0 25px 25px; border-bottom: 4px solid var(--gold); margin-bottom: 10px; }
+        .user-info { font-size: 14px; color: #aaa; margin-top: 5px; }
+        #adminBtn { cursor: pointer; text-decoration: underline; color: var(--gold); font-weight: bold; }
+        .balance-container { border: 3px solid var(--gold); display: inline-block; padding: 10px 25px; border-radius: 40px; margin: 10px 0; background: rgba(255,196,15,0.1); }
+        .balance-display { font-size: 28px; font-weight: bold; color: var(--gold); }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 450px; margin: 15px auto; }
+        .num { background: #2c2c2c; border: 1px solid #444; padding: 12px 0; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .selected { background: #3498db !important; border-color: #fff; }
+        .hit { background: var(--gold) !important; color: black; transform: scale(1.1); box-shadow: 0 0 15px var(--gold); }
+        .action-btn { width: 100%; max-width: 450px; padding: 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 18px; margin: 10px 0; transition: 0.3s; }
+        .draw-btn { background: var(--green); color: white; box-shadow: 0 5px 15px rgba(46,204,113,0.4); }
+        .draw-btn:disabled { background: #555; opacity: 0.7; }
+        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 8px; width: 100px; text-align: center; border-radius: 8px; font-size: 20px; outline: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2 style="margin:0; color:var(--gold);">🎰 CHICKEN KENO</h2>
+        <div class="user-info">መለያ: <span id="adminBtn">ID-በመጫን ላይ...</span></div>
+        <div class="balance-container">
+            <span class="balance-display">💰 <span id="balance">0.00</span> ETB</span>
+        </div>
+        <div id="status" style="color: #2ecc71; font-weight: bold;">ቁጥሮችን ይምረጡ (ከ 1 - 10)</div>
+    </div>
+
+    <div style="margin: 15px;">
+        ውርርድ: <input type="number" id="betAmount" value="15" min="15">
+    </div>
+
+    <div class="grid" id="grid"></div>
+    <button class="action-btn draw-btn" id="drawBtn" onclick="startDraw()">ይጀምር (DRAW)</button>
+
+    <script>
+        // --- ያንተ Firebase መረጃ ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBM9VbTCQT39mjHWMN5Yk8F7aEXVM2WeUA",
+            authDomain: "chickenkeno-c41fa.firebaseapp.com",
+            projectId: "chickenkeno-c41fa",
+            databaseURL: "https://chickenkeno-c41fa-default-rtdb.firebaseio.com",
+            storageBucket: "chickenkeno-c41fa.firebasestorage.app",
+            messagingSenderId: "423384148862",
+            appId: "1:423384148862:web:99e9faebe83982f968e12f"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let userID = localStorage.getItem('keno_user_id');
+        let currentBalance = 0;
+        let selected = [];
+
+        // 1. ተጠቃሚ መለየት
+        if (!userID) {
+            userID = "ID-" + Math.floor(1000 + Math.random() * 9000);
+            localStorage.setItem('keno_user_id', userID);
+            database.ref('users/' + userID).set({ balance: 0 });
+        }
+        document.getElementById('adminBtn').innerText = userID;
+
+        // 2. ባላንስ ማንበብ
+        database.ref('users/' + userID + '/balance').on('value', (snap) => {
+            currentBalance = snap.val() || 0;
+            document.getElementById('balance').innerText = currentBalance.toFixed(2);
+        });
+
+        // 3. አድሚን ብር መጨመሪያ (ID ላይ ተጭኖ በመያዝ)
+        let timer;
+        const btn = document.getElementById('adminBtn');
+        btn.addEventListener('touchstart', () => {
+            timer = setTimeout(() => {
+                let pass = prompt("የአድሚን ሚስጥር ቁጥር:");
+                if (pass === "1234") {
+                    let target = prompt("ብር የሚጨመርለት ተጫዋች ID:");
+                    let amt = parseFloat(prompt("የብር መጠን:"));
+                    if (target && !isNaN(amt)) {
+                        database.ref('users/' + target).once('value', (s) => {
+                            if (s.exists()) {
+                                let newB = (s.val().balance || 0) + amt;
+                                database.ref('users/' + target).update({ balance: newB });
+                                alert("ተጨምሯል!");
+                            } else { alert("ያ ID አልተገኘም!"); }
+                        });
+                    }
+                }
+            }, 2000);
+        });
+        btn.addEventListener('touchend', () => clearTimeout(timer));
+
+        // Grid መፍጠሪያ
+        const grid = document.getElementById('grid');
+        for (let i = 1; i <= 80; i++) {
+            let d = document.createElement('div');
+            d.className = 'num'; d.id = 'num-' + i; d.innerText = i;
+            d.onclick = function() {
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    selected = selected.filter(n => n !== i);
+                } else if (selected.length < 10) {
+                    this.classList.add('selected');
+                    selected.push(i);
+                }
+            };
+            grid.appendChild(d);
+        }
+
+        function startDraw() {
+            let bet = parseFloat(document.getElementById('betAmount').value);
+            if (selected.length === 0) { alert("ቁጥር ይምረጡ!"); return; }
+            if (currentBalance < bet) { alert("ባላንስ የሎትም!"); return; }
+
+            database.ref('users/' + userID).update({ balance: currentBalance - bet });
+
+            let drawn = [];
+            let hits = 0;
+            let count = 0;
+            document.getElementById('drawBtn').disabled = true;
+
+            let interval = setInterval(() => {
+                let r;
+                do { r = Math.floor(Math.random() * 80) + 1; } while (drawn.includes(r));
+                drawn.push(r);
+                document.getElementById('num-' + r).classList.add('hit');
+                if (selected.includes(r)) hits++;
+                count++;
+                if (count === 20) {
+                    clearInterval(interval);
+                    document.getElementById('drawBtn').disabled = false;
+                    let win = 0;
+                    if (hits === 3) win = bet * 2;
+                    else if (hits === 4) win = bet * 5;
+                    else if (hits >= 5) win = bet * 10;
+                    
+                    if (win > 0) {
+                        database.ref('users/' + userID).once('value', (s) => {
+                            database.ref('users/' + userID).update({ balance: s.val().balance + win });
+                        });
+                    }
+                    document.getElementById('status').innerText = `Hits: ${hits} | Win: ${win} ETB`;
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>
