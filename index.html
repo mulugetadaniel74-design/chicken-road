@@ -105,13 +105,17 @@
         grid.appendChild(d);
     }
 
+    // *** ዋናው የተስተካከለ startDraw ክፍል ***
     function startDraw() {
         if (selected.length === 0) return alert("ቁጥር ይምረጡ!");
         let bet = parseFloat(document.getElementById('betAmount').value);
         db.ref('users/' + uID + '/balance').once('value', (s) => {
             let bal = s.val() || 0;
             if (bal < bet) return alert("በቂ ብር የለም!");
+            
             db.ref('users/' + uID).update({ balance: bal - bet });
+            document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
+            
             let drawn = []; let hits = 0;
             let intv = setInterval(() => {
                 let r = Math.floor(Math.random() * 80) + 1;
@@ -124,23 +128,16 @@
                         let winTable = [0, 0, 0, bet*2, bet*5, bet*10, bet*20, bet*50, bet*100, bet*500, bet*1000];
                         let win = winTable[hits] || 0;
                         db.ref('users/' + uID).update({ balance: (bal - bet + win) });
+
+                        // ለቴሌግራም ሪፖርት መላክ
+                        let status = (win > 0) ? "💰 አሸንፏል!" : "❌ ተበልቷል!";
+                        let reportMsg = `🕹 *Game Report*\n\n👤 User: \`${uID}\`\n💵 Bet: *${bet} ETB*\n🎯 Hits: *${hits}*\n💰 Win: *${win} ETB*\n📝 Status: ${status}`;
+                        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(reportMsg)}&parse_mode=Markdown`);
+
                         alert("Hits: " + hits + " | Win: " + win + " ETB");
                     }
                 }
             }, 100);
-        });
-    }
-
-    function requestWithdraw() {
-        let amt = parseFloat(prompt("የሚወጣ ብር መጠን:"));
-        let phone = prompt("የቴሌብር ስልክ:");
-        if (amt < 300) return alert("ዝቅተኛ 300 ብር ነው!");
-        db.ref('users/' + uID + '/balance').once('value', (s) => {
-            let bal = s.val() || 0;
-            if (bal < amt) return alert("በቂ ብር የለም!");
-            let msg = `📤 Withdraw: ${uID}, Amount: ${amt}, Phone: ${phone}`;
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`);
-            db.ref('users/' + uID).update({ balance: bal - amt }).then(() => { alert("ተልኳል!"); location.reload(); });
         });
     }
 
