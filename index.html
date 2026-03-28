@@ -23,7 +23,7 @@
         .adm-btn { background: #555; color: white; font-size: 12px; }
         input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 8px; width: 70px; text-align: center; border-radius: 8px; font-size: 16px; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding-top: 60px; }
-        .modal-content { background: var(--card); margin: auto; padding: 20px; border: 1px solid var(--gold); width: 80%; border-radius: 15px; text-align: left; line-height: 1.6; }
+        .modal-content { background: var(--card); margin: auto; padding: 20px; border: 1px solid var(--gold); width: 85%; border-radius: 15px; text-align: left; line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -53,8 +53,8 @@
         <p>📱 <b>Telebirr:</b> <span style="color:var(--gold)">0986980130</span></p>
         <p>🏦 <b>Abyssinia:</b> <span style="color:var(--gold)">153682704</span></p>
         <p>👤 <b>Name:</b> DANIEL M.</p>
-        <p>2. የላኩበትን ደረሰኝ (Screenshot) እና የእርስዎን <b>ID</b> ለ <b>@Godis1256</b> በቴሌግራም ይላኩ።</p>
-        <button onclick="closeModal('depModal')" style="background:var(--red); color:white; padding:10px; border:none; border-radius:5px; width:100%; font-weight:bold; cursor:pointer;">ዝጋ</button>
+        <p>2. የላኩበትን ደረሰኝ እና የእርስዎን <b>ID</b> ለ <b>@Godis1256</b> በቴሌግራም ይላኩ።</p>
+        <button onclick="closeModal('depModal')" style="background:var(--red); color:white; padding:12px; border:none; border-radius:5px; width:100%; font-weight:bold; cursor:pointer;">ዝጋ</button>
     </div>
 </div>
 
@@ -63,7 +63,7 @@
         <h3 style="color:var(--red); border-bottom: 1px solid #444;">ብር ለማውጣት (Withdraw)</h3>
         <p>ዝቅተኛ መጠን: <b>300 ETB</b></p>
         <input type="number" id="witAmt" placeholder="የብር መጠን" style="width:95%; margin-bottom:10px; padding:10px;"><br>
-        <input type="text" id="witPhone" placeholder="የኪስ ስልክ ቁጥር (Telebirr)" style="width:95%; margin-bottom:10px; padding:10px;">
+        <input type="text" id="witPhone" placeholder="የቴሌብር ስልክ ቁጥር" style="width:95%; margin-bottom:10px; padding:10px;">
         <button onclick="requestWithdraw()" style="background:var(--green); color:white; padding:12px; border:none; border-radius:5px; width:100%; font-weight:bold; cursor:pointer;">የማውጫ ጥያቄ ላክ</button>
         <button onclick="closeModal('witModal')" style="margin-top:10px; background:#555; color:white; border:none; padding:10px; width:100%; border-radius:5px; cursor:pointer;">ተመለስ</button>
     </div>
@@ -89,16 +89,18 @@
     localStorage.setItem('keno_user_id', uID);
     document.getElementById('myID').innerText = uID;
 
-    // ተጠቃሚውን ወዲያውኑ ዳታቤዝ ላይ መመዝገብ (ለ Admin Add እንዲመች)
-    db.ref('users/' + uID).on('value', (snap) => {
+    // *** ዋናው ማስተካከያ: ወዲያውኑ መመዝገቢያ ***
+    db.ref('users/' + uID).once('value', (snap) => {
         if (!snap.exists()) {
             db.ref('users/' + uID).set({ 
-                balance: 50,
-                registeredAt: new Date().toISOString()
-            }); 
-        } else {
-            document.getElementById('balance').innerText = (snap.val().balance || 0).toFixed(2);
+                balance: 50, 
+                registeredAt: new Date().toISOString() 
+            });
         }
+    });
+
+    db.ref('users/' + uID + '/balance').on('value', (snap) => {
+        document.getElementById('balance').innerText = (snap.val() || 0).toFixed(2);
     });
 
     const grid = document.getElementById('grid');
@@ -119,16 +121,13 @@
     }
 
     function startDraw() {
-        if (selected.length === 0) return alert("እባክዎ ቁጥር ይምረጡ!");
+        if (selected.length === 0) return alert("ቁጥር ይምረጡ!");
         let bet = parseFloat(document.getElementById('betAmount').value);
-        
         db.ref('users/' + uID + '/balance').once('value', (s) => {
             let bal = s.val() || 0;
             if (bal < bet) return alert("በቂ ብር የለም!");
-
             db.ref('users/' + uID).update({ balance: bal - bet });
             document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
-
             let drawn = []; let hits = 0;
             let intv = setInterval(() => {
                 let r = Math.floor(Math.random() * 80) + 1;
@@ -151,41 +150,32 @@
     function requestWithdraw() {
         let amt = parseFloat(document.getElementById('witAmt').value);
         let phone = document.getElementById('witPhone').value;
-        if (isNaN(amt) || amt < 300) return alert("ዝቅተኛው የዊዝድራው መጠን 300 ብር ነው!");
-        if (phone.length < 10) return alert("ትክክለኛ ስልክ ቁጥር ያስገቡ!");
-        
+        if (amt < 300) return alert("ዝቅተኛው የዊዝድራው መጠን 300 ብር ነው!");
         db.ref('users/' + uID + '/balance').once('value', (s) => {
             let bal = s.val() || 0;
             if (bal < amt) return alert("በቂ ብር የለዎትም!");
-            
-            let msg = `📤 *Withdraw Request*\n\nUser ID: \`${uID}\`\nAmount: *${amt} ETB*\nPhone: \`${phone}\``;
+            let msg = `📤 *Withdraw Request*\nUser ID: \`${uID}\`\nAmount: *${amt} ETB*\nPhone: \`${phone}\``;
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`)
             .then(() => {
                 db.ref('users/' + uID).update({ balance: bal - amt });
-                alert("ጥያቄዎ ተልኳል! በቅርቡ ይላክለታል።");
+                alert("ጥያቄዎ ተልኳል!");
                 closeModal('witModal');
             });
         });
     }
 
     function adminAddMoney() {
-        if (prompt("Admin Password ያስገቡ:") === "1234") {
-            let id = prompt("ብር የሚጨመርለት User ID (ለምሳሌ USER-4173):");
-            let amt = parseFloat(prompt("የሚጨመር የብር መጠን:"));
-            if (!id || isNaN(amt)) return;
-
+        if (prompt("Admin Password:") === "1234") {
+            let id = prompt("User ID:");
+            let amt = parseFloat(prompt("Amount:"));
             db.ref('users/' + id).once('value', (s) => {
                 if(s.exists()){
-                    let current = s.val().balance || 0;
-                    db.ref('users/' + id).update({ balance: current + amt });
-                    alert("ለ " + id + " " + amt + " ብር ተጨምሯል!");
-                } else { 
-                    alert("ስህተት: ይህ ID (" + id + ") ዳታቤዝ ላይ አልተገኘም! ተጠቃሚው ዌብሳይቱን አንዴ መክፈት አለበት።"); 
-                }
+                    db.ref('users/' + id).update({ balance: (s.val().balance || 0) + amt });
+                    alert("ለ " + id + " ብር ተጨምሯል!");
+                } else { alert("User አልተገኘም!"); }
             });
         }
     }
-
     function showModal(id) { document.getElementById(id).style.display = "block"; }
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
 </script>
