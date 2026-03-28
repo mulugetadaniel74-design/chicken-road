@@ -3,78 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DANIEL KENO ROYAL - OFFICIAL PRO</title>
+    <title>DANIEL KENO ROYAL - ULTIMATE</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         :root { --gold: #ffc40f; --dark: #0a0a0a; --card: #161616; --green: #2ecc71; --red: #e74c3c; --blue: #3498db; }
-        body { background-color: var(--dark); color: white; text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 50px; }
+        body { background-color: var(--dark); color: white; text-align: center; font-family: sans-serif; margin: 0; padding-bottom: 50px; }
         .header { background: var(--card); padding: 15px; border-bottom: 3px solid var(--gold); position: sticky; top: 0; z-index: 100; }
-        .balance-box { border: 2px solid var(--gold); display: inline-block; padding: 8px 20px; border-radius: 12px; font-size: 22px; color: var(--gold); font-weight: bold; background: #000; box-shadow: 0 0 10px rgba(255, 196, 15, 0.2); }
-        .u-id-display { color: #888; font-size: 14px; margin-top: 8px; font-weight: bold; letter-spacing: 1px; }
-        .timer-display { font-size: 3rem; font-weight: bold; color: var(--red); margin: 15px 0; text-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
+        .balance-box { border: 2px solid var(--gold); display: inline-block; padding: 8px 20px; border-radius: 12px; font-size: 22px; color: var(--gold); font-weight: bold; background: #000; }
+        .u-id-display { color: #888; font-size: 13px; margin-top: 5px; font-weight: bold; }
+        .timer-display { font-size: 2.5rem; font-weight: bold; color: var(--red); margin: 10px; }
         
-        .odds-container { background: #222; margin: 10px auto; padding: 12px; border-radius: 10px; max-width: 380px; text-align: left; border-left: 5px solid var(--gold); min-height: 45px; }
-        .odds-item { background: #333; padding: 3px 8px; border-radius: 5px; font-size: 12px; margin: 2px; color: var(--gold); display: inline-block; border: 1px solid #444; }
+        .main-layout { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; padding: 10px; }
+        .game-area { flex: 1; min-width: 320px; max-width: 450px; }
+        .ticket-sidebar { flex: 0.8; min-width: 280px; background: #111; border-radius: 15px; padding: 15px; border: 1px solid #333; max-height: 500px; overflow-y: auto; }
 
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 420px; margin: 15px auto; padding: 10px; background: #111; border-radius: 12px; }
-        .num { background: #2a2a2a; border: 1px solid #333; padding: 12px 0; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s; }
-        .selected { background: var(--blue) !important; color: white; transform: scale(0.9); box-shadow: 0 0 10px var(--blue); }
-        .hit { background: var(--gold) !important; color: black; box-shadow: 0 0 20px var(--gold); transform: scale(1.1); animation: pop 0.4s ease-out; z-index: 5; }
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1.1); } }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin: 10px auto; }
+        .num { background: #333; border: 1px solid #444; padding: 10px 0; font-weight: bold; border-radius: 5px; font-size: 0.9rem; }
+        .selected { background: var(--blue) !important; color: white; }
+        .hit { background: var(--gold) !important; color: black; box-shadow: 0 0 15px var(--gold); animation: pop 0.4s ease-out; }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-        .result-panel { background: #1a1a1a; margin: 15px auto; padding: 15px; max-width: 380px; border-radius: 12px; border: 1px solid #333; box-shadow: inset 0 0 10px #000; }
-        .drawn-nums { color: var(--gold); font-weight: bold; font-size: 1.2rem; margin-top: 10px; word-spacing: 8px; line-height: 1.8; min-height: 30px; }
-        
-        .btn-main { width: 85%; padding: 18px; border-radius: 12px; border: none; font-weight: bold; font-size: 1.2rem; cursor: pointer; background: var(--green); color: white; margin: 10px 0; transition: 0.3s; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
-        .btn-main:active { transform: scale(0.98); }
-        
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); }
-        .modal-content { background: var(--card); margin: 15% auto; padding: 25px; width: 85%; border-radius: 20px; border: 1px solid var(--gold); text-align: left; }
+        .ticket-item { background: #222; margin-bottom: 8px; padding: 10px; border-radius: 8px; text-align: left; border-left: 4px solid var(--blue); font-size: 0.85rem; }
+        .ticket-nums { color: #bbb; margin-top: 5px; letter-spacing: 1px; }
+        .match { color: var(--green); font-weight: bold; }
+        .no-match { color: var(--red); }
+
+        .result-panel { background: #1a1a1a; margin: 15px 0; padding: 15px; border-radius: 10px; border: 1px solid #333; }
+        .drawn-nums { color: var(--gold); font-weight: bold; font-size: 1.1rem; min-height: 40px; word-spacing: 5px; }
+
+        .btn-main { width: 100%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; background: var(--green); color: white; margin: 10px 0; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); }
+        .modal-content { background: var(--card); margin: 15% auto; padding: 25px; width: 85%; border-radius: 15px; border: 1px solid var(--gold); text-align: left; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h3 style="margin:0; color:var(--gold); letter-spacing: 1px;">🎰 DANIEL KENO ROYAL</h3>
+    <h3 style="margin:0; color:var(--gold);">🎰 DANIEL KENO ROYAL</h3>
     <div class="balance-box">💰 <span id="balance">0.00</span> ETB</div>
-    <div class="u-id-display">የእርሶ መለያ (ID): <span id="myID" style="color:var(--gold);">...</span></div>
+    <div class="u-id-display">መለያ (ID): <span id="myID" style="color:var(--gold);">...</span></div>
 </div>
 
-<div class="timer-display" id="timerDisplay">01:00</div>
+<div class="main-layout">
+    <div class="game-area">
+        <div class="timer-display" id="timerDisplay">01:00</div>
+        
+        <div id="oddsInfo" style="font-size: 0.85rem; background: #222; padding: 8px; border-radius: 5px; margin-bottom: 10px; color: var(--gold);">
+            ቁጥር ሲመርጡ የክፍያ ዝርዝር እዚህ ይታያል...
+        </div>
 
-<div class="odds-container">
-    <div id="oddsInfo" style="font-size: 0.9rem; color: #ccc;">ቁጥር ሲመርጡ የክፍያ ዝርዝር (Odds) እዚህ ይታያል...</div>
+        <div class="grid" id="grid"></div>
+
+        <div style="margin:10px;">
+            ወራጅ: <input type="number" id="betAmount" value="15" min="15" style="width:65px; background:#000; color:var(--gold); border:1px solid var(--gold); text-align:center; padding:5px; border-radius:5px;">
+            <button onclick="buyTicket()" class="btn-main">ትኬት ቁረጥ (BUY)</button>
+        </div>
+
+        <div class="result-panel">
+            <div style="color:#666; font-size:0.8rem; margin-bottom:5px;">የቀጥታ ውጤት (Live Result)</div>
+            <div id="drawnNumbersList" class="drawn-nums">...</div>
+        </div>
+    </div>
+
+    <div class="ticket-sidebar">
+        <h4 style="margin:0 0 10px 0; color:var(--blue); border-bottom:1px solid #333; padding-bottom:5px;">የቆረጧቸው ትኬቶች</h4>
+        <div id="activeTicketsList">ትኬት አልቆረጡም...</div>
+    </div>
 </div>
 
-<div class="grid" id="grid"></div>
-
-<div style="margin:15px;">
-    ወራጅ: <input type="number" id="betAmount" value="15" min="15" style="width:75px; background:#000; color:var(--gold); border:2px solid var(--gold); text-align:center; padding:8px; border-radius:8px; font-weight:bold; font-size: 1rem;">
-    <button onclick="buyTicket()" class="btn-main">ትኬት ቁረጥ (BUY TICKET)</button>
+<div style="display:flex; justify-content:center; gap:10px; margin-bottom: 20px;">
+    <button onclick="showModal('depModal')" style="background:var(--blue); color:white; border:none; padding:12px; border-radius:8px; width:45%; font-weight:bold;">Deposit 📥</button>
+    <button onclick="showModal('witModal')" style="background:var(--red); color:white; border:none; padding:12px; border-radius:8px; width:45%; font-weight:bold;">Withdraw 📤</button>
 </div>
-
-<div class="result-panel">
-    <div style="color:#888; font-size:0.85rem; border-bottom:1px solid #333; padding-bottom:8px; letter-spacing: 1px;">የቀጥታ ውጤት (LIVE DRAW)</div>
-    <div id="drawnNumbersList" class="drawn-nums">...</div>
-</div>
-
-<div style="display:flex; justify-content:center; gap:15px; margin-bottom:30px;">
-    <button onclick="showModal('depModal')" style="background:var(--blue); color:white; border:none; padding:15px; border-radius:10px; width:43%; font-weight:bold; font-size: 1rem;">Deposit 📥</button>
-    <button onclick="showModal('witModal')" style="background:var(--red); color:white; border:none; padding:15px; border-radius:10px; width:43%; font-weight:bold; font-size: 1rem;">Withdraw 📤</button>
-</div>
-
-<button onclick="adminAction()" style="background:transparent; border:none; color:#1a1a1a; font-size:10px; margin-top:10px;">Admin Login ⚙️</button>
 
 <div id="depModal" class="modal"><div class="modal-content">
-    <h3 style="color:var(--blue); margin-top:0;">📥 ገንዘብ ለማስገባት</h3>
-    <div style="background:#000; padding:15px; border-radius:10px; border:1px solid #333; line-height:1.8;">
-        👤 ስም: <b>Daniel Mulugeta</b><br>
-        📱 Telebirr: <b style="color:var(--gold);">0986980130</b><br>
-        🏦 አቢሲኒያ: <b style="color:var(--gold);">153682704</b>
-    </div>
-    <p style="font-size:0.9rem; margin-top:15px; color:#bbb;">ሪሲት እና የእርሶን <b>ID: <span class="u-id-text" style="color:var(--gold);"></span></b> ለ <b>@Godis1256</b> ይላኩ።</p>
-    <button onclick="closeModal('depModal')" style="background:var(--red); color:white; width:100%; padding:12px; border:none; border-radius:8px; font-weight:bold; margin-top:10px;">ተመለስ</button>
+    <h3 style="color:var(--blue);">📥 ብር ለማስገባት</h3>
+    <p>ስም: <b>Daniel Mulugeta</b><br>Telebirr: <b>0986980130</b><br>አቢሲኒያ: <b>153682704</b></p>
+    <p style="color:var(--gold);">* ቢያንስ 100 ብር እና በላይ መሆን አለበት</p>
+    <p>ID: <b class="u-id-text"></b> ለ @Godis1256 ይላኩ።</p>
+    <button onclick="closeModal('depModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; border-radius:5px;">ዝጋ</button>
+</div></div>
+
+<div id="witModal" class="modal"><div class="modal-content">
+    <h3 style="color:var(--red);">📤 ብር ለማውጣት</h3>
+    <p>ID: <b class="u-id-text" style="color:var(--gold);"></b> እና መጠን ለ @Godis1256 ይላኩ።</p>
+    <p style="color:var(--red);">* ቢያንስ 300 ብር እና በላይ መሆን አለበት</p>
+    <button onclick="closeModal('witModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; border-radius:5px;">ዝጋ</button>
 </div></div>
 
 <script>
@@ -89,28 +104,17 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const BOT_TOKEN = "8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw";
-    const CHAT_ID = "7313437942";
-
-    // User ID System
+    
     let uID = localStorage.getItem('keno_user_id') || "USER-" + Math.floor(1000 + Math.random() * 9000);
     localStorage.setItem('keno_user_id', uID);
     document.getElementById('myID').innerText = uID;
     document.querySelectorAll('.u-id-text').forEach(e => e.innerText = uID);
-
     db.ref('users/' + uID + '/balance').on('value', s => document.getElementById('balance').innerText = (s.val() || 0).toFixed(2));
 
-    // Keno Official Hard Rules (Payout Table)
     const kenoRules = {
-        2: { 2: 10 },
-        3: { 2: 1, 3: 20 },
-        4: { 2: 0.5, 3: 4, 4: 40 },
-        5: { 3: 3, 4: 15, 5: 100 },
-        6: { 3: 1, 4: 8, 5: 50, 6: 250 },
-        7: { 4: 3, 5: 20, 6: 150, 7: 1000 },
-        8: { 4: 1, 5: 10, 6: 50, 7: 500, 8: 2000 },
-        9: { 5: 5, 6: 25, 7: 150, 8: 1000, 9: 4000 },
-        10: { 5: 2, 6: 15, 7: 100, 8: 500, 9: 2500, 10: 10000 }
+        2: { 2: 10 }, 3: { 2: 1, 3: 20 }, 4: { 2: 0.5, 3: 4, 4: 40 }, 5: { 3: 3, 4: 15, 5: 100 },
+        6: { 3: 1, 4: 8, 5: 50, 6: 250 }, 7: { 4: 3, 5: 20, 6: 150, 7: 1000 }, 8: { 4: 1, 5: 10, 6: 50, 7: 500, 8: 2000 },
+        9: { 5: 5, 6: 25, 7: 150, 8: 1000, 9: 4000 }, 10: { 5: 2, 6: 15, 7: 100, 8: 500, 9: 2500, 10: 10000 }
     };
 
     const grid = document.getElementById('grid');
@@ -118,16 +122,10 @@
     let activeBets = [];
 
     for(let i=1; i<=80; i++) {
-        let d = document.createElement('div');
-        d.className='num'; d.id='n'+i; d.innerText=i;
+        let d = document.createElement('div'); d.className='num'; d.id='n'+i; d.innerText=i;
         d.onclick=()=>{ 
-            if(d.classList.contains('selected')){
-                d.classList.remove('selected');
-                selectedNums = selectedNums.filter(x => x !== i);
-            } else if(selectedNums.length < 10){
-                d.classList.add('selected');
-                selectedNums.push(i);
-            }
+            if(d.classList.contains('selected')){ d.classList.remove('selected'); selectedNums = selectedNums.filter(x => x !== i); }
+            else if(selectedNums.length < 10){ d.classList.add('selected'); selectedNums.push(i); }
             updateOddsDisplay();
         };
         grid.appendChild(d);
@@ -137,39 +135,55 @@
         let count = selectedNums.length;
         let info = document.getElementById('oddsInfo');
         if (count < 2) { info.innerHTML = "ቢያንስ 2 ቁጥር ይምረጡ..."; return; }
-        let rule = kenoRules[count];
-        let html = `<b>ለ ${count} ቁጥር፡</b> `;
-        for (let hit in rule) if (rule[hit] > 0) html += `<span class="odds-item">${hit} ከገቡ፡ x${rule[hit]}</span>`;
+        let rule = kenoRules[count], html = `<b>ለ ${count} ቁጥር፡</b> `;
+        for (let hit in rule) html += `<span style="margin-right:8px;">${hit} ከገቡ፡ x${rule[hit]}</span>`;
         info.innerHTML = html;
     }
 
     function buyTicket() {
         let amt = parseFloat(document.getElementById('betAmount').value);
-        if(amt < 15 || selectedNums.length < 2) return alert("እባክዎ ወራጅ እና ቁጥሮችን በትክክል ይምረጡ!");
+        if(amt < 15 || selectedNums.length < 2) return alert("ስህተት!");
         db.ref('users/' + uID + '/balance').once('value', s => {
             let bal = s.val() || 0;
             if(bal < amt) return alert("በቂ ብር የለም!");
             db.ref('users/' + uID).update({balance: bal - amt});
             activeBets.push({nums: [...selectedNums], bet: amt, count: selectedNums.length});
+            renderTickets();
             selectedNums = [];
             document.querySelectorAll('.num').forEach(n => n.classList.remove('selected'));
-            document.getElementById('oddsInfo').innerHTML = "ትኬት ተቆርጧል! መልካም እድል!";
-            alert("ትኬት ተቆርጧል!");
         });
     }
 
-    let timeLeft = 60;
-    let isDrawing = false;
+    function renderTickets(drawn = []) {
+        let list = document.getElementById('activeTicketsList');
+        if(activeBets.length === 0) { list.innerHTML = "ትኬት አልቆረጡም..."; return; }
+        list.innerHTML = activeBets.map((t, idx) => {
+            let hits = t.nums.filter(n => drawn.includes(n)).length;
+            let numsHtml = t.nums.map(n => {
+                let status = drawn.length > 0 ? (drawn.includes(n) ? "✅" : "❌") : "";
+                return `<span class="${drawn.includes(n) ? 'match' : ''}">${n}${status}</span>`;
+            }).join(' ');
+            return `<div class="ticket-item">
+                <b>ትኬት #${idx+1} | ወራጅ: ${t.bet} ETB</b><br>
+                <div class="ticket-nums">${numsHtml}</div>
+                ${drawn.length > 0 ? `<div style="margin-top:5px; color:var(--gold);">የገቡ፡ ${hits}/${t.count}</div>` : ""}
+            </div>`;
+        }).join('');
+    }
+
+    let timeLeft = 60, isDrawing = false;
     setInterval(() => {
         if(isDrawing) return;
         timeLeft--;
         let m = Math.floor(timeLeft/60), s = timeLeft%60;
         document.getElementById('timerDisplay').innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
         
-        // አዲስ ዙር ሲጀምር የድሮ ውጤትን ያጸዳል
-        if(timeLeft === 59) { 
+        // አዲሱ ዙር ሊጀምር 2 ሰከንድ ሲቀረው ሁሉንም ያጸዳል
+        if(timeLeft === 2) { 
             document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
             document.getElementById('drawnNumbersList').innerText = "...";
+            activeBets = [];
+            renderTickets();
         }
         if(timeLeft <= 0) runDraw();
     }, 1000);
@@ -177,53 +191,26 @@
     async function runDraw() {
         isDrawing = true;
         let drawn = [];
-        while(drawn.length < 20) {
-            let r = Math.floor(Math.random()*80)+1;
-            if(!drawn.includes(r)) drawn.push(r);
-        }
+        while(drawn.length < 20) { let r = Math.floor(Math.random()*80)+1; if(!drawn.includes(r)) drawn.push(r); }
         
         let displayDrawn = [];
-        // ቁጥሮቹ ተራ በተራ (በየ 0.4 ሰከንዱ) እንዲወጡ የሚያደርግ
         for(let n of drawn) {
             await new Promise(res => setTimeout(res, 400));
             document.getElementById('n'+n).classList.add('hit');
             displayDrawn.push(n);
-            // ከስር በዝርዝር ውጤቱን ያሳያል
             document.getElementById('drawnNumbersList').innerText = displayDrawn.sort((a,b)=>a-b).join('  ');
+            renderTickets(displayDrawn); // ትኬቶች ላይ ✅ እና ❌ ምልክት ያደርጋል
         }
 
         activeBets.forEach(t => {
             let hits = t.nums.filter(n => drawn.includes(n)).length;
-            let multiplier = (kenoRules[t.count] && kenoRules[t.count][hits]) || 0;
-            let win = t.bet * multiplier;
-            
-            let status = win > 0 ? "💰 አሸንፏል" : "📉 ተበልቷል";
-            // ቴሌግራም ላይ ለአድሚኑ መረጃ ይልካል
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(status + " ID:" + uID + " ወራጅ:" + t.bet + " ትርፍ:" + win + " የገቡ:" + hits + "/" + t.count)}`);
-
+            let win = t.bet * ((kenoRules[t.count] && kenoRules[t.count][hits]) || 0);
             if(win > 0) {
                 db.ref('users/' + uID + '/balance').once('value', s => db.ref('users/' + uID).update({balance: (s.val()||0) + win}));
-                alert(`🎉 እንኳን ደስ አለዎት! ${win} ብር አሸንፈዋል!`);
+                alert(`🎉 አሸንፈዋል! ${win} ብር ተጨምሮልዎታል።`);
             }
         });
-        
-        activeBets = [];
-        isDrawing = false;
-        timeLeft = 60;
-    }
-
-    function adminAction() {
-        let pass = prompt("Admin Password:");
-        if(pass === "1234") {
-            let id = prompt("ገንዘብ የሚሞላለት User ID:");
-            let amt = parseFloat(prompt("የሚሞላው የብር መጠን:"));
-            db.ref('users/' + id).once('value', s => {
-                if(s.exists()){
-                    db.ref('users/' + id).update({balance: (s.val().balance || 0) + amt});
-                    alert("ተሳክቷል! ብሩ ተሞልቷል።");
-                } else alert("ይህ ID አልተገኘም!");
-            });
-        }
+        isDrawing = false; timeLeft = 60;
     }
 
     function showModal(id) { document.getElementById(id).style.display = "block"; }
