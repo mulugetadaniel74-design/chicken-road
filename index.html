@@ -11,7 +11,7 @@
         body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
         .header { background: var(--card); padding: 15px; border-radius: 0 0 25px 25px; border-bottom: 4px solid var(--gold); margin-bottom: 10px; }
         .user-info { font-size: 14px; color: #aaa; margin-top: 5px; }
-        #adminBtn { cursor: pointer; text-decoration: underline; color: var(--gold); font-weight: bold; }
+        #adminBtn { cursor: pointer; text-decoration: underline; color: var(--gold); font-weight: bold; padding: 5px; }
         .balance-container { border: 3px solid var(--gold); display: inline-block; padding: 10px 25px; border-radius: 40px; margin: 10px 0; background: rgba(255,196,15,0.1); }
         .balance-display { font-size: 28px; font-weight: bold; color: var(--gold); }
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 450px; margin: 15px auto; }
@@ -20,7 +20,6 @@
         .hit { background: var(--gold) !important; color: black; transform: scale(1.1); box-shadow: 0 0 15px var(--gold); }
         .action-btn { width: 100%; max-width: 450px; padding: 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 18px; margin: 10px 0; transition: 0.3s; }
         .draw-btn { background: var(--green); color: white; box-shadow: 0 5px 15px rgba(46,204,113,0.4); }
-        .draw-btn:disabled { background: #555; opacity: 0.7; }
         input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 8px; width: 100px; text-align: center; border-radius: 8px; font-size: 20px; outline: none; }
     </style>
 </head>
@@ -28,7 +27,7 @@
 
     <div class="header">
         <h2 style="margin:0; color:var(--gold);">🎰 CHICKEN KENO</h2>
-        <div class="user-info">መለያ: <span id="adminBtn">ID-በመጫን ላይ...</span></div>
+        <div class="user-info">የእርስዎ መለያ: <span id="adminBtn">መለያ በመጫን ላይ...</span></div>
         <div class="balance-container">
             <span class="balance-display">💰 <span id="balance">0.00</span> ETB</span>
         </div>
@@ -36,14 +35,14 @@
     </div>
 
     <div style="margin: 15px;">
-        ውርርድ: <input type="number" id="betAmount" value="15" min="15">
+        የውርርድ መጠን: <input type="number" id="betAmount" value="15" min="15">
     </div>
 
     <div class="grid" id="grid"></div>
     <button class="action-btn draw-btn" id="drawBtn" onclick="startDraw()">ይጀምር (DRAW)</button>
 
     <script>
-        // --- ያንተ Firebase መረጃ ---
+        // --- ያንተ Firebase መረጃ (ከፎቶው ላይ የተወሰደ) ---
         const firebaseConfig = {
             apiKey: "AIzaSyBM9VbTCQT39mjHWMN5Yk8F7aEXVM2WeUA",
             authDomain: "chickenkeno-c41fa.firebaseapp.com",
@@ -54,6 +53,7 @@
             appId: "1:423384148862:web:99e9faebe83982f968e12f"
         };
 
+        // Firebase-ን ማስጀመር
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -61,7 +61,7 @@
         let currentBalance = 0;
         let selected = [];
 
-        // 1. ተጠቃሚ መለየት
+        // 1. ተጫዋቹን መለየትና መመዝገብ
         if (!userID) {
             userID = "ID-" + Math.floor(1000 + Math.random() * 9000);
             localStorage.setItem('keno_user_id', userID);
@@ -69,28 +69,30 @@
         }
         document.getElementById('adminBtn').innerText = userID;
 
-        // 2. ባላንስ ማንበብ
+        // 2. ባላንስን ከዳታቤዝ ማንበብ
         database.ref('users/' + userID + '/balance').on('value', (snap) => {
             currentBalance = snap.val() || 0;
             document.getElementById('balance').innerText = currentBalance.toFixed(2);
         });
 
-        // 3. አድሚን ብር መጨመሪያ (ID ላይ ተጭኖ በመያዝ)
+        // 3. ብር መጨመሪያ (የመለያ ቁጥሩን ለ 2 ሰከንድ ተጭነው ይያዙ)
         let timer;
         const btn = document.getElementById('adminBtn');
         btn.addEventListener('touchstart', () => {
             timer = setTimeout(() => {
-                let pass = prompt("የአድሚን ሚስጥር ቁጥር:");
+                let pass = prompt("አድሚን ፓስወርድ ያስገቡ:");
                 if (pass === "1234") {
-                    let target = prompt("ብር የሚጨመርለት ተጫዋች ID:");
-                    let amt = parseFloat(prompt("የብር መጠን:"));
-                    if (target && !isNaN(amt)) {
-                        database.ref('users/' + target).once('value', (s) => {
+                    let targetID = prompt("ብር የሚጨመርለት ተጫዋች ID:");
+                    let amount = parseFloat(prompt("የብር መጠን:"));
+                    if (targetID && !isNaN(amount)) {
+                        database.ref('users/' + targetID).once('value', (s) => {
                             if (s.exists()) {
-                                let newB = (s.val().balance || 0) + amt;
-                                database.ref('users/' + target).update({ balance: newB });
-                                alert("ተጨምሯል!");
-                            } else { alert("ያ ID አልተገኘም!"); }
+                                let oldBal = s.val().balance || 0;
+                                database.ref('users/' + targetID).update({ balance: oldBal + amount });
+                                alert("በተሳካ ሁኔታ ተጨምሯል!");
+                            } else {
+                                alert("ስህተት: ይህ ID አልተገኘም!");
+                            }
                         });
                     }
                 }
@@ -117,15 +119,17 @@
 
         function startDraw() {
             let bet = parseFloat(document.getElementById('betAmount').value);
-            if (selected.length === 0) { alert("ቁጥር ይምረጡ!"); return; }
-            if (currentBalance < bet) { alert("ባላንስ የሎትም!"); return; }
+            if (selected.length === 0) { alert("እባክዎ ቁጥሮችን ይምረጡ!"); return; }
+            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም! እባክዎ ብር ያስገቡ።"); return; }
 
+            // ባላንስ መቀነስ
             database.ref('users/' + userID).update({ balance: currentBalance - bet });
 
             let drawn = [];
             let hits = 0;
             let count = 0;
             document.getElementById('drawBtn').disabled = true;
+            document.querySelectorAll('.hit').forEach(el => el.classList.remove('hit'));
 
             let interval = setInterval(() => {
                 let r;
@@ -144,7 +148,7 @@
                     
                     if (win > 0) {
                         database.ref('users/' + userID).once('value', (s) => {
-                            database.ref('users/' + userID).update({ balance: s.val().balance + win });
+                            database.ref('users/' + userID).update({ balance: (s.val().balance || 0) + win });
                         });
                     }
                     document.getElementById('status').innerText = `Hits: ${hits} | Win: ${win} ETB`;
