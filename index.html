@@ -49,23 +49,11 @@
 <div id="depModal" class="modal">
     <div class="modal-content">
         <h3 style="color:var(--blue); border-bottom: 1px solid #444;">ብር ለማስገባት (Deposit)</h3>
-        <p>1. በቴሌብር ወይም አቢሲኒያ ባንክ ብር ይላኩ፦</p>
         <p>📱 <b>Telebirr:</b> <span style="color:var(--gold)">0986980130</span></p>
         <p>🏦 <b>Abyssinia:</b> <span style="color:var(--gold)">153682704</span></p>
         <p>👤 <b>Name:</b> DANIEL M.</p>
-        <p>2. የላኩበትን Screenshot እና የእርስዎን <b>ID</b> ለ <b>@Godis1256</b> በቴሌግራም ይላኩ።</p>
+        <p>የላኩበትን Screenshot እና የረሶን ID ለ <b>@Godis1256</b> ይላኩ።</p>
         <button onclick="closeModal('depModal')" style="background:var(--red); color:white; padding:12px; border:none; border-radius:5px; width:100%; font-weight:bold;">ዝጋ</button>
-    </div>
-</div>
-
-<div id="witModal" class="modal">
-    <div class="modal-content">
-        <h3 style="color:var(--red); border-bottom: 1px solid #444;">ብር ለማውጣት (Withdraw)</h3>
-        <p>ዝቅተኛ መጠን: <b>300 ETB</b></p>
-        <input type="number" id="witAmt" placeholder="የብር መጠን" style="width:95%; margin-bottom:10px; padding:10px;"><br>
-        <input type="text" id="witPhone" placeholder="የቴሌብር ስልክ ቁጥር" style="width:95%; margin-bottom:10px; padding:10px;">
-        <button onclick="requestWithdraw()" style="background:var(--green); color:white; padding:12px; border:none; border-radius:5px; width:100%; font-weight:bold;">ጥያቄ ላክ</button>
-        <button onclick="closeModal('witModal')" style="margin-top:10px; background:#555; color:white; border:none; padding:10px; width:100%; border-radius:5px;">ተመለስ</button>
     </div>
 </div>
 
@@ -89,10 +77,10 @@
     localStorage.setItem('keno_user_id', uID);
     document.getElementById('myID').innerText = uID;
 
-    // አዲስ ተጠቃሚ ከሆነ ወዲያውኑ መመዝገብ
+    // አዲስ ተጠቃሚ መመዝገብ
     db.ref('users/' + uID).once('value', (snap) => {
         if (!snap.exists()) {
-            db.ref('users/' + uID).set({ balance: 50, registeredAt: new Date().toISOString() });
+            db.ref('users/' + uID).set({ balance: 50 });
         }
     });
 
@@ -124,7 +112,6 @@
             let bal = s.val() || 0;
             if (bal < bet) return alert("በቂ ብር የለም!");
             db.ref('users/' + uID).update({ balance: bal - bet });
-            document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
             let drawn = []; let hits = 0;
             let intv = setInterval(() => {
                 let r = Math.floor(Math.random() * 80) + 1;
@@ -145,32 +132,28 @@
     }
 
     function requestWithdraw() {
-        let amt = parseFloat(document.getElementById('witAmt').value);
-        let phone = document.getElementById('witPhone').value;
-        if (amt < 300) return alert("ዝቅተኛው የዊዝድራው መጠን 300 ብር ነው!");
+        let amt = parseFloat(prompt("የሚወጣ ብር መጠን:"));
+        let phone = prompt("የቴሌብር ስልክ:");
+        if (amt < 300) return alert("ዝቅተኛ 300 ብር ነው!");
         db.ref('users/' + uID + '/balance').once('value', (s) => {
             let bal = s.val() || 0;
-            if (bal < amt) return alert("በቂ ብር የለዎትም!");
-            let msg = `📤 *Withdraw Request*\nUser ID: \`${uID}\`\nAmount: *${amt} ETB*\nPhone: \`${phone}\``;
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`)
-            .then(() => {
-                db.ref('users/' + uID).update({ balance: bal - amt });
-                alert("ጥያቄዎ ተልኳል!"); closeModal('witModal');
-            });
+            if (bal < amt) return alert("በቂ ብር የለም!");
+            let msg = `📤 Withdraw: ${uID}, Amount: ${amt}, Phone: ${phone}`;
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}`);
+            db.ref('users/' + uID).update({ balance: bal - amt }).then(() => { alert("ተልኳል!"); location.reload(); });
         });
     }
 
-    // አዲሱ Admin Add Money ዘዴ (Force Update)
     function adminAddMoney() {
         if (prompt("Admin Password:") === "1234") {
-            let id = prompt("User ID:");
-            let amt = parseFloat(prompt("Amount:"));
+            let id = prompt("User ID (ለምሳሌ USER-4173):");
+            let amt = parseFloat(prompt("የሚጨመር ብር:"));
             if (!id || isNaN(amt)) return;
-
-            db.ref('users/' + id).once('value', (s) => {
-                let current = (s.exists()) ? s.val().balance : 0;
+            db.ref('users/' + id + '/balance').once('value', (s) => {
+                let current = s.val() || 0;
                 db.ref('users/' + id).update({ balance: current + amt }).then(() => {
-                    alert("ለ " + id + " " + amt + " ብር በትክክል ተጨምሯል!");
+                    alert("ለ " + id + " " + amt + " ብር ተጨምሯል!");
+                    location.reload(); 
                 });
             });
         }
@@ -180,5 +163,4 @@
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
 </script>
 </body>
-    </html>
-    
+</html>
