@@ -3,59 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHICKEN KENO ROYAL</title>
+    <title>CHICKEN KENO ROYAL - LIVE</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --red: #e74c3c; --blue: #3498db; --white: #ffffff; }
         body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 50px; }
-        .header { background: var(--card); padding: 15px; border-bottom: 4px solid var(--gold); position: sticky; top: 0; z-index: 100; }
-        .balance-box { border: 2px solid var(--gold); display: inline-block; padding: 10px 25px; border-radius: 15px; margin: 10px 0; background: #000; font-size: 20px; font-weight: bold; color: var(--gold); }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 450px; margin: 15px auto; padding: 10px; }
-        .num { background: #2c2c2c; border: 1px solid #444; padding: 12px 0; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .selected { background: var(--blue) !important; color: white; transform: scale(1.1); }
-        .hit { background: var(--gold) !important; color: black; box-shadow: 0 0 10px var(--gold); }
-        .btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
-        .action-btn { padding: 12px 20px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: bold; min-width: 120px; }
-        .draw-btn { background: var(--green); color: white; width: 80%; max-width: 400px; font-size: 20px; }
-        .dep-btn { background: var(--blue); color: white; }
-        .wit-btn { background: var(--red); color: white; }
-        .adm-btn { background: #555; color: white; font-size: 12px; }
-        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 8px; width: 70px; text-align: center; border-radius: 8px; font-size: 16px; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); padding-top: 60px; }
-        .modal-content { background: var(--card); margin: auto; padding: 20px; border: 1px solid var(--gold); width: 85%; border-radius: 15px; text-align: left; line-height: 1.6; }
+        .header { background: var(--card); padding: 10px; border-bottom: 4px solid var(--gold); position: sticky; top: 0; z-index: 100; }
+        .balance-box { border: 2px solid var(--gold); display: inline-block; padding: 5px 15px; border-radius: 10px; background: #000; font-size: 18px; color: var(--gold); }
+        .timer-box { font-size: 24px; font-weight: bold; color: var(--red); margin: 10px; background: #000; display: inline-block; padding: 5px 20px; border-radius: 5px; border: 1px solid var(--red); }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 400px; margin: 10px auto; padding: 5px; }
+        .num { background: #2c2c2c; border: 1px solid #444; padding: 10px 0; font-weight: bold; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        .selected { background: var(--blue) !important; color: white; }
+        .hit { background: var(--gold) !important; color: black; box-shadow: 0 0 8px var(--gold); }
+        .btn-buy { background: var(--green); color: white; width: 80%; padding: 15px; font-size: 18px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .tickets-container { margin: 20px auto; max-width: 400px; text-align: left; padding: 10px; }
+        .ticket-card { background: #2c2c2c; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 5px solid var(--blue); font-size: 13px; }
+        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 5px; width: 60px; text-align: center; border-radius: 5px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
+        .modal-content { background: var(--card); margin: 15% auto; padding: 20px; width: 80%; border-radius: 10px; border: 1px solid var(--gold); }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h2 style="margin:0; color:var(--gold);">🎰 CHICKEN KENO</h2>
-    <div style="font-size:12px; color:#888;">መለያ (ID): <span id="myID" style="color:var(--gold); font-weight:bold;">...</span></div>
+    <h3 style="margin:0; color:var(--gold);">🎰 CHICKEN KENO LIVE</h3>
     <div class="balance-box">💰 <span id="balance">0.00</span> ETB</div>
+    <div style="font-size:11px; margin-top:5px;">ID: <span id="myID" style="color:var(--gold);">...</span></div>
 </div>
 
-<div style="margin: 15px;">ወራጅ (Bet): <input type="number" id="betAmount" value="15" min="5"></div>
+<div class="timer-box" id="timerDisplay">ቀጣይ ጨዋታ: 01:00</div>
+
+<div style="margin: 10px;">ወራጅ: <input type="number" id="betAmount" value="15" min="15"> (Min 15)</div>
 
 <div class="grid" id="grid"></div>
 
-<button class="action-btn draw-btn" onclick="startDraw()">ይጀምር (DRAW)</button>
+<button class="btn-buy" onclick="buyTicket()">ትኬት ቁረጥ (BUY TICKET)</button>
 
-<div class="btn-group">
-    <button class="action-btn dep-btn" onclick="showModal('depModal')">Deposit 📥</button>
-    <button class="action-btn wit-btn" onclick="showModal('witModal')">Withdraw 📤</button>
-    <button class="action-btn adm-btn" onclick="adminAddMoney()">Admin ⚙️</button>
+<div class="tickets-container">
+    <h4 style="border-bottom: 1px solid #444;">የቆረጧቸው ትኬቶች</h4>
+    <div id="activeTickets">ትኬት የለም...</div>
 </div>
 
-<div id="depModal" class="modal">
-    <div class="modal-content">
-        <h3 style="color:var(--blue); border-bottom: 1px solid #444;">ብር ለማስገባት (Deposit)</h3>
-        <p>📱 <b>Telebirr:</b> <span style="color:var(--gold)">0986980130</span></p>
-        <p>🏦 <b>Abyssinia:</b> <span style="color:var(--gold)">153682704</span></p>
-        <p>👤 <b>Name:</b> DANIEL M.</p>
-        <p>የላኩበትን Screenshot እና የረሶን ID ለ <b>@Godis1256</b> ይላኩ።</p>
-        <button onclick="closeModal('depModal')" style="background:var(--red); color:white; padding:12px; border:none; border-radius:5px; width:100%; font-weight:bold;">ዝጋ</button>
-    </div>
+<div style="display:flex; justify-content:center; gap:10px;">
+    <button onclick="showModal('depModal')" style="background:var(--blue); color:white; border:none; padding:10px; border-radius:5px;">Deposit 📥</button>
+    <button onclick="adminAddMoney()" style="background:#555; color:white; border:none; padding:10px; border-radius:5px;">Admin ⚙️</button>
 </div>
+
+<div id="depModal" class="modal"><div class="modal-content">
+    <h3>ብር ለማስገባት</h3>
+    <p>Telebirr: <b>0986980130</b><br>Abyssinia: <b>153682704</b></p>
+    <p>ደረሰኝ እና ID ለ <b>@Godis1256</b> ይላኩ</p>
+    <button onclick="closeModal('depModal')" style="background:var(--red); color:white; border:none; padding:10px; width:100%;">ዝጋ</button>
+</div></div>
 
 <script>
     const firebaseConfig = {
@@ -77,85 +77,129 @@
     localStorage.setItem('keno_user_id', uID);
     document.getElementById('myID').innerText = uID;
 
-    // አዲስ ተጠቃሚ መመዝገብ
-    db.ref('users/' + uID).once('value', (snap) => {
-        if (!snap.exists()) {
-            db.ref('users/' + uID).set({ balance: 50 });
-        }
-    });
+    let selectedNumbers = [];
+    let myTickets = [];
+    let timeLeft = 60;
 
-    db.ref('users/' + uID + '/balance').on('value', (snap) => {
+    // Balance Sync
+    db.ref('users/' + uID + '/balance').on('value', snap => {
         document.getElementById('balance').innerText = (snap.val() || 0).toFixed(2);
     });
 
+    // Create Grid
     const grid = document.getElementById('grid');
-    let selected = [];
     for (let i = 1; i <= 80; i++) {
         let d = document.createElement('div');
         d.className = 'num'; d.id = 'n' + i; d.innerText = i;
-        d.onclick = function() {
-            if (this.classList.contains('selected')) {
-                this.classList.remove('selected');
-                selected = selected.filter(n => n !== i);
-            } else if (selected.length < 10) {
-                this.classList.add('selected');
-                selected.push(i);
+        d.onclick = () => {
+            if (d.classList.contains('selected')) {
+                d.classList.remove('selected');
+                selectedNumbers = selectedNumbers.filter(n => n !== i);
+            } else if (selectedNumbers.length < 10) {
+                d.classList.add('selected');
+                selectedNumbers.push(i);
             }
         };
         grid.appendChild(d);
     }
 
-    // *** ዋናው የተስተካከለ startDraw ክፍል ***
-    function startDraw() {
-        if (selected.length === 0) return alert("ቁጥር ይምረጡ!");
+    // Buy Ticket Logic
+    function buyTicket() {
         let bet = parseFloat(document.getElementById('betAmount').value);
-        db.ref('users/' + uID + '/balance').once('value', (s) => {
-            let bal = s.val() || 0;
+        if (bet < 15) return alert("ዝቅተኛ መወራረጃ 15 ብር ነው!");
+        if (selectedNumbers.length < 2) return alert("ቢያንስ 2 ቁጥር ይምረጡ!");
+
+        db.ref('users/' + uID + '/balance').once('value', snap => {
+            let bal = snap.val() || 0;
             if (bal < bet) return alert("በቂ ብር የለም!");
-            
+
             db.ref('users/' + uID).update({ balance: bal - bet });
-            document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
+            myTickets.push({ numbers: [...selectedNumbers], bet: bet });
+            updateTicketList();
             
-            let drawn = []; let hits = 0;
-            let intv = setInterval(() => {
-                let r = Math.floor(Math.random() * 80) + 1;
-                if(!drawn.includes(r)) {
-                    drawn.push(r);
-                    document.getElementById('n' + r).classList.add('hit');
-                    if (selected.includes(r)) hits++;
-                    if (drawn.length === 20) {
-                        clearInterval(intv);
-                        let winTable = [0, 0, 0, bet*2, bet*5, bet*10, bet*20, bet*50, bet*100, bet*500, bet*1000];
-                        let win = winTable[hits] || 0;
-                        db.ref('users/' + uID).update({ balance: (bal - bet + win) });
-
-                        // ለቴሌግራም ሪፖርት መላክ
-                        let status = (win > 0) ? "💰 አሸንፏል!" : "❌ ተበልቷል!";
-                        let reportMsg = `🕹 *Game Report*\n\n👤 User: \`${uID}\`\n💵 Bet: *${bet} ETB*\n🎯 Hits: *${hits}*\n💰 Win: *${win} ETB*\n📝 Status: ${status}`;
-                        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(reportMsg)}&parse_mode=Markdown`);
-
-                        alert("Hits: " + hits + " | Win: " + win + " ETB");
-                    }
-                }
-            }, 100);
+            // Clear selection for next ticket
+            selectedNumbers = [];
+            document.querySelectorAll('.num').forEach(n => n.classList.remove('selected'));
+            alert("ትኬት ተቆርጧል!");
         });
     }
 
-    function adminAddMoney() {
-        if (prompt("Admin Password:") === "1234") {
-            let id = prompt("User ID (ለምሳሌ USER-4173):");
-            let amt = parseFloat(prompt("የሚጨመር ብር:"));
-            if (!id || isNaN(amt)) return;
-            db.ref('users/' + id + '/balance').once('value', (s) => {
-                let current = s.val() || 0;
-                db.ref('users/' + id).update({ balance: current + amt }).then(() => {
-                    alert("ለ " + id + " " + amt + " ብር ተጨምሯል!");
-                    location.reload(); 
-                });
+    function updateTicketList() {
+        const container = document.getElementById('activeTickets');
+        if (myTickets.length === 0) { container.innerHTML = "ትኬት የለም..."; return; }
+        container.innerHTML = myTickets.map((t, idx) => `
+            <div class="ticket-card">🎫 ትኬት #${idx+1} | Bet: ${t.bet} ETB<br>ቁጥሮች: ${t.numbers.join(', ')}</div>
+        `).join('');
+    }
+
+    // Game Timer (Every 60 Seconds)
+    setInterval(() => {
+        timeLeft--;
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        document.getElementById('timerDisplay').innerText = `ቀጣይ ጨዋታ: ${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+
+        if (timeLeft <= 0) {
+            runDraw();
+            timeLeft = 60;
+        }
+    }, 1000);
+
+    function runDraw() {
+        let drawn = [];
+        document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
+        
+        let i = 0;
+        let intv = setInterval(() => {
+            let r = Math.floor(Math.random() * 80) + 1;
+            if (!drawn.includes(r)) {
+                drawn.push(r);
+                document.getElementById('n' + r).classList.add('hit');
+                i++;
+                if (i === 20) {
+                    clearInterval(intv);
+                    processResults(drawn);
+                }
+            }
+        }, 150);
+    }
+
+    function processResults(drawn) {
+        let totalWin = 0;
+        let report = "";
+
+        myTickets.forEach((t, idx) => {
+            let hits = t.numbers.filter(n => drawn.includes(n)).length;
+            let winTable = [0, 0, 0, t.bet*2, t.bet*5, t.bet*10, t.bet*20, t.bet*50, t.bet*100, t.bet*500, t.bet*1000];
+            let win = winTable[hits] || 0;
+            totalWin += win;
+            report += `🎫 Ticket #${idx+1}: ${hits} hits, Win: ${win} ETB\n`;
+        });
+
+        if (myTickets.length > 0) {
+            db.ref('users/' + uID + '/balance').once('value', snap => {
+                db.ref('users/' + uID).update({ balance: (snap.val() || 0) + totalWin });
+                alert(`ጨዋታ ተጠናቋል!\n${report}\nጠቅላላ ድል: ${totalWin} ETB`);
+                
+                // Telegram Report
+                let msg = `🕹 *Game Report*\n👤 User: \`${uID}\`\n🎟 Tickets: ${myTickets.length}\n💰 Total Win: *${totalWin} ETB*`;
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+                
+                myTickets = [];
+                updateTicketList();
             });
         }
     }
 
+    function adminAddMoney() {
+        if (prompt("Password:") === "1234") {
+            let id = prompt("User ID:");
+            let amt = parseFloat(prompt("Amount:"));
+            db.ref('users/' + id + '/balance').once('value', s => {
+                db.ref('users/' + id).update({ balance: (s.val() || 0) + amt }).then(() => location.reload());
+            });
+        }
+    }
     function showModal(id) { document.getElementById(id).style.display = "block"; }
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
 </script>
