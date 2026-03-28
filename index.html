@@ -21,18 +21,18 @@
         .withdraw-btn { background: #e74c3c; color: white; }
         .deposit-btn { background: #3498db; color: white; }
         input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 10px; width: 100px; text-align: center; border-radius: 8px; font-size: 18px; }
-        .admin-section { font-size: 12px; color: #888; margin-top: 10px; }
+        .admin-section { font-size: 12px; color: #888; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <h2 style="margin:0; color:var(--gold);">🎰 CHICKEN KENO</h2>
-    <div class="admin-section">መለያ: <span id="adminBtn">መጫኛ...</span></div>
+    <div class="admin-section" onclick="adminAddMoney()">መለያ: <span id="adminBtn">መጫኛ...</span> (Admin)</div>
     <div class="balance-container">
         💰 <span id="balance" class="balance-display">0.00</span> ETB
     </div>
-    <div id="status" style="color:var(--green); font-weight:bold;">ቁጥሮችን ይምረጡ</div>
+    <div id="status" style="color:var(--green); font-weight:bold;">ቀጣይ ዙር በየ 1 ደቂቃው ይወጣል</div>
 </div>
 
 <div style="margin: 15px;">
@@ -47,7 +47,7 @@
 <button class="action-btn withdraw-btn" onclick="requestWithdraw()">ገንዘብ አውጣ (Withdraw)</button>
 
 <script>
-    // 1. Firebase Config (ያንተ መረጃ)
+    // 1. Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBM9vbTCQT39mjHMWN5Yk8f7aEXVMZWXUA",
         authDomain: "chickenkeno-c41fa.firebaseapp.com",
@@ -64,7 +64,7 @@
     let currentBalance = 0;
     let selected = [];
 
-    // 2. User Setup (User Not Found መፍትሄ)
+    // 2. User Setup (ወዲያውኑ ዳታቤዝ ላይ እንዲመዘገብ)
     if (!userID) {
         userID = "USER-" + Math.floor(1000 + Math.random() * 9000);
         localStorage.setItem('keno_user_id', userID);
@@ -94,47 +94,50 @@
         grid.appendChild(d);
     }
 
-    // 4. Deposit (ያንተ የባንክ መረጃ)
-    function showDepositInfo() {
-        alert("💰 ገንዘብ ለማስገባት (Minimum: 100 ETB):\n\n" +
-              "1. Telebirr: 0986980130\n" +
-              "2. Abyssinia Bank: 153682704\n" +
-              "Name: Daniel Mulugeta\n\n" +
-              "ብር ካስገቡ በኋላ ለ @Godis1256 የስክሪንሾት መረጃ ይላኩ።");
-    }
-
-    // 5. Withdrawal (አሁን በቀጥታ ለአንተ መልእክት ይልካል)
-    function requestWithdraw() {
-        let amt = prompt("ማውጣት የሚፈልጉትን መጠን ያስገቡ (Min: 300 ETB):");
-        amt = parseFloat(amt);
-        if (amt >= 300 && currentBalance >= amt) {
-            const token = "8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw"; 
-            const adminId = "7313437942"; 
-            const text = `🚨 የዊዝድራው ጥያቄ!\n\nተጠቃሚ: ${userID}\nመጠን: ${amt} ETB\n\nእባክህ በቴሌብር (0986980130) ላክለት።`;
-
-            fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${adminId}&text=${encodeURIComponent(text)}`)
-            .then(() => {
-                database.ref('users/' + userID).update({ balance: currentBalance - amt });
-                alert("ጥያቄዎ ተልኳል! ዳንኤል በቅርቡ ይልክልዎታል።");
-            })
-            .catch(() => alert("ስህተት ተፈጥሯል፣ እባክዎ ደግመው ይሞክሩ።"));
-        } else {
-            alert("ስህተት: ዝቅተኛው 300 ብር ነው ወይም በቂ ሂሳብ የለዎትም።");
+    // 4. ብር መጨመሪያ (Admin Function)
+    function adminAddMoney() {
+        let pass = prompt("አድሚን ፓስወርድ ያስገቡ:");
+        if (pass === "1234") {
+            let target = prompt("ብር የሚጨመርለት User ID (ለምሳሌ: USER-4173):");
+            let amount = parseFloat(prompt("የሚጨመረው ብር መጠን:"));
+            database.ref('users/' + target).once('value', (s) => {
+                if(s.exists()){
+                    let cur = s.val().balance || 0;
+                    database.ref('users/' + target).update({ balance: cur + amount });
+                    alert("ተሳክቷል!");
+                } else { alert("ተጠቃሚው አልተገኘም!"); }
+            });
         }
     }
 
-    // 6. Game Logic (15 ETB Min Bet)
+    // 5. Deposit & Withdraw
+    function showDepositInfo() {
+        alert("💰 በቴሌብር: 0986980130 ወይም በአቢሲኒያ: 153682704 ብር ያስገቡና ለ @Godis1256 ይላኩ።");
+    }
+
+    function requestWithdraw() {
+        let amt = parseFloat(prompt("የሚወጣ ብር (Min 300):"));
+        if (amt >= 300 && currentBalance >= amt) {
+            const token = "8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw";
+            const adminId = "7313437942";
+            fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${adminId}&text=${encodeURIComponent("🚨 Withdraw: " + userID + " Amount: " + amt)}`);
+            database.ref('users/' + userID).update({ balance: currentBalance - amt });
+            alert("ጥያቄው ተልኳል!");
+        } else { alert("ስህተት!"); }
+    }
+
+    // 6. Game Logic & Auto-Draw (በየ 1 ደቂቃው)
     function startDraw() {
         let bet = parseFloat(document.getElementById('betAmount').value);
-        if (bet < 15) { alert("ዝቅተኛ መወራረጃ 15 ብር ነው!"); return; }
-        if (selected.length === 0 || currentBalance < bet) { alert("ቁጥር ይምረጡ ወይም በቂ ብር የለዎትም!"); return; }
+        if (bet < 15) { alert("ዝቅተኛ ወራጅ 15 ነው!"); return; }
+        if (currentBalance < bet) { alert("በቂ ብር የለዎትም!"); return; }
 
         database.ref('users/' + userID).update({ balance: currentBalance - bet });
-        document.getElementById('drawBtn').disabled = true;
         
-        let drawn = [];
-        let hits = 0;
-        let count = 0;
+        // የድሮ ሂቶችን አጽዳ
+        document.querySelectorAll('.num').forEach(n => n.classList.remove('hit'));
+
+        let drawn = []; let hits = 0; let count = 0;
         let interval = setInterval(() => {
             let r; do { r = Math.floor(Math.random() * 80) + 1; } while (drawn.includes(r));
             drawn.push(r);
@@ -143,13 +146,20 @@
             count++;
             if (count === 20) {
                 clearInterval(interval);
-                document.getElementById('drawBtn').disabled = false;
-                let win = hits >= 3 ? bet * (hits - 1.5) : 0; 
+                let win = hits >= 3 ? bet * (hits - 1.5) : 0;
                 if (win > 0) database.ref('users/' + userID).update({ balance: currentBalance + win });
                 document.getElementById('status').innerText = `Hits: ${hits} | Win: ${win.toFixed(2)} ETB`;
             }
-        }, 200);
+        }, 150);
     }
+
+    // በየ 1 ደቂቃው (60,000ms) ራሱ እንዲጫወት
+    setInterval(() => {
+        if (selected.length > 0) {
+            startDraw();
+        }
+    }, 60000);
+
 </script>
 </body>
 </html>
