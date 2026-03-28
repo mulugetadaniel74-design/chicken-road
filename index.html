@@ -3,77 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KENO ROYAL PRO</title>
+    <title>KENO ROYAL PRO - SECURE</title>
     <style>
-        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; --blue: #3498db; --red: #e74c3c; --orange: #f39c12; }
+        :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; --blue: #3498db; --red: #e74c3c; }
         body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-        .header { background: var(--card); padding: 20px; border-radius: 0 0 25px 25px; border-bottom: 5px solid var(--gold); margin-bottom: 15px; }
-        .balance-container { border: 3px solid var(--gold); display: inline-block; padding: 10px 30px; border-radius: 40px; margin: 10px 0; }
-        .balance-display { font-size: 28px; font-weight: bold; color: var(--gold); }
-        .bet-input-box { background: var(--card); padding: 15px; border-radius: 12px; margin: 10px auto; max-width: 400px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 450px; margin: 15px auto; padding: 5px; }
-        .num { background: #2c2c2c; border: 1px solid #444; padding: 12px 0; cursor: pointer; font-weight: bold; border-radius: 6px; font-size: 15px; transition: 0.2s; color: #ccc; }
-        .selected { background: var(--blue) !important; color: white; transform: scale(1.05); box-shadow: 0 0 10px var(--blue); }
-        .winner { background: var(--gold) !important; color: black !important; animation: pop 0.3s ease; }
-        .matched { background: var(--green) !important; color: white !important; border: 2px solid white; box-shadow: 0 0 15px var(--green); }
-        @keyframes pop { 0% { transform: scale(0.7); } 100% { transform: scale(1); } }
-        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 8px; width: 80px; text-align: center; border-radius: 8px; font-size: 20px; font-weight: bold; }
-        .action-btn { width: 100%; max-width: 450px; padding: 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 18px; margin: 8px 0; transition: 0.3s; }
-        .draw-btn { background: var(--green); color: white; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4); }
-        .dep-btn { background: var(--orange); color: white; }
-        .with-section { background: var(--card); padding: 20px; border-radius: 20px; margin: 15px auto; max-width: 450px; border: 1px solid #333; }
+        .header { background: var(--card); padding: 15px; border-radius: 0 0 25px 25px; border-bottom: 4px solid var(--gold); margin-bottom: 10px; }
+        .user-id { font-size: 14px; color: #aaa; margin-top: 5px; }
+        .balance-container { border: 3px solid var(--gold); display: inline-block; padding: 10px 25px; border-radius: 40px; margin: 10px 0; cursor: pointer; -webkit-user-select: none; }
+        .balance-display { font-size: 26px; font-weight: bold; color: var(--gold); }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 450px; margin: 10px auto; }
+        .num { background: #2c2c2c; border: 1px solid #444; padding: 10px 0; font-weight: bold; border-radius: 5px; font-size: 14px; }
+        .selected { background: var(--blue) !important; color: white; }
+        .action-btn { width: 100%; max-width: 450px; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; margin: 5px 0; }
+        .draw-btn { background: var(--green); color: white; }
+        .dep-btn { background: #f39c12; color: white; }
         .with-btn { background: var(--red); color: white; }
-        .action-btn:active { transform: scale(0.96); }
+        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 5px; width: 70px; text-align: center; border-radius: 5px; font-size: 18px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2 style="margin:0; color:var(--gold); letter-spacing: 2px;">🎰 KENO ROYAL PRO 🎰</h2>
-        <div class="balance-container">
+        <h3 style="margin:0; color:var(--gold);">🎰 KENO ROYAL PRO</h3>
+        <div class="user-id">የተጫዋች መለያ (ID): <span id="displayID">...</span></div>
+        <div class="balance-container" id="adminTrigger">
             <span class="balance-display">💰 <span id="balance">0.00</span> ETB</span>
         </div>
     </div>
 
-    <div class="bet-input-box">
-        <span>መወራረድ (ሚኒመም 15):</span>
-        <input type="number" id="betAmount" value="15" min="15">
-    </div>
+    <div style="margin: 5px;">መወራረድ (ሚኒመም 15): <input type="number" id="betAmount" value="15" min="15"></div>
 
     <div class="grid" id="grid"></div>
 
     <button class="action-btn draw-btn" onclick="draw()">ይጀምር (DRAW)</button>
     <button onclick="requestDeposit()" class="action-btn dep-btn">💳 ብር አስገባ / DEPOSIT</button>
-
-    <div class="with-section">
-        <h3 style="margin-top:0;">💸 ብር አውጣ (WITHDRAW)</h3>
-        <input type="number" id="withAmount" value="300" min="300" style="margin-bottom:10px;"><br>
-        <button class="action-btn with-btn" onclick="requestWithdraw()">ብር አውጣ</button>
-    </div>
+    <button class="action-btn with-btn" onclick="requestWithdraw()">💸 ብር አውጣ (WITHDRAW)</button>
 
     <script>
-        // --- የግል መረጃዎች ---
         const botToken = '8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw';
         const chatId = '7313437942';
-        const adminPass = "1234"; 
+        const adminPass = "1234";
 
-        let currentBalance = 0.00; 
+        let currentBalance = 0.00;
         let selected = [];
-        const grid = document.getElementById('grid');
+        let userID = "";
 
-        // ገጹ ሲከፈት የቆየ ባላንስ መጫኛ
-        window.onload = function() {
-            let saved = localStorage.getItem('keno_balance');
-            if (saved) {
-                currentBalance = parseFloat(saved);
-                updateUI();
+        // ID መፍጠሪያ
+        function getID() {
+            let id = localStorage.getItem('keno_user_id');
+            if (!id) {
+                id = "USER-" + Math.floor(1000 + Math.random() * 9000);
+                localStorage.setItem('keno_user_id', id);
             }
-        };
+            return id;
+        }
 
-        // ግሪዱን መፍጠር
+        function updateUI() {
+            document.getElementById('balance').innerText = currentBalance.toFixed(2);
+            localStorage.setItem('keno_balance', currentBalance);
+            document.getElementById('displayID').innerText = userID;
+        }
+
+        function sendToTelegram(msg) {
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&parse_mode=HTML&text=${encodeURIComponent(msg)}`;
+            fetch(url);
+        }
+
+        // --- አድሚን ብር ለመጨመር (ባላንሱ ላይ ተጭኖ መያዝ) ---
+        let timer;
+        const trigger = document.getElementById('adminTrigger');
+        trigger.addEventListener('touchstart', () => {
+            timer = setTimeout(() => {
+                let pass = prompt("አድሚን ፓስወርድ ያስገቡ፦");
+                if (pass === adminPass) {
+                    let add = parseFloat(prompt("የሚጨመር የብር መጠን፦"));
+                    if (!isNaN(add)) {
+                        currentBalance += add;
+                        updateUI();
+                        sendToTelegram(`✅ <b>ባላንስ ተጨምሯል!</b>\nID: ${userID}\nመጠን: ${add} ETB\nአሁን ያለው: ${currentBalance} ETB`);
+                        alert("ተጨምሯል!");
+                    }
+                }
+            }, 1500);
+        });
+        trigger.addEventListener('touchend', () => clearTimeout(timer));
+
+        // Withdraw ሲደረግ ወዲያውኑ ይቀንሳል
+        function requestWithdraw() {
+            let amount = parseFloat(prompt("የሚወጣ የብር መጠን ያስገቡ፦"));
+            if (isNaN(amount) || amount <= 0) return;
+            
+            if (amount > currentBalance) {
+                alert("በቂ ባላንስ የሎትም!");
+                return;
+            }
+
+            let phone = prompt("ብር የሚላክበት ስልክ ቁጥር፦");
+            if (phone) {
+                // መጀመሪያ ከባላንሱ ይቀንሳል!
+                currentBalance -= amount;
+                updateUI();
+
+                // ከዚያ ለአንተ ይላካል
+                let msg = `🔴 <b>የመውጫ ጥያቄ (Withdraw)</b>\n━━━━━━━━━━━━━\n<b>መለያ (ID):</b> ${userID}\n<b>መጠን:</b> ${amount} ETB\n<b>ስልክ:</b> ${phone}\n<b>ቀሪ ባላንስ:</b> ${currentBalance} ETB`;
+                sendToTelegram(msg);
+                alert("ጥያቄዎ ተልኳል። ብሩ ከባላንስዎ ላይ ቀንሷል!");
+            }
+        }
+
+        function requestDeposit() {
+            let msg = `📥 <b>የተቀማጭ ጥያቄ (Deposit)</b>\nID: ${userID}\nተጫዋቹ ብር ማስገባት ይፈልጋል።`;
+            sendToTelegram(msg);
+            alert("ጥያቄው ተልኳል! እባክዎ አስተዳዳሪውን ያነጋግሩ።");
+        }
+
+        // ግሪድ መፍጠሪያ
+        const grid = document.getElementById('grid');
         for (let i = 1; i <= 80; i++) {
             let d = document.createElement('div');
-            d.className = 'num'; d.id = 'n' + i; d.innerText = i;
+            d.className = 'num'; d.innerText = i;
             d.onclick = function() {
                 if (this.classList.contains('selected')) {
                     this.classList.remove('selected');
@@ -86,89 +134,21 @@
             grid.appendChild(d);
         }
 
-        // ቴሌግራም መላኪያ
-        function sendToTelegram(message) {
-            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
-            fetch(url).then(res => {
-                if(res.ok) alert("ጥያቄዎ ተልኳል! በቅርቡ እናነጋግርዎታለን።");
-            });
-        }
-
-        function requestDeposit() {
-            sendToTelegram("<b>📥 የዴፖዚት ጥያቄ</b>\nተጠቃሚው ብር ማስገባት ይፈልጋል።");
-        }
-
-        function requestWithdraw() {
-            let amt = document.getElementById('withAmount').value;
-            if (amt >= 300) {
-                let phone = prompt("ብር የሚላክበትን ስልክ ቁጥር ያስገቡ፦");
-                if (phone) {
-                    sendToTelegram(`<b>💸 የውዝድሮው ጥያቄ</b>\n<b>መጠን:</b> ${amt} ETB\n<b>ስልክ:</b> ${phone}`);
-                }
-            } else { alert("ዝቅተኛው ማውጫ 300 ብር ነው!"); }
-        }
-
-        // --- ADMIN ቁልፍ (Ctrl + B) ---
-        window.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'b') { 
-                let pass = prompt("አድሚን ፓስወርድ ያስገቡ፦");
-                if (pass === adminPass) {
-                    let add = parseFloat(prompt("የሚጨመር የብር መጠን፦"));
-                    if (!isNaN(add)) {
-                        currentBalance += add;
-                        updateUI();
-                        alert(add + " ብር ተጨምሯል!");
-                    }
-                }
-            }
-        });
-
         function draw() {
             let bet = parseFloat(document.getElementById('betAmount').value);
-            if (selected.length === 0) { alert("እባክዎ ቁጥር ይምረጡ!"); return; }
-            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም! መጀመሪያ ዴፖዚት ያድርጉ።"); return; }
-
+            if (selected.length === 0) { alert("ቁጥር ይምረጡ!"); return; }
+            if (currentBalance < bet) { alert("ባላንስ የሎትም!"); return; }
             currentBalance -= bet;
             updateUI();
-
-            document.querySelectorAll('.num').forEach(n => n.classList.remove('winner', 'matched'));
-
-            let winners = [];
-            while (winners.length < 20) {
-                let r = Math.floor(Math.random() * 80) + 1;
-                if (!winners.includes(r)) winners.push(r);
-            }
-
-            winners.forEach((n, i) => {
-                setTimeout(() => {
-                    let el = document.getElementById('n' + n);
-                    el.classList.add('winner');
-                    if (selected.includes(n)) el.classList.add('matched');
-                    if (i === 19) checkWin(winners, bet);
-                }, i * 80);
-            });
+            alert("ጨዋታው ተጀምሯል!");
         }
 
-        function checkWin(winNums, bet) {
-            let matches = selected.filter(n => winNums.includes(n)).length;
-            let mult = 0;
-            if (matches === 2) mult = 2;
-            if (matches === 3) mult = 5;
-            if (matches === 4) mult = 20;
-            if (matches >= 5) mult = 100;
-
-            if (mult > 0) {
-                let win = bet * mult;
-                currentBalance += win;
-                alert(`እንኳን ደስ አለዎት! ${matches} ቁጥሮች ገጥመው ${win} ብር አሸንፈዋል!`);
-            }
+        window.onload = function() {
+            userID = getID();
+            let saved = localStorage.getItem('keno_balance');
+            if (saved) { currentBalance = parseFloat(saved); }
             updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('balance').innerText = currentBalance.toFixed(2);
-            localStorage.setItem('keno_balance', currentBalance);
-        }
+        };
     </script>
 </body>
 </html>
