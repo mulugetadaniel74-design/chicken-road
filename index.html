@@ -10,39 +10,30 @@
         :root { --gold: #ffc40f; --dark: #121212; --card: #1e1e1e; --green: #2ecc71; --white: #ffffff; }
         body { background-color: var(--dark); color: var(--white); text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
         .header { background: var(--card); padding: 15px; border-radius: 0 0 25px 25px; border-bottom: 4px solid var(--gold); margin-bottom: 10px; }
-        .user-info { font-size: 14px; color: #aaa; margin-top: 5px; }
-        #adminBtn { cursor: pointer; text-decoration: underline; color: var(--gold); font-weight: bold; padding: 5px; }
+        #adminBtn { cursor: pointer; text-decoration: underline; color: var(--gold); font-weight: bold; }
         .balance-container { border: 3px solid var(--gold); display: inline-block; padding: 10px 25px; border-radius: 40px; margin: 10px 0; background: rgba(255,196,15,0.1); }
         .balance-display { font-size: 28px; font-weight: bold; color: var(--gold); }
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 450px; margin: 15px auto; }
-        .num { background: #2c2c2c; border: 1px solid #444; padding: 12px 0; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .selected { background: #3498db !important; border-color: #fff; }
-        .hit { background: var(--gold) !important; color: black; transform: scale(1.1); box-shadow: 0 0 15px var(--gold); }
-        .action-btn { width: 100%; max-width: 450px; padding: 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 18px; margin: 10px 0; transition: 0.3s; }
-        .draw-btn { background: var(--green); color: white; box-shadow: 0 5px 15px rgba(46,204,113,0.4); }
-        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 8px; width: 100px; text-align: center; border-radius: 8px; font-size: 20px; outline: none; }
+        .num { background: #2c2c2c; border: 1px solid #444; padding: 12px 0; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        .selected { background: #3498db !important; }
+        .hit { background: var(--gold) !important; color: black; }
+        .action-btn { width: 100%; max-width: 450px; padding: 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 18px; background: var(--green); color: white; }
+        input { background: #000; color: var(--gold); border: 2px solid var(--gold); padding: 8px; width: 100px; text-align: center; border-radius: 8px; }
     </style>
 </head>
 <body>
-
     <div class="header">
         <h2 style="margin:0; color:var(--gold);">🎰 CHICKEN KENO</h2>
-        <div class="user-info">የእርስዎ መለያ: <span id="adminBtn">መለያ በመጫን ላይ...</span></div>
-        <div class="balance-container">
-            <span class="balance-display">💰 <span id="balance">0.00</span> ETB</span>
-        </div>
-        <div id="status" style="color: #2ecc71; font-weight: bold;">ቁጥሮችን ይምረጡ (ከ 1 - 10)</div>
+        <div style="font-size:14px;">መለያ: <span id="adminBtn">Loading...</span></div>
+        <div class="balance-container"><span class="balance-display">💰 <span id="balance">0.00</span> ETB</span></div>
+        <div id="status" style="color: #2ecc71;">ቁጥሮችን ይምረጡ</div>
     </div>
-
-    <div style="margin: 15px;">
-        የውርርድ መጠን: <input type="number" id="betAmount" value="15" min="15">
-    </div>
-
+    <div style="margin: 15px;">ውርርድ: <input type="number" id="betAmount" value="15"></div>
     <div class="grid" id="grid"></div>
-    <button class="action-btn draw-btn" id="drawBtn" onclick="startDraw()">ይጀምር (DRAW)</button>
+    <button class="action-btn" id="drawBtn" onclick="startDraw()">ይጀምር (DRAW)</button>
 
     <script>
-        // --- ያንተ Firebase መረጃ (ከፎቶው ላይ የተወሰደ) ---
+        // 2. ያንተ Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyBM9VbTCQT39mjHWMN5Yk8F7aEXVM2WeUA",
             authDomain: "chickenkeno-c41fa.firebaseapp.com",
@@ -53,7 +44,6 @@
             appId: "1:423384148862:web:99e9faebe83982f968e12f"
         };
 
-        // Firebase-ን ማስጀመር
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -61,7 +51,6 @@
         let currentBalance = 0;
         let selected = [];
 
-        // 1. ተጫዋቹን መለየትና መመዝገብ
         if (!userID) {
             userID = "ID-" + Math.floor(1000 + Math.random() * 9000);
             localStorage.setItem('keno_user_id', userID);
@@ -69,36 +58,30 @@
         }
         document.getElementById('adminBtn').innerText = userID;
 
-        // 2. ባላንስን ከዳታቤዝ ማንበብ
         database.ref('users/' + userID + '/balance').on('value', (snap) => {
             currentBalance = snap.val() || 0;
             document.getElementById('balance').innerText = currentBalance.toFixed(2);
         });
 
-        // 3. ብር መጨመሪያ (የመለያ ቁጥሩን ለ 2 ሰከንድ ተጭነው ይያዙ)
+        // አድሚን ብር መጨመሪያ (ID ተጭኖ በመያዝ)
         let timer;
-        const btn = document.getElementById('adminBtn');
-        btn.addEventListener('touchstart', () => {
+        document.getElementById('adminBtn').addEventListener('touchstart', () => {
             timer = setTimeout(() => {
-                let pass = prompt("አድሚን ፓስወርድ ያስገቡ:");
+                let pass = prompt("Password:");
                 if (pass === "1234") {
-                    let targetID = prompt("ብር የሚጨመርለት ተጫዋች ID:");
-                    let amount = parseFloat(prompt("የብር መጠን:"));
-                    if (targetID && !isNaN(amount)) {
-                        database.ref('users/' + targetID).once('value', (s) => {
+                    let target = prompt("User ID:");
+                    let amt = parseFloat(prompt("Amount:"));
+                    if (target && !isNaN(amt)) {
+                        database.ref('users/' + target).once('value', (s) => {
                             if (s.exists()) {
-                                let oldBal = s.val().balance || 0;
-                                database.ref('users/' + targetID).update({ balance: oldBal + amount });
-                                alert("በተሳካ ሁኔታ ተጨምሯል!");
-                            } else {
-                                alert("ስህተት: ይህ ID አልተገኘም!");
-                            }
+                                database.ref('users/' + target).update({ balance: (s.val().balance || 0) + amt });
+                                alert("Success!");
+                            } else { alert("User not found!"); }
                         });
                     }
                 }
             }, 2000);
         });
-        btn.addEventListener('touchend', () => clearTimeout(timer));
 
         // Grid መፍጠሪያ
         const grid = document.getElementById('grid');
@@ -119,38 +102,21 @@
 
         function startDraw() {
             let bet = parseFloat(document.getElementById('betAmount').value);
-            if (selected.length === 0) { alert("እባክዎ ቁጥሮችን ይምረጡ!"); return; }
-            if (currentBalance < bet) { alert("በቂ ባላንስ የሎትም! እባክዎ ብር ያስገቡ።"); return; }
-
-            // ባላንስ መቀነስ
+            if (selected.length === 0 || currentBalance < bet) { alert("Check selection/balance!"); return; }
             database.ref('users/' + userID).update({ balance: currentBalance - bet });
-
-            let drawn = [];
-            let hits = 0;
-            let count = 0;
+            
+            let drawn = []; let hits = 0; let count = 0;
             document.getElementById('drawBtn').disabled = true;
-            document.querySelectorAll('.hit').forEach(el => el.classList.remove('hit'));
-
             let interval = setInterval(() => {
-                let r;
-                do { r = Math.floor(Math.random() * 80) + 1; } while (drawn.includes(r));
-                drawn.push(r);
-                document.getElementById('num-' + r).classList.add('hit');
+                let r; do { r = Math.floor(Math.random() * 80) + 1; } while (drawn.includes(r));
+                drawn.push(r); document.getElementById('num-' + r).classList.add('hit');
                 if (selected.includes(r)) hits++;
                 count++;
                 if (count === 20) {
                     clearInterval(interval);
                     document.getElementById('drawBtn').disabled = false;
-                    let win = 0;
-                    if (hits === 3) win = bet * 2;
-                    else if (hits === 4) win = bet * 5;
-                    else if (hits >= 5) win = bet * 10;
-                    
-                    if (win > 0) {
-                        database.ref('users/' + userID).once('value', (s) => {
-                            database.ref('users/' + userID).update({ balance: (s.val().balance || 0) + win });
-                        });
-                    }
+                    let win = hits >= 3 ? bet * (hits - 1) : 0;
+                    if (win > 0) database.ref('users/' + userID).update({ balance: currentBalance + win });
                     document.getElementById('status').innerText = `Hits: ${hits} | Win: ${win} ETB`;
                 }
             }, 200);
