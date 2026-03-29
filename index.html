@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DANIEL KENO ROYAL - MASTER EDITION</title>
+    <title>DANIEL KENO ROYAL - ULTIMATE EDITION</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         :root { --gold: #ffc40f; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ecc71; --red: #e74c3c; --blue: #3498db; }
         body { background-color: var(--dark); color: white; text-align: center; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 60px; }
         .header { background: #111; padding: 15px; border-bottom: 2px solid var(--gold); }
-        .balance-box { border: 2px solid var(--gold); display: inline-block; padding: 5px 25px; border-radius: 50px; font-size: 24px; color: var(--gold); font-weight: bold; background: #000; }
+        .balance-box { border: 2px solid var(--gold); display: inline-block; padding: 5px 25px; border-radius: 50px; font-size: 24px; color: var(--gold); font-weight: bold; background: #000; box-shadow: 0 0 10px rgba(255,196,15,0.2); }
         .timer { font-size: 3.2rem; font-weight: bold; color: var(--red); margin: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background: #111; padding: 10px; border-radius: 12px; max-width: 450px; margin: auto; }
-        .num { background: #2a2a2a; border: 1px solid #333; padding: 12px 0; font-weight: bold; border-radius: 6px; cursor: pointer; color: #ccc; font-size: 0.9rem; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background: #111; padding: 10px; border-radius: 12px; max-width: 450px; margin: auto; border: 1px solid #333; }
+        .num { background: #2a2a2a; border: 1px solid #333; padding: 12px 0; font-weight: bold; border-radius: 6px; cursor: pointer; color: #ccc; font-size: 0.9rem; transition: 0.2s; }
         .selected { background: var(--blue) !important; color: white; transform: scale(1.05); }
         .hit { background: var(--gold) !important; color: black; animation: pop 0.4s; }
         @keyframes pop { 0% {transform: scale(1);} 50% {transform: scale(1.2);} 100% {transform: scale(1);} }
         
         .bet-controls { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 20px 0; }
-        .bet-btn { background: #333; color: white; border: 1px solid var(--gold); width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; }
+        .bet-btn { background: #333; color: white; border: 1px solid var(--gold); width: 45px; height: 45px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-bet-main { width: 90%; max-width: 400px; padding: 18px; border-radius: 15px; border: none; font-weight: bold; font-size: 1.3rem; cursor: pointer; background: var(--green); color: white; box-shadow: 0 4px 0 #1e8449; }
         
         .panel { background: var(--card); margin: 10px; padding: 15px; border-radius: 15px; border: 1px solid #333; text-align: left; }
@@ -29,7 +29,7 @@
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); }
         .modal-content { background: var(--card); margin: 10% auto; padding: 25px; width: 85%; max-width: 380px; border-radius: 20px; border: 1px solid var(--gold); text-align: center; }
         .input-field { width: 100%; background: #000; color: white; border: 1px solid #444; padding: 12px; border-radius: 10px; margin-top: 10px; box-sizing: border-box; }
-        #adminBtn { display: none; background: #222; color: var(--gold); border: 1px solid var(--gold); padding: 10px 20px; border-radius: 10px; margin: 20px auto; cursor: pointer; }
+        #adminBtn { display: none; background: #222; color: var(--gold); border: 1px solid var(--gold); padding: 10px 20px; border-radius: 10px; margin: 20px auto; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -52,19 +52,19 @@
 
 <div class="bet-controls">
     <button class="bet-btn" onclick="adjustBet(-5)">-</button>
-    <div style="font-size: 1.2rem; font-weight: bold; color: var(--gold);"><span id="betValue">15</span> ETB</div>
+    <div style="font-size: 1.4rem; font-weight: bold; color: var(--gold); min-width: 80px;"><span id="betValue">15</span> ETB</div>
     <button class="bet-btn" onclick="adjustBet(5)">+</button>
 </div>
 
 <button onclick="buyTicket()" class="btn-bet-main">ትኬት ቁረጥ (PLACE BET)</button>
 
 <div style="display:flex; justify-content:center; gap:10px; margin: 15px;">
-    <button onclick="showModal('depModal')" style="background:var(--blue); border:none; padding:15px; border-radius:12px; width:45%; color:white; font-weight:bold;">Deposit 📥</button>
-    <button onclick="showModal('witModal')" style="background:var(--red); border:none; padding:15px; border-radius:12px; width:45%; color:white; font-weight:bold;">Withdraw 📤</button>
+    <button onclick="showModal('depModal')" style="background:var(--blue); border:none; padding:15px; border-radius:12px; width:45%; color:white; font-weight:bold; cursor:pointer;">Deposit 📥</button>
+    <button onclick="showModal('witModal')" style="background:var(--red); border:none; padding:15px; border-radius:12px; width:45%; color:white; font-weight:bold; cursor:pointer;">Withdraw 📤</button>
 </div>
 
 <div class="panel">
-    <div style="color:var(--blue); margin-bottom:8px; font-size:0.9rem;">📜 የአሁኑ ዙር ውጤቶች (LIVE)</div>
+    <div style="color:var(--blue); margin-bottom:8px; font-size:0.9rem;">📜 የአሁኑ ዙር ውጤቶች (LIVE DRAW)</div>
     <div id="liveDraw" class="scroll-box"></div>
 </div>
 
@@ -83,8 +83,8 @@
         👤 ስም: <b>ዳንኤል ሙሉጌታ ኩምሳ</b>
     </div>
     <input type="file" id="receiptFile" accept="image/*" class="input-field">
-    <button onclick="sendDeposit()" style="background:var(--green); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold; margin-top:15px;">ደረሰኝ ላክ</button>
-    <button onclick="closeModal('depModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; border-radius:10px; margin-top:10px;">ተመለስ</button>
+    <button onclick="sendDeposit()" style="background:var(--green); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold; margin-top:15px; cursor:pointer;">ደረሰኝ ላክ</button>
+    <button onclick="closeModal('depModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; border-radius:10px; margin-top:10px; cursor:pointer;">ተመለስ</button>
 </div></div>
 
 <div id="witModal" class="modal"><div class="modal-content">
@@ -93,8 +93,8 @@
     <input type="text" id="witBank" class="input-field" placeholder="ባንክ / ቴሌብር">
     <input type="text" id="witAcc" class="input-field" placeholder="አካውንት ቁጥር">
     <input type="text" id="witName" class="input-field" placeholder="ሙሉ ስም">
-    <button onclick="sendWithdraw()" style="background:var(--red); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold; margin-top:15px;">ጥያቄ ላክ</button>
-    <button onclick="closeModal('witModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; border-radius:10px; margin-top:10px;">ተመለስ</button>
+    <button onclick="sendWithdraw()" style="background:var(--red); color:white; border:none; padding:15px; border-radius:12px; width:100%; font-weight:bold; margin-top:15px; cursor:pointer;">ጥያቄ ላክ</button>
+    <button onclick="closeModal('witModal')" style="background:#444; color:white; width:100%; padding:10px; border:none; border-radius:10px; margin-top:10px; cursor:pointer;">ተመለስ</button>
 </div></div>
 
 <script>
@@ -102,6 +102,14 @@
     const CHAT_ID = "7313437942";
     const ADMIN_ID = "USER-4173";
     
+    const kenoOdds = {
+        2: { 2: 10 },
+        3: { 2: 2, 3: 25 },
+        4: { 2: 1, 3: 5, 4: 80 },
+        5: { 3: 2, 4: 15, 5: 350 },
+        10: { 5: 2, 6: 10, 7: 50, 8: 300, 9: 1500, 10: 10000 }
+    };
+
     const firebaseConfig = {
         apiKey: "AIzaSyBM9vbTCQT39mjHMWN5Yk8f7aEXVMZWXUA",
         authDomain: "chickenkeno-c41fa.firebaseapp.com",
@@ -119,7 +127,6 @@
 
     let selectedNums = [], timeLeft = 60, isDrawing = false, currentBet = 15, activeTickets = [];
 
-    // Grid
     for(let i=1; i<=80; i++) {
         let d = document.createElement('div'); d.className='num'; d.id='n'+i; d.innerText=i;
         d.onclick=()=> {
@@ -164,16 +171,31 @@
 
     function checkTickets(drawn) {
         activeTickets.forEach(t => {
-            t.hits = t.nums.filter(n => drawn.includes(n)).length;
+            let hits = t.nums.filter(n => drawn.includes(n)).length;
+            t.hits = hits;
+            let selCount = t.nums.length;
+            let mult = 0;
+            if (kenoOdds[selCount] && kenoOdds[selCount][hits]) mult = kenoOdds[selCount][hits];
+
+            if (mult > 0) {
+                let win = t.bet * mult;
+                t.win = win;
+                db.ref('users/'+uID+'/balance').once('value', s => {
+                    db.ref('users/'+uID).update({balance: (s.val()||0) + win});
+                });
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chat_id: CHAT_ID, text: `💰 አሸናፊ!\nID: ${uID}\nHits: ${hits}/${selCount}\nያሸነፈው: ${win} ETB` }) });
+            }
         });
         updateTicketUI();
     }
 
     function updateTicketUI() {
         document.getElementById('ticketList').innerHTML = activeTickets.map(t => `
-            <div style="background:#222; padding:8px; border-radius:8px; margin-bottom:5px; border-left:3px solid var(--gold);">
-                💰 ${t.bet} ETB | Hits: <b style="color:var(--green)">${t.hits || 0}</b><br>
-                <small style="color:#888">${t.nums.join(', ')}</small>
+            <div style="background:#222; padding:10px; border-radius:10px; margin-bottom:6px; border-left:4px solid ${t.win > 0 ? 'var(--green)' : 'var(--gold)'};">
+                <div style="display:flex; justify-content:space-between;">
+                    <span>💸 ${t.bet} ETB</span>
+                    <b style="color:${t.win > 0 ? 'var(--green)' : 'white'}">${t.win > 0 ? 'WON: '+t.win : 'Hits: '+t.hits}</b>
+                </div>
             </div>
         `).join('');
     }
@@ -184,12 +206,9 @@
             let bal = s.val() || 0;
             if(bal < currentBet) return alert("በቂ ብር የለም!");
             db.ref('users/'+uID).update({balance: bal - currentBet});
-            activeTickets.push({ bet: currentBet, nums: [...selectedNums], hits: 0 });
+            activeTickets.push({ bet: currentBet, nums: [...selectedNums], hits: 0, win: 0 });
             updateTicketUI();
-            
-            // Telegram Alert
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chat_id: CHAT_ID, text: `🎟 ትኬት ተቆረጠ!\nID: ${uID}\nመጠን: ${currentBet} ETB\nቁጥሮች: ${selectedNums.join(', ')}` }) });
-            
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chat_id: CHAT_ID, text: `🎟 ትኬት!\nID: ${uID}\nBet: ${currentBet}\nNums: ${selectedNums.join(',')}` }) });
             clearSelection();
             alert("ትኬት ተቆርጧል!");
         });
@@ -215,11 +234,11 @@
         let p = prompt("Password:");
         if(p === "9801") {
             let id = prompt("User ID:");
-            let amt = parseFloat(prompt("Amount to add/subtract:"));
+            let amt = parseFloat(prompt("Amount (+/-):"));
             if(id && !isNaN(amt)) {
                 db.ref('users/'+id+'/balance').once('value', s => {
                     db.ref('users/'+id).update({balance: (s.val()||0) + amt});
-                    alert("Done!");
+                    alert("ተሳክቷል!");
                 });
             }
         }
