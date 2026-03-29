@@ -31,7 +31,6 @@
         .input-field { width: 100%; background: #000; color: white; border: 1px solid #444; padding: 12px; border-radius: 10px; margin-top: 10px; box-sizing: border-box; }
         #adminBtn { display: none; background: #222; color: var(--gold); border: 1px solid var(--gold); padding: 10px 20px; border-radius: 10px; margin: 20px auto; cursor: pointer; font-weight: bold; }
         
-        /* Win Message */
         #winMsg { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--green); color: white; padding: 30px; border-radius: 20px; z-index: 2000; font-size: 1.5rem; font-weight: bold; box-shadow: 0 0 50px rgba(46, 204, 113, 0.5); border: 3px solid white; }
     </style>
 </head>
@@ -60,6 +59,8 @@
     <div style="font-size: 1.4rem; font-weight: bold; color: var(--gold); min-width: 80px;"><span id="betValue">15</span> ETB</div>
     <button class="bet-btn" onclick="adjustBet(5)">+</button>
 </div>
+
+<div id="oddsDisplay" style="color:var(--green); font-weight:bold; margin-bottom:10px; height:20px; font-size:1.1rem;"></div>
 
 <button onclick="buyTicket()" class="btn-bet-main">ትኬት ቁረጥ (PLACE BET)</button>
 
@@ -106,6 +107,7 @@
     const BOT_TOKEN = "8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw";
     const CHAT_ID = "7313437942";
     const ADMIN_ID = "USER-4173";
+    const ADMIN_PASS = "9801";
     
     const kenoOdds = {
         2: { 2: 10 },
@@ -136,10 +138,28 @@
         let d = document.createElement('div'); d.className='num'; d.id='n'+i; d.innerText=i;
         d.onclick=()=> {
             if(isDrawing) return;
-            if(d.classList.contains('selected')) { d.classList.remove('selected'); selectedNums = selectedNums.filter(x=>x!==i); }
-            else if(selectedNums.length < 10) { d.classList.add('selected'); selectedNums.push(i); }
+            if(d.classList.contains('selected')) { 
+                d.classList.remove('selected'); 
+                selectedNums = selectedNums.filter(x=>x!==i); 
+            } else if(selectedNums.length < 10) { 
+                d.classList.add('selected'); 
+                selectedNums.push(i); 
+            }
+            updateOddsText();
         };
         document.getElementById('grid').appendChild(d);
+    }
+
+    function updateOddsText() {
+        let count = selectedNums.length;
+        let display = document.getElementById('oddsDisplay');
+        if (count < 2) { display.innerText = ""; return; }
+        let maxMult = 0;
+        if (kenoOdds[count]) {
+            let hits = Object.keys(kenoOdds[count]);
+            maxMult = kenoOdds[count][Math.max(...hits)];
+        }
+        display.innerText = maxMult > 0 ? `${count} ቁጥሮች - እስከ x${maxMult} ክፍያ!` : `${count} ቁጥሮች ተመርጠዋል`;
     }
 
     function adjustBet(val) { currentBet = Math.max(15, currentBet + val); document.getElementById('betValue').innerText = currentBet; }
@@ -156,7 +176,6 @@
         isDrawing = true;
         let drawn = [];
         while(drawn.length < 20) { let r = Math.floor(Math.random()*80)+1; if(!drawn.includes(r)) drawn.push(r); }
-        
         let html = "";
         for(let n of drawn) {
             await new Promise(res => setTimeout(res, 400));
@@ -164,7 +183,6 @@
             html += `<div class="ball">${n}</div>`;
             document.getElementById('liveDraw').innerHTML = html;
         }
-
         checkTickets(drawn);
         setTimeout(() => {
             document.querySelectorAll('.num').forEach(el => el.classList.remove('hit', 'selected'));
@@ -172,6 +190,7 @@
             activeTickets = []; updateTicketUI();
             selectedNums = []; isDrawing = false; timeLeft = 60;
             document.getElementById('winMsg').style.display = "none";
+            document.getElementById('oddsDisplay').innerText = "";
         }, 6000);
     }
 
@@ -179,28 +198,20 @@
         activeTickets.forEach(t => {
             let hits = t.nums.filter(n => drawn.includes(n)).length;
             t.hits = hits;
-            let selCount = t.nums.length;
             let mult = 0;
-            if (kenoOdds[selCount] && kenoOdds[selCount][hits]) mult = kenoOdds[selCount][hits];
-
+            if (kenoOdds[t.nums.length] && kenoOdds[t.nums.length][hits]) mult = kenoOdds[t.nums.length][hits];
             if (mult > 0) {
                 let win = t.bet * mult;
                 t.win = win;
-                // Update Balance
                 db.ref('users/'+uID+'/balance').once('value', s => {
                     db.ref('users/'+uID).update({balance: (s.val()||0) + win});
                 });
-                // Show Win Msg
                 document.getElementById('winAmtText').innerText = win;
                 document.getElementById('winMsg').style.display = "block";
-                // Send to Bot
                 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        chat_id: CHAT_ID, 
-                        text: `💰 አሸናፊ (WINNER)! 🎉\nID: ${uID}\nBet: ${t.bet} ETB\nHits: ${hits}/${selCount}\nያሸነፈው: ${win} ETB` 
-                    })
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: `💰 አሸናፊ! 🎉\nID: ${uID}\nBet: ${t.bet} ETB\nHits: ${hits}/${t.nums.length}\nWon: ${win} ETB` })
                 });
             }
         });
@@ -226,13 +237,9 @@
             db.ref('users/'+uID).update({balance: bal - currentBet});
             activeTickets.push({ bet: currentBet, nums: [...selectedNums], hits: 0, win: 0 });
             updateTicketUI();
-            // Send Ticket to Bot
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({ chat_id: CHAT_ID, text: `🎟 ትኬት ተቆረጠ!\nID: ${uID}\nBet: ${currentBet} ETB\nቁጥሮች: ${selectedNums.join(', ')}` }) 
-            });
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chat_id: CHAT_ID, text: `🎟 ትኬት!\nID: ${uID}\nBet: ${currentBet} ETB\nቁጥሮች: ${selectedNums.join(', ')}` }) });
             clearSelection();
+            document.getElementById('oddsDisplay').innerText = "";
             alert("ትኬት ተቆርጧል!");
         });
     }
@@ -240,7 +247,7 @@
     async function sendDeposit() {
         const file = document.getElementById('receiptFile').files[0];
         if(!file) return alert("ደረሰኝ ይምረጡ!");
-        let fd = new FormData(); fd.append('chat_id', CHAT_ID); fd.append('photo', file); fd.append('caption', `📥 ገቢ ጥያቄ (DEPOSIT)\nID: ${uID}`);
+        let fd = new FormData(); fd.append('chat_id', CHAT_ID); fd.append('photo', file); fd.append('caption', `📥 DEPOSIT\nID: ${uID}`);
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
         alert("ተልኳል!"); closeModal('depModal');
     }
@@ -248,14 +255,14 @@
     function sendWithdraw() {
         let amt = document.getElementById('witAmt').value;
         if(amt < 300) return alert("ዝቅተኛ 300 ነው!");
-        let msg = `📤 የወጪ ጥያቄ (WITHDRAW)\nID: ${uID}\nAmount: ${amt} ETB\nBank: ${document.getElementById('witBank').value}\nAcc: ${document.getElementById('witAcc').value}\nName: ${document.getElementById('witName').value}`;
+        let msg = `📤 WITHDRAW\nID: ${uID}\nAmt: ${amt} ETB\nBank: ${document.getElementById('witBank').value}\nAcc: ${document.getElementById('witAcc').value}\nName: ${document.getElementById('witName').value}`;
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chat_id: CHAT_ID, text: msg }) });
-        alert("ጥያቄዎ ተልኳል!"); closeModal('witModal');
+        alert("ጥያቄ ተልኳል!"); closeModal('witModal');
     }
 
     function adminAction() {
         let p = prompt("Password:");
-        if(p === "9801") {
+        if(p === ADMIN_PASS) {
             let id = prompt("User ID:");
             let amt = parseFloat(prompt("Amount (+/-):"));
             if(id && !isNaN(amt)) {
@@ -270,9 +277,9 @@
     db.ref('users/'+uID+'/balance').on('value', s => { document.getElementById('balance').innerText = (s.val()||0).toFixed(2); });
     function showModal(id) { document.getElementById(id).style.display = "block"; }
     function closeModal(id) { document.getElementById(id).style.display = "none"; }
-    function quickPick(n) { clearSelection(); while(selectedNums.length<n) { let r=Math.floor(Math.random()*80)+1; if(!selectedNums.includes(r)) { selectedNums.push(r); document.getElementById('n'+r).classList.add('selected'); } } }
-    function clearSelection() { document.querySelectorAll('.num').forEach(n=>n.classList.remove('selected')); selectedNums=[]; }
+    function quickPick(n) { clearSelection(); while(selectedNums.length<n) { let r=Math.floor(Math.random()*80)+1; if(!selectedNums.includes(r)) { selectedNums.push(r); document.getElementById('n'+r).classList.add('selected'); } } updateOddsText(); }
+    function clearSelection() { document.querySelectorAll('.num').forEach(n=>n.classList.remove('selected')); selectedNums=[]; updateOddsText(); }
 </script>
 </body>
-    </html>
-    
+        </html>
+        
