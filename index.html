@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DANIEL ROYAL KENO - FULL FIXED</title>
+    <title>DANIEL ROYAL KENO - FINAL</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -12,7 +12,7 @@
         body { background-color: var(--dark); color: white; text-align: center; font-family: sans-serif; margin: 0; padding-bottom: 80px; }
         .header { background: #1a1a1a; padding: 15px; border-bottom: 3px solid var(--gold); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .balance-box { border: 2px solid var(--gold); padding: 8px 15px; border-radius: 50px; font-size: 18px; color: var(--gold); font-weight: bold; background: #000; }
-        .timer-display { font-size: 3.5rem; font-weight: bold; color: var(--red); margin: 10px 0; text-shadow: 0 0 10px var(--red); }
+        .timer-display { font-size: 3.5rem; font-weight: bold; color: var(--red); margin: 10px 0; }
         .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; background: #111; padding: 10px; border-radius: 10px; margin: 10px; }
         .num { background: #333; border: 1px solid #444; padding: 12px 0; font-weight: bold; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
         .selected { background: var(--blue) !important; color: white; }
@@ -28,7 +28,7 @@
         .modal-content { background: #161616; margin: 15% auto; padding: 20px; border-radius: 15px; width: 85%; border: 1px solid var(--gold); }
         .tg-support { position: fixed; bottom: 20px; right: 20px; background: #0088cc; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 30px; z-index: 500; border: 2px solid white; }
         #adminArea { display: none; margin-top: 5px; }
-        .admin-btn { background: #333; color: var(--gold); border: 1px solid var(--gold); padding: 5px 10px; border-radius: 5px; font-size: 10px; cursor: pointer; }
+        .admin-btn { background: none; color: #444; border: none; font-size: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -68,7 +68,7 @@
         📌 <b>Telebirr:</b> 0986980130<br>
         📌 <b>Abyssinia:</b> 153682704 (Daniel Mulugeta)
     </div>
-    <p>ደረሰኙን እዚህ ይላኩ፦</p>
+    <p>ደረሰኙን (Screenshot) እዚህ ይላኩ፦</p>
     <input type="file" id="receiptImg" style="margin-bottom: 15px; width: 100%;">
     <button onclick="sendReceipt()" class="btn-main" style="width:100%">ደረሰኝ ላክ</button>
     <button onclick="closeModal('depModal')" style="background:none; border:none; color:gray;">ዝጋ</button>
@@ -89,7 +89,7 @@
     
     const BOT_TOKEN = "8398999747:AAGS7-Hc9sjBzBs7vu_Mjj8uiONpwfhxLgw";
     const CHAT_ID = "7313437942"; 
-    const DANIEL_ID = "DK-7313"; // ያንተ ID
+    const DANIEL_ID = "DK-7313";
     const PASS = "9801";
 
     let uID = localStorage.getItem('keno_user_id') || "DK-" + Math.floor(1000 + Math.random() * 9000);
@@ -139,7 +139,7 @@
         if(!file) return alert("ደረሰኝ ይምረጡ!");
         let fd = new FormData(); fd.append('chat_id', CHAT_ID); fd.append('photo', file); fd.append('caption', `📥 <b>የዲፖዚት ደረሰኝ</b>\nUser ID: ${uID}`);
         fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {method:'POST', body:fd});
-        alert("ተልኳል!"); closeModal('depModal');
+        alert("ተልኳል! አድሚን እስኪያረጋግጥ ይጠብቁ።"); closeModal('depModal');
     }
 
     function sendWithdraw() {
@@ -150,14 +150,19 @@
     }
 
     function openAdmin() {
-        let p = prompt("Password:");
+        // በፎቶው ላይ እንዳለው የአማርኛ ጥያቄ
+        let p = prompt("አድሚን ቁልፍ ያስገቡ:");
         if(p === PASS) {
-            let t = prompt("User ID:"); let a = parseFloat(prompt("Amount:"));
-            if(!isNaN(a)) db.ref('users/' + t + '/balance').once('value', s => {
-                db.ref('users/' + t).update({balance: (s.val()||0) + a});
-                alert("ተሳክቷል!"); sendToBot(`⚙️ <b>ADMIN DEPOSIT</b>\nTo: ${t}\nAmt: ${a} ETB`);
-            });
-        }
+            let t = prompt("የተጠቃሚ ID ያስገቡ:"); 
+            let a = parseFloat(prompt("የብር መጠን ያስገቡ:"));
+            if(!isNaN(a) && t) {
+                db.ref('users/' + t + '/balance').once('value', s => {
+                    db.ref('users/' + t).update({balance: (s.val()||0) + a});
+                    alert("ብር ተሞልቷል!");
+                    sendToBot(`⚙️ <b>ADMIN DEPOSIT</b>\nTo: ${t}\nAmt: ${a} ETB`);
+                });
+            }
+        } else if(p) { alert("የተሳሳተ ቁልፍ!"); }
     }
 
     function showModal(id) { document.getElementById(id).style.display = 'block'; }
@@ -190,5 +195,4 @@
     }
 </script>
 </body>
-        </html>
-        
+</html>
